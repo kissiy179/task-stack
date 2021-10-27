@@ -12,11 +12,11 @@ class CreateNodesTask(task.Task):
         }
         
     def get_ui_types(self):
-        return {
-            'count': int,
-            'nodeType': str,
-            'key': str,
-        }
+        return OrderedDict(
+            ('count', int),
+            ('nodeType', str),
+            ('key', str),
+        )
          
     def execute(self):
         parameters = self.get_parameters()
