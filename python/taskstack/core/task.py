@@ -1,4 +1,5 @@
 import abc
+from collections import OrderedDict
 
 class Task(object):
     
@@ -9,10 +10,10 @@ class Task(object):
         
     # @abc.abstractmethod
     def get_default_parameters(self):
-        return {}
+        return OrderedDict()
         
     def get_ui_types(self):
-        return {}
+        return OrderedDict()
     
     def get_parameters(self):
         return self.__parameters
@@ -24,3 +25,4 @@ class Task(object):
     @abc.abstractmethod
     def execute(self):
         raise NotImplemented()
+
