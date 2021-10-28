@@ -48,8 +48,10 @@ class TaskList(object):
     def set_parameters(self, parameters):
         task_classes = get_task_classes()
 
-        for task_name, task_parameters in parameters.items():
-            self.add_task(task_name=task_name, parameters=task_parameters)
+        for task_info in parameters:
+            task_name = task_info.get('name')
+            task_params = task_info.get('parameters')
+            self.add_task(task_name=task_name, parameters=task_params)
 
     def add_task(self, task=None, task_name='', parameters={}):
         if not task:
@@ -72,7 +74,7 @@ class TaskList(object):
         for task in self.__tasks:
             task.execute()
 
-class TaskListParameters(OrderedDict):
+class TaskListParameters(list):
 
     def __init__(self, *args, **kwargs):
         # self.__source_parameters
@@ -81,7 +83,7 @@ class TaskListParameters(OrderedDict):
 
     def load(self, path):
         with open(path, 'r') as f:
-            params = json.load(f, object_pairs_hook=OrderedDict)
+            params = json.load(f)#, object_pairs_hook=OrderedDict)
 
         self.__init__(params)
 
@@ -90,7 +92,7 @@ class TaskListParameters(OrderedDict):
             json.dump(self, f, indent=4)
 
     def loads(self, s):
-        params = json.loads(s, object_pairs_hook=OrderedDict)
+        params = json.loads(s)#, object_pairs_hook=OrderedDict)
         self.__init__(params)
 
     def dumps(self):
