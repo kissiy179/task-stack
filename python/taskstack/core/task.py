@@ -6,14 +6,20 @@ class Task(object):
     __metaclass__ = abc.ABCMeta
     
     def __init__(self):
+        self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
         
-    # @abc.abstractmethod
+    @abc.abstractmethod
     def get_default_parameters(self):
         return OrderedDict()
         
-    def get_ui_types(self):
-        return OrderedDict()
+    def get_parameter_types(self):
+        parameter_types = OrderedDict()
+
+        for name, value in self.__default_parameters.items():
+            parameter_types[name] = type(value).__name__
+
+        return parameter_types
     
     def get_parameters(self):
         return self.__parameters
