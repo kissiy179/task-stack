@@ -5,13 +5,13 @@ import abc
 import json
 from .task import Task
 
-task_dirs = os.environ.get('TASKSTACK_TASK_DIRS')
+TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 PYTHON_EXTENSIONS = ('.py', )
 
 def get_task_classes():
     task_classes = {}
 
-    for task_dir in task_dirs.split(';'):
+    for task_dir in TASK_DIRS.split(';'):
         for dirpath, dirnames, filenames in os.walk(task_dir):
             for filename in filenames:
                 basename, ext = os.path.splitext(filename)
