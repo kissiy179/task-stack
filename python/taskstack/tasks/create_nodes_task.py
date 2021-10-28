@@ -5,18 +5,18 @@ import taskstack.core.task as task
 class CreateNodesTask(task.Task):
     
     def get_default_parameters(self):
-        return {
-            'count': 1,
-            'nodeType': 'transform',
-            'key': 'test',
-        }
+        return OrderedDict((
+            ('count', 1),
+            ('nodeType', 'transform'),
+            ('key', 'test'),
+        ))
         
-    def get_ui_types(self):
-        return OrderedDict(
-            ('count', int),
-            ('nodeType', str),
-            ('key', str),
-        )
+    # def get_parameter_types(self):
+    #     return OrderedDict((
+    #         ('count', int),
+    #         ('nodeType', str),
+    #         ('key', str),
+    #     ))
          
     def execute(self):
         parameters = self.get_parameters()
