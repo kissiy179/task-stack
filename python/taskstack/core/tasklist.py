@@ -1,6 +1,8 @@
+from collections import OrderedDict
 import os
 import imp
 import abc
+import json
 from .task import Task
 
 task_dirs = os.environ.get('TASKSTACK_TASK_DIRS')
@@ -43,7 +45,7 @@ class TaskList(object):
     def get_parameters(self):
         return self.__parameters
 
-    def set_parameters(self, **parameters):
+    def set_parameters(self, parameters):
         task_classes = get_task_classes()
 
         for task_name, task_parameters in parameters.items():
@@ -69,3 +71,28 @@ class TaskList(object):
     def execute(self):
         for task in self.__tasks:
             task.execute()
+
+class TaskListParameters(OrderedDict):
+
+    def __init__(self, *args, **kwargs):
+        # self.__source_parameters
+        # self.__parameters
+        super(TaskListParameters, self).__init__(*args, **kwargs)
+
+    def load(self, path):
+        with open(path, 'r') as f:
+            params = json.load(f, object_pairs_hook=OrderedDict)
+
+        self.__init__(params)
+
+    def dump(self, path):
+        with open(path, 'w') as f:
+            json.dump(self, f, indent=4)
+
+    def loads(self, s):
+        params = json.loads(s, object_pairs_hook=OrderedDict)
+        self.__init__(params)
+
+    def dumps(self):
+        s = json.dumps(self, indent=4)
+        return s
