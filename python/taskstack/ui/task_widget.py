@@ -9,11 +9,13 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
     def __init__(self, task, *args, **kwargs):
         super(TaskWidget, self).__init__(*args, **kwargs)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.__widgets = {}
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
         self.__main_layout = None
         self.init_ui()
+        self.resize(300, 0)
 
     def init_ui(self, executable=True, show_parameters=True):
         # uiクリア
@@ -56,9 +58,6 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             exec_btn.clicked.connect(self.execute)
             self.__main_layout.addWidget(exec_btn)
 
-        # Resize
-        self.resize(300, 0)
-
     def init_parameters_ui(self, parametrs, parameter_types):
         lo = QtWidgets.QFormLayout()
         lo.setVerticalSpacing(0)
@@ -86,13 +85,8 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         active = self.group_box.isChecked()
         self.__task.set_active(active)
 
-    def execute(self):
+    def apply_parameters(self):
         task = self.__task
-        active = task.get_active()
-
-        if not active:
-            return 
-
         params = {}
         param_types = self.__parameter_types
 
@@ -103,4 +97,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             params[param_name] = getattr(widget, get_method)()
 
         task.set_parameters(**params)
-        task.execute()
+
+    def execute(self):
+        self.apply_parameters()
+        task.execute_if_active()
