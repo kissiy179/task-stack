@@ -8,6 +8,7 @@ class Task(object):
     def __init__(self):
         self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
+        self.__active = True
         
     @abc.abstractmethod
     def get_default_parameters(self):
@@ -30,8 +31,20 @@ class Task(object):
 
     def get_doc(self):
         return self.__doc__
+
+    def get_active(self):
+        return self.__active
+
+    def set_active(self, active):
+        self.__active = active
         
     @abc.abstractmethod
     def execute(self):
         raise NotImplemented()
+
+    def execute_if_active(self):
+        if not self.__active:
+            return 
+
+        self.execute()
 
