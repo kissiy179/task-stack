@@ -26,14 +26,24 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QWidget):
         self.init_ui()
 
     def init_ui(self):
+        # Main layout
         main_lo = QtWidgets.QVBoxLayout()
-        # main_lo.setContentsMargins(0,0,0,0)
         self.setLayout(main_lo)
+
+        # Scroll Aere
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setWidgetResizable(True)
         main_lo.addWidget(scroll_area)
+
+        # Main Widgets
         tasks = self.__task_list.get_tasks()
         inner_wgt = InnerTaskListWidget(tasks)
         scroll_area.setWidget(inner_wgt)
+
+        # Execute button
         exec_btn = QtWidgets.QPushButton('Execute')
+        exec_btn.clicked.connect(self.execute)
         main_lo.addWidget(exec_btn)
+
+    def execute(self):
+        self.__task_list.execute()

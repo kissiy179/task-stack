@@ -48,24 +48,26 @@ class TaskList(object):
     def set_parameters(self, parameters):
         for task_info in parameters:
             task_name = task_info.get('name')
+            task_active = task_info.get('active', True)
             task_params = task_info.get('parameters')
-            self.add_task(task_name=task_name, parameters=task_params)
+            self.add_task(name=task_name, active=task_active, parameters=task_params)
 
     def get_tasks(self):
         return self.__tasks
 
-    def add_task(self, task=None, task_name='', parameters={}):
+    def add_task(self, task=None, name='', active=True, parameters={}):
         if not task:
-            task_class = self.__task_classes.get(task_name)
+            task_class = self.__task_classes.get(name)
 
             if not task_class:
-                print('TaskStackError: Task [{}] does not exist.'.format(task_name))
+                print('TaskStackError: Task [{}] does not exist.'.format(name))
                 return
 
             task = task_class()
+            task.active = active
 
         if not isinstance(parameters, dict):
-            print('TaskStackError: Parameters must be dictionary.'.format(task_name))
+            print('TaskStackError: Parameters must be dictionary.'.format(name))
             return
 
         task.set_parameters(**parameters)
@@ -73,7 +75,7 @@ class TaskList(object):
 
     def execute(self):
         for task in self.__tasks:
-            task.execute()
+            task.execute_if_active()
 
 class TaskListParameters(list):
 
