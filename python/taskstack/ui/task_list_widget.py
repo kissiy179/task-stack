@@ -11,6 +11,8 @@ down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
 class InnerTaskListWidget(QtWidgets.QWidget):
 
     remove_task = QtCore.Signal(int)
+    moveup_task = QtCore.Signal(int)
+    movedown_task = QtCore.Signal(int)
 
     def __init__(self, tasks, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
@@ -49,10 +51,12 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             up_btn = QtWidgets.QPushButton()
             up_btn.setIcon(up_icon)
             up_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            up_btn.clicked.connect(partial(self._moveup_task, i))
             vlo.addWidget(up_btn)
             down_btn = QtWidgets.QPushButton()
             down_btn.setIcon(down_icon)
             down_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            down_btn.clicked.connect(partial(self._movedown_task, i))
             vlo.addWidget(down_btn)
 
             # Stretch
@@ -68,6 +72,12 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
     def _remove_task(self, idx):
         self.remove_task.emit(idx)
+
+    def _moveup_task(self, idx):
+        self.moveup_task.emit(idx)
+
+    def _movedown_task(self, idx):
+        self.movedown_task.emit(idx)
 
     def apply_parameters(self):
         for task_widget in self.__task_widgets:
@@ -99,6 +109,8 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QWidget):
         tasks = self.__task_list.get_tasks()
         self.inner_wgt = InnerTaskListWidget(tasks)
         self.inner_wgt.remove_task.connect(self.remove_task)
+        self.inner_wgt.moveup_task.connect(self.moveup_task)
+        self.inner_wgt.movedown_task.connect(self.movedown_task)
         scroll_area.setWidget(self.inner_wgt)
 
         # Execute button
@@ -112,6 +124,14 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QWidget):
 
     def remove_task(self, idx):
         self.__task_list.remove_task(idx)
+        self.init_ui()
+
+    def moveup_task(self, idx):
+        self.__task_list.moveup_task(idx)
+        self.init_ui()
+
+    def movedown_task(self, idx):
+        self.__task_list.movedown_task(idx)
         self.init_ui()
 
     def execute(self):

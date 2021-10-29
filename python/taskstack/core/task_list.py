@@ -76,6 +76,20 @@ class TaskList(object):
     def remove_task(self, idx):
         del self.__tasks[idx]
 
+    def moveup_task(self, idx):
+        tasks = self.__tasks
+        src_task = tasks[idx]
+        tgt_task = tasks[idx -1]
+        tasks[idx] = tgt_task
+        tasks[idx -1] = src_task
+
+    def movedown_task(self, idx):
+        tasks = self.__tasks
+        src_task = tasks[idx]
+        tgt_task = tasks[idx +1]
+        tasks[idx] = tgt_task
+        tasks[idx +1] = src_task
+
     def execute(self):
         for task in self.__tasks:
             task.execute_if_active()
