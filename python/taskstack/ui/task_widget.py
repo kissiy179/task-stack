@@ -9,17 +9,19 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.__widgets = {}
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
-        # self.init_ui()
+        self.main_layout = None
+        self.init_ui()
 
-    def init_ui(self, executable=False):
+    def init_ui(self, executable=True):
+        self.clear_ui()
         task = self.__task
         param_types = self.__parameter_types
         params = task.get_parameters()
-        lo = QtWidgets.QVBoxLayout()
-        self.setLayout(lo)
+        self.main_layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.main_layout)
         self.group = QtWidgets.QGroupBox(type(task).__name__)
         self.group.setCheckable(True)
-        lo.addWidget(self.group)
+        self.main_layout.addWidget(self.group)
         group_lo = QtWidgets.QFormLayout()
         self.group.setLayout(group_lo)
 
@@ -42,11 +44,16 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             group_lo.addRow('', lbl)
 
         if executable:
+            print('exec')
             exec_btn = QtWidgets.QPushButton('Execute')
             exec_btn.clicked.connect(self.execute)
-            lo.addWidget(exec_btn)
+            self.main_layout.addWidget(exec_btn)
 
         self.resize(400, 0)
+
+    def clear_ui(self):
+        if self.main_layout:
+            QtWidgets.QWidget().setLayout(self.main_layout)
 
     def execute(self):
         if not self.group.isChecked():
