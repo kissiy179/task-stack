@@ -1,6 +1,8 @@
 from pprint import pprint
 from mayaqt import *
+# import qtawesome as qta
 from . import WIDGET_TABLE
+# task_icon = qta.icon('fa5s.cog', color='calendar')
 
 class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
@@ -15,6 +17,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
     def init_ui(self, executable=True):
         self.clear_ui()
         task = self.__task
+        doc = task.get_doc()
         param_types = self.__parameter_types
         params = task.get_parameters()
         self.main_layout = QtWidgets.QVBoxLayout()
@@ -22,8 +25,16 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.group = QtWidgets.QGroupBox(type(task).__name__)
         self.group.setCheckable(True)
         self.main_layout.addWidget(self.group)
-        group_lo = QtWidgets.QFormLayout()
+        group_lo = QtWidgets.QVBoxLayout()
         self.group.setLayout(group_lo)
+
+        if doc:
+            doc_lbl = QtWidgets.QLabel(doc)
+            # doc_lbl.setIcon(task_icon)
+            group_lo.addWidget(doc_lbl)
+
+        group_form_lo = QtWidgets.QFormLayout()
+        group_lo.addLayout(group_form_lo)
 
         for param_name, param_type in param_types.items():
             widget_info = WIDGET_TABLE.get(param_type)
@@ -36,15 +47,14 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             widget = widget_class()
             value = params.get(param_name)
             getattr(widget, set_method)(value)
-            group_lo.addRow(param_name, widget)
+            group_form_lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget
 
-        if not len(param_types):
-            lbl = QtWidgets.QLabel('No parameters.')
-            group_lo.addRow('', lbl)
+        # if not len(param_types):
+        #     lbl = QtWidgets.QLabel('No parameters.')
+        #     group_form_lo.addRow('', lbl)
 
         if executable:
-            print('exec')
             exec_btn = QtWidgets.QPushButton('Execute')
             exec_btn.clicked.connect(self.execute)
             self.main_layout.addWidget(exec_btn)
