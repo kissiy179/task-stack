@@ -73,6 +73,9 @@ class TaskList(object):
         task.set_parameters(**parameters)
         self.__tasks.append(task)
 
+    def remove_task(self, idx):
+        del self.__tasks[idx]
+
     def execute(self):
         for task in self.__tasks:
             task.execute_if_active()
