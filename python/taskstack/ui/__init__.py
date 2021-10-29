@@ -1,9 +1,9 @@
 from mayaqt import *
 
 WIDGET_TABLE = {
-    'int': QtWidgets.QSpinBox,
-    'float': QtWidgets.QDoubleSpinBox,
-    'string': QtWidgets.QLineEdit,
+    'int': {'class': QtWidgets.QSpinBox, 'get_method': 'value', 'set_method': 'setValue'},
+    'float': {'class': QtWidgets.QDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue'},
+    'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText'},
 }
 
 import task_widget; reload(task_widget)
