@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
 from collections import OrderedDict
 import maya.cmds as cmds
 import pymel.core as pm
 import taskstack.core.task as task
 
 class SetAttributeTask(task.Task):
+    '''
+    指定したノードタイプのオブジェクトにアトリビュートを設定するタスク
+    '''
     
     def get_default_parameters(self):
         return OrderedDict((

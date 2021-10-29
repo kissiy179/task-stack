@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 from collections import OrderedDict
 import maya.cmds as cmds
 import taskstack.core.task as task
 
 class CreateNodesTask(task.Task):
+    '''
+    指定したタイプのノードを指定数作成するタスク
+    '''
     
     def get_default_parameters(self):
         return OrderedDict((

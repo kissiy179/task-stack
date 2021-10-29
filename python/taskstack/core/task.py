@@ -27,6 +27,9 @@ class Task(object):
     def set_parameters(self, **parameters):
         for key in self.__parameters:
             self.__parameters[key] = parameters.get(key, self.__parameters.get(key))
+
+    def get_doc(self):
+        return self.__doc__
         
     @abc.abstractmethod
     def execute(self):
