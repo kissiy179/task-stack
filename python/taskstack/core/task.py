@@ -30,7 +30,14 @@ class Task(object):
             self.__parameters[key] = parameters.get(key, self.__parameters.get(key))
 
     def get_doc(self):
-        return self.__doc__
+        doc = self.__doc__
+
+        if not doc:
+            doc = 'No description...'
+
+        doc = doc.replace(' ', '')
+        doc = doc.strip('\n')
+        return doc
 
     def get_active(self):
         return self.__active

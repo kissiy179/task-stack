@@ -15,7 +15,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.__main_layout = None
         self.init_ui()
 
-    def init_ui(self, executable=True):
+    def init_ui(self, executable=True, show_parameters=True):
         # uiクリア
         self.clear_ui()
 
@@ -35,31 +35,19 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.group_box.setChecked(task.get_active())
         self.group_box.toggled.connect(self.toggle_active)
         self.__main_layout.addWidget(self.group_box)
-        group_lo = QtWidgets.QVBoxLayout()
-        self.group_box.setLayout(group_lo)
+        self.group_lo = QtWidgets.QVBoxLayout()
+        self.group_box.setLayout(self.group_lo)
 
         # Description
         if doc:
             doc_lbl = QtWidgets.QLabel(doc)
-            group_lo.addWidget(doc_lbl)
+            doc_lbl.setStyleSheet('background-color: #555')
+            doc_lbl.setMargin(5)
+            self.group_lo.addWidget(doc_lbl)
 
         # Parameters
-        group_form_lo = QtWidgets.QFormLayout()
-        group_lo.addLayout(group_form_lo)
-
-        for param_name, param_type in param_types.items():
-            widget_info = WIDGET_TABLE.get(param_type)
-
-            if not widget_info:
-                continue
-
-            widget_class = widget_info.get('class')
-            set_method = widget_info.get('set_method')
-            widget = widget_class()
-            value = params.get(param_name)
-            getattr(widget, set_method)(value)
-            group_form_lo.addRow(param_name, widget)
-            self.__widgets[param_name] = widget
+        if show_parameters:
+            self.init_parameters_ui(params, param_types)
 
         # Execute button
         if executable:
@@ -69,6 +57,25 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
         # Resize
         self.resize(400, 0)
+
+    def init_parameters_ui(self, parametrs, parameter_types):
+        lo = QtWidgets.QFormLayout()
+        lo.setVerticalSpacing(0)
+        self.group_lo.addLayout(lo)
+
+        for param_name, param_type in parameter_types.items():
+            widget_info = WIDGET_TABLE.get(param_type)
+
+            if not widget_info:
+                continue
+
+            widget_class = widget_info.get('class')
+            set_method = widget_info.get('set_method')
+            widget = widget_class()
+            value = parametrs.get(param_name)
+            getattr(widget, set_method)(value)
+            lo.addRow(param_name, widget)
+            self.__widgets[param_name] = widget
 
     def clear_ui(self):
         if self.__main_layout:
