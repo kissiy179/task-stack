@@ -7,3 +7,4 @@ WIDGET_TABLE = {
 }
 
 import task_widget; reload(task_widget)
+import task_list_widget; reload(task_list_widget)

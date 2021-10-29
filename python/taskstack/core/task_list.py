@@ -46,12 +46,13 @@ class TaskList(object):
         return self.__parameters
 
     def set_parameters(self, parameters):
-        task_classes = get_task_classes()
-
         for task_info in parameters:
             task_name = task_info.get('name')
             task_params = task_info.get('parameters')
             self.add_task(task_name=task_name, parameters=task_params)
+
+    def get_tasks(self):
+        return self.__tasks
 
     def add_task(self, task=None, task_name='', parameters={}):
         if not task:
