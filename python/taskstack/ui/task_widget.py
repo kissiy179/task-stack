@@ -33,6 +33,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.group_box = QtWidgets.QGroupBox(type(task).__name__)
         self.group_box.setCheckable(True)
         self.group_box.setChecked(task.get_active())
+        # self.group_box.setStyle(QtWidgets.QStyleFactory.create("plastique"))
         self.group_box.toggled.connect(self.toggle_active)
         self.__main_layout.addWidget(self.group_box)
         self.group_lo = QtWidgets.QVBoxLayout()
@@ -56,7 +57,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             self.__main_layout.addWidget(exec_btn)
 
         # Resize
-        self.resize(400, 0)
+        self.resize(300, 0)
 
     def init_parameters_ui(self, parametrs, parameter_types):
         lo = QtWidgets.QFormLayout()
