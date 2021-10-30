@@ -29,15 +29,30 @@ class Task(object):
         for key in self.__parameters:
             self.__parameters[key] = parameters.get(key, self.__parameters.get(key))
 
-    def get_doc(self):
+    @classmethod
+    def get_doc(self, first_line_only=False):
         doc = self.__doc__
 
         if not doc:
             doc = 'No description...'
 
-        doc = doc.replace(' ', '')
-        doc = doc.strip('\n')
-        return doc
+        lines = doc.split('\n')
+        lines_ = []
+
+        for line in lines:
+            line = line.strip(' ')
+
+            if not line:
+                continue
+
+            lines_.append(line)
+
+        if first_line_only:
+            return lines_[0]
+
+        print lines_
+
+        return '\n'.join(lines_)
 
     def get_active(self):
         return self.__active
