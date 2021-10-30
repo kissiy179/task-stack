@@ -13,6 +13,14 @@ up_icon = qta.icon('fa5s.chevron-up', color='lightgray')
 down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='white')
+detail_icon = qta.icon('fa5s.align-left', color='white')
+
+class HorizontalLine(QtWidgets.QFrame):
+
+    def __init__(self, *args, **kwargs):
+        super(HorizontalLine, self).__init__(*args, **kwargs)
+        self.setFrameShape(QtWidgets.QFrame.HLine)
+        self.setFrameShadow(QtWidgets.QFrame.Plain)
 
 class InnerTaskListWidget(QtWidgets.QWidget):
 
@@ -23,6 +31,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     def __init__(self, tasks, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
         self.__task_widgets = []
+        self.__show_details = True
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;} InnerTaskListWidget{background-color: #3f3f3f}')
         lo = QtWidgets.QVBoxLayout()
@@ -79,9 +88,13 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
             # Task widget
             task_wdiget = TaskWidget(task)
-            task_wdiget.init_ui(label_prefix='[ {} ]  '.format(i))#executable=False)
+            task_wdiget.init_ui(show_parameters=self.__show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
             hlo.addWidget(task_wdiget)
             self.__task_widgets.append(task_wdiget)
+
+            # Line
+            line = HorizontalLine()
+            lo.addWidget(line)
 
         lo.addStretch()
 
@@ -199,6 +212,10 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
         add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
         add_task_action.triggered.connect(self.select_task_class)
         task_list_actions.append(add_task_action)
+
+        # Toggle deetails
+        toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
+        task_list_actions.append(toggle_task_details_action)
 
         # Clear Tasks
         clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear Tasks', self)
