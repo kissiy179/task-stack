@@ -1,9 +1,9 @@
 # encoding: UTF-8
 from pprint import pprint
-from mayaqt import maya_base_mixin, QtWidgets
-# import qtawesome as qta
+from mayaqt import maya_base_mixin, QtCore, QtWidgets
+import qtawesome as qta
 from . import WIDGET_TABLE
-# task_icon = qta.icon('fa5s.cog', color='calendar')
+exec_icon = qta.icon('fa5s.play', color='lightgreen')
 
 class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
@@ -41,22 +41,28 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.group_lo = QtWidgets.QVBoxLayout()
         self.group_box.setLayout(self.group_lo)
 
+        # Exec button
+        doc_lo = QtWidgets.QHBoxLayout()
+        doc_lo.setContentsMargins(0,0,0,0)
+
+        if executable:
+            exec_btn = QtWidgets.QPushButton()
+            exec_btn.setIcon(exec_icon)
+            exec_btn.setIconSize(QtCore.QSize(14, 14))
+            exec_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            exec_btn.clicked.connect(self.execute)
+            doc_lo.addWidget(exec_btn)
+
         # Description
-        if doc:
-            doc_lbl = QtWidgets.QLabel(doc)
-            doc_lbl.setStyleSheet('background-color: #555')
-            doc_lbl.setMargin(5)
-            self.group_lo.addWidget(doc_lbl)
+        self.group_lo.addLayout(doc_lo)
+        doc_lbl = QtWidgets.QLabel(doc)
+        doc_lbl.setStyleSheet('background-color: #555')
+        doc_lbl.setMargin(5)
+        doc_lo.addWidget(doc_lbl)
 
         # Parameters
         if show_parameters:
             self.init_parameters_ui(params, param_types)
-
-        # Execute button
-        if executable:
-            exec_btn = QtWidgets.QPushButton('Execute')
-            exec_btn.clicked.connect(self.execute)
-            self.__main_layout.addWidget(exec_btn)
 
     def init_parameters_ui(self, parametrs, parameter_types):
         lo = QtWidgets.QFormLayout()
@@ -79,7 +85,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
             except:
                 pass
-            
+
             lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget
 
@@ -106,4 +112,4 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
 
     def execute(self):
         self.apply_parameters()
-        task.execute_if_active()
+        self.__task.execute_if_active()
