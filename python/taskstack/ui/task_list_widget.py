@@ -88,11 +88,12 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QWidget):
     def __init__(self, task_list=(), *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.__task_list = task_list
+        print(task_list)
         self.__main_layout = None
         self.init_ui()
         self.resize(500, 600)
 
-    def init_ui(self):
+    def init_ui(self, executable=True):
         # Clear ui
         self.clear_ui()
 
@@ -113,11 +114,16 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QWidget):
         self.inner_wgt.movedown_task.connect(self.movedown_task)
         scroll_area.setWidget(self.inner_wgt)
 
-        # Execute button
-        exec_btn = QtWidgets.QPushButton('Execute')
-        exec_btn.clicked.connect(self.execute)
-        self.__main_layout.addWidget(exec_btn)
+        # Buttons
+        buttons_lo = QtWidgets.QHBoxLayout()
+        self.__main_layout.addLayout(buttons_lo)
+        buttons_lo.setContentsMargins(0,0,0,0)
 
+        if executable:
+            exec_btn = QtWidgets.QPushButton('Execute')
+            exec_btn.clicked.connect(self.execute)
+            buttons_lo.addWidget(exec_btn)
+        
     def clear_ui(self):
         if self.__main_layout:
             QtWidgets.QWidget().setLayout(self.__main_layout)
