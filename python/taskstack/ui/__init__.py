@@ -22,5 +22,6 @@ WIDGET_TABLE = {
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText'},
 }
 
+import task_list_menu; reload(task_list_menu)
 import task_widget; reload(task_widget)
 import task_list_widget; reload(task_list_widget)
