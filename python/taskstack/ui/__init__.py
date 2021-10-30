@@ -17,6 +17,7 @@ class CustomDoubleSpinBox(QtWidgets.QDoubleSpinBox):
 
 
 WIDGET_TABLE = {
+    'bool': {'class': QtWidgets.QCheckBox, 'get_method': 'isChecked', 'set_method': 'setChecked'},
     'int': {'class': CustomSpinBox, 'get_method': 'value', 'set_method': 'setValue'},
     'float': {'class': CustomDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue'},
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText'},
