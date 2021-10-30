@@ -50,8 +50,6 @@ class Task(object):
         if first_line_only:
             return lines_[0]
 
-        print lines_
-
         return '\n'.join(lines_)
 
     def get_active(self):
