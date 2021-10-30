@@ -73,7 +73,13 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
             set_method = widget_info.get('set_method')
             widget = widget_class()
             value = parametrs.get(param_name)
-            getattr(widget, set_method)(value)
+
+            try:
+                getattr(widget, set_method)(value)
+
+            except:
+                pass
+            
             lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget
 
