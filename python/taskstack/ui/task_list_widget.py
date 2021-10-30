@@ -6,6 +6,8 @@ from . import WIDGET_TABLE
 import qtawesome as qta
 from .task_widget import TaskWidget
 from ..ui.task_list_menu import TaskListMenu
+import_icon = qta.icon('fa5s.folder-open', color='white')
+export_icon = qta.icon('fa5s.save', color='white')
 close_icon = qta.icon('fa5s.trash-alt', color='lightgray')
 up_icon = qta.icon('fa5s.chevron-up', color='lightgray')
 down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
@@ -100,7 +102,9 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
 
     def __init__(self, task_list=(), *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
+        self.setWindowTitle('Task List')
         self.__task_list = task_list
+        self.__menuBar = None
         self.__toolBar = None
         self.__main_layout = None
         self.__actions = self.get_actions()
@@ -141,15 +145,26 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
         buttons_lo.setContentsMargins(0,0,0,0)
 
         if executable:
+            self.init_menubar()
             self.init_toolbar()
+
+    def init_menubar(self):
+        if self.__menuBar:
+            return
+
+        self.__menuBar = self.menuBar()
+        menu = self.__menuBar.addMenu('&File')
+
+        for action in self.__actions.get('io_actions'):
+            menu.addAction(action)
 
     def init_toolbar(self):
         if self.__toolBar:
             return 
 
-        self.__toolBar = self.addToolBar('File')
+        self.__toolBar = self.addToolBar('&File')
 
-        for name, action in self.__actions.items():
+        for action in self.__actions.get('task_list_actions'):
             self.__toolBar.addAction(action)
         
     def clear_ui(self):
@@ -159,20 +174,37 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
     def get_actions(self):
         actions = OrderedDict()
 
+        # I/O actions ------
+        io_actions = []
+        actions['io_actions'] = io_actions
+
+        # Import tasks
+        import_tasks_action = QtWidgets.QAction(import_icon, '&Import Tasks', self)
+        io_actions.append(import_tasks_action)
+
+        # Export tasks
+        export_tasks_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
+        io_actions.append(export_tasks_action)
+
+        # Tasks actions -------
+        task_list_actions = []
+        actions['task_list_actions'] = task_list_actions
+
         # Execute
         exec_action = QtWidgets.QAction(exec_icon, 'Execute', self)
         exec_action.triggered.connect(self.execute)
-        actions['Execute'] = exec_action
+        task_list_actions.append(exec_action)
 
         # Add Task
         add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
         add_task_action.triggered.connect(self.select_task_class)
-        actions['Add Task'] = add_task_action
+        task_list_actions.append(add_task_action)
 
         # Clear Tasks
         clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear Tasks', self)
         clear_tasks_action.triggered.connect(self.clear_tasks)
-        actions['Clear Tasks'] = clear_tasks_action
+        task_list_actions.append(clear_tasks_action)
+
         return actions
         
     def select_task_class(self):
