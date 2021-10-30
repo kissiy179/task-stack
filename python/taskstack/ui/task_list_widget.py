@@ -77,7 +77,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
             # Task widget
             task_wdiget = TaskWidget(task)
-            task_wdiget.init_ui()#executable=False)
+            task_wdiget.init_ui(label_prefix='[ {} ]  '.format(i))#executable=False)
             hlo.addWidget(task_wdiget)
             self.__task_widgets.append(task_wdiget)
 

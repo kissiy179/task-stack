@@ -17,7 +17,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.init_ui()
         self.resize(300, 0)
 
-    def init_ui(self, executable=True, show_parameters=True):
+    def init_ui(self, executable=True, show_parameters=True, label_prefix=''):
         # uiクリア
         self.clear_ui()
 
@@ -32,7 +32,9 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.setLayout(self.__main_layout)
 
         # Group box
-        self.group_box = QtWidgets.QGroupBox(type(task).__name__)
+        label = type(task).__name__
+        label = '{}{}'.format(label_prefix, label) if label else label
+        self.group_box = QtWidgets.QGroupBox(label)
         self.group_box.setCheckable(True)
         self.group_box.setChecked(task.get_active())
         # self.group_box.setStyle(QtWidgets.QStyleFactory.create("plastique"))
