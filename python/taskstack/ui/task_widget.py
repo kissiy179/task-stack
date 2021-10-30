@@ -14,6 +14,7 @@ class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
         self.__main_layout = None
+        self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
         self.resize(300, 0)
 
