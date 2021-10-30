@@ -49,7 +49,7 @@ class TaskList(object):
             task_active = task.get_active()
             task_params = task.get_parameters()
             params.append({'name': type(task).__name__, 'active': task_active, 'parameters': task_params})
-            
+
         return params
 
     def set_parameters(self, parameters):
@@ -96,6 +96,9 @@ class TaskList(object):
         tgt_task = tasks[idx +1]
         tasks[idx] = tgt_task
         tasks[idx +1] = src_task
+
+    def clear_tasks(self):
+        del self.__tasks[:]
 
     def execute(self):
         for task in self.__tasks:

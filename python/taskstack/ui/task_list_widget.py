@@ -148,11 +148,9 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
             return 
 
         self.__toolBar = self.addToolBar('File')
-        menu = self.menuBar().addMenu('File')
 
         for name, action in self.__actions.items():
             self.__toolBar.addAction(action)
-            menu.addAction(action)
         
     def clear_ui(self):
         if self.__main_layout:
@@ -160,12 +158,21 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
 
     def get_actions(self):
         actions = OrderedDict()
+
+        # Execute
         exec_action = QtWidgets.QAction(exec_icon, 'Execute', self)
         exec_action.triggered.connect(self.execute)
-        actions['Exec'] = exec_action
+        actions['Execute'] = exec_action
+
+        # Add Task
         add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
         add_task_action.triggered.connect(self.select_task_class)
-        actions['AddTask'] = add_task_action
+        actions['Add Task'] = add_task_action
+
+        # Clear Tasks
+        clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear Tasks', self)
+        clear_tasks_action.triggered.connect(self.clear_tasks)
+        actions['Clear Tasks'] = clear_tasks_action
         return actions
         
     def select_task_class(self):
@@ -196,6 +203,10 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
 
     def movedown_task(self, idx):
         self.__task_list.movedown_task(idx)
+        self.init_ui()
+
+    def clear_tasks(self):
+        self.__task_list.clear_tasks()
         self.init_ui()
 
     def execute(self):

@@ -7,6 +7,7 @@ import taskstack.core.task as task
 class SetAttributeTask(task.Task):
     '''
     指定したノードタイプのオブジェクトにアトリビュートを設定するタスク
+    サンプルタスク
     '''
     
     def get_default_parameters(self):
