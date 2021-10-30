@@ -38,12 +38,19 @@ class TaskList(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
-        self.__parameters = {}
+        # self.__parameters = {}
         self.__tasks = []
         self.__task_classes = get_task_classes()
 
     def get_parameters(self):
-        return self.__parameters
+        params = []
+
+        for task in self.__tasks:
+            task_active = task.get_active()
+            task_params = task.get_parameters()
+            params.append({'name': type(task).__name__, 'active': task_active, 'parameters': task_params})
+            
+        return params
 
     def set_parameters(self, parameters):
         for task_info in parameters:
