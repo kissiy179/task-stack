@@ -247,12 +247,20 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
         varticalBar.setSliderPosition(crr_position)
 
     def moveup_task(self, idx):
+        varticalBar = self.scroll_area.verticalScrollBar()
+        crr_position = varticalBar.sliderPosition()
         self.__task_list.moveup_task(idx)
         self.init_ui()
+        varticalBar = self.scroll_area.verticalScrollBar()
+        varticalBar.setSliderPosition(crr_position)
 
     def movedown_task(self, idx):
+        varticalBar = self.scroll_area.verticalScrollBar()
+        crr_position = varticalBar.sliderPosition()
         self.__task_list.movedown_task(idx)
         self.init_ui()
+        varticalBar = self.scroll_area.verticalScrollBar()
+        varticalBar.setSliderPosition(crr_position)
 
     def clear_tasks(self):
         self.__task_list.clear_tasks()
