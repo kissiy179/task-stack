@@ -1,7 +1,7 @@
 from pprint import pprint
 from functools import partial
 from collections import OrderedDict
-from mayaqt import maya_base_mixin, QtCore, QtWidgets, QtGui
+from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
 from . import WIDGET_TABLE
 import qtawesome as qta
 from .task_widget import TaskWidget
@@ -111,7 +111,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         for task_widget in self.__task_widgets:
             task_widget.apply_parameters()
 
-class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
+class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def __init__(self, task_list=(), *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
@@ -214,8 +214,8 @@ class TaskListWidget(maya_base_mixin, QtWidgets.QMainWindow):
         task_list_actions.append(add_task_action)
 
         # Toggle deetails
-        toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
-        task_list_actions.append(toggle_task_details_action)
+        # toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
+        # task_list_actions.append(toggle_task_details_action)
 
         # Clear Tasks
         clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear Tasks', self)

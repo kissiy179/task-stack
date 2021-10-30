@@ -1,15 +1,16 @@
 # encoding: UTF-8
 from pprint import pprint
-from mayaqt import maya_base_mixin, QtCore, QtWidgets
+from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
 import qtawesome as qta
 from . import WIDGET_TABLE
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
 
-class TaskWidget(maya_base_mixin, QtWidgets.QWidget):
+class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
     def __init__(self, task, *args, **kwargs):
         super(TaskWidget, self).__init__(*args, **kwargs)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}')
         self.__widgets = {}
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
