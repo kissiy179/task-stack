@@ -13,7 +13,7 @@ class SetAttributeTask(task.Task):
         return OrderedDict((
             ('nodeType', 'transform'),
             ('attrName', 'tx'),
-            ('value', 10),
+            ('value', 10.0),
         ))
         
     def execute(self):
