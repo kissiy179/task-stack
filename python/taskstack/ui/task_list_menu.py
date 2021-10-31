@@ -26,5 +26,9 @@ class TaskListMenu(QtWidgets.QMenu):
             action.triggered.connect(partial(self.trigger, task_class))
             self.addAction(action)
 
+        if not lbls:
+            action = QtWidgets.QAction('No Tasks...', self)
+            self.addAction(action)
+
     def trigger(self, task_name):
         self.triggered.emit(task_name)
