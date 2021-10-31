@@ -53,6 +53,8 @@ class TaskList(object):
         return params
 
     def set_parameters(self, parameters):
+        self.clear_tasks()
+        
         for task_info in parameters:
             task_name = task_info.get('name')
             task_active = task_info.get('active', True)
