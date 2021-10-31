@@ -16,7 +16,8 @@ class TaskListMenu(QtWidgets.QMenu):
         self.setTearOffEnabled(True)
         self.setTitle('Tasks')
         task_classes = task_list.get_task_classes()
-        max_task_class_name_len = max([len(cls.__name__) for cls in task_classes.values()])
+        max_task_class_name_lens = [len(cls.__name__) for cls in task_classes.values()]
+        max_task_class_name_len = max(max_task_class_name_lens) if max_task_class_name_lens else 0
         lbls = ['{}: {}'.format(task_class.__name__.ljust(max_task_class_name_len), task_class.get_doc(first_line_only=True)) for task_class in task_classes.values()]
 
         for i, lbl in enumerate(lbls):
