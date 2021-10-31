@@ -181,10 +181,15 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         toolbar = self.addToolBar('Commands')
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
+        for action in self.__actions.get('exec_actions'):
+            toolbar.addAction(action)
+
+        toolbar.addSeparator() #-----
+
         for action in self.__actions.get('task_list_actions'):
             toolbar.addAction(action)
 
-        toolbar.addSeparator()
+        toolbar.addSeparator() #-----
 
         for action in self.__actions.get('io_actions'):
             toolbar.addAction(action)
@@ -212,14 +217,18 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         export_task_list_parameters_action.triggered.connect(self.export_task_list_parameters)
         io_actions.append(export_task_list_parameters_action)
 
-        # Tasks actions -------
-        task_list_actions = []
-        actions['task_list_actions'] = task_list_actions
+        # Execute actions -------
+        exec_actions = []
+        actions['exec_actions'] = exec_actions
 
         # Execute
         exec_action = QtWidgets.QAction(exec_icon, 'Execute', self)
         exec_action.triggered.connect(self.execute)
-        task_list_actions.append(exec_action)
+        exec_actions.append(exec_action)
+
+        # Tasks actions -------
+        task_list_actions = []
+        actions['task_list_actions'] = task_list_actions
 
         # Add Task
         add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
