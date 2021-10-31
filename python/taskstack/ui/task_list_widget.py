@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from pprint import pprint
 from functools import partial
 from collections import OrderedDict
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
 from . import WIDGET_TABLE
 import qtawesome as qta
+from ..core.task_list import TaskListParameters
 from .task_widget import TaskWidget
 from ..ui.task_list_menu import TaskListMenu
 import_icon = qta.icon('fa5s.folder-open', color='white')
@@ -14,6 +16,7 @@ down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='white')
 detail_icon = qta.icon('fa5s.align-left', color='white')
+JSON_FILTERS = 'Json (*.json)'
 
 class HorizontalLine(QtWidgets.QFrame):
 
@@ -117,8 +120,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
         self.__task_list = task_list
-        self.__menuBar = None
-        self.__toolBar = None
+        self.__menu_bar = None
+        self.__tool_bar = None
         self.__main_layout = None
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
@@ -158,27 +161,35 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         buttons_lo.setContentsMargins(0,0,0,0)
 
         if executable:
-            self.init_menubar()
+            # self.init_menubar()
             self.init_toolbar()
 
     def init_menubar(self):
-        if self.__menuBar:
+        if self.__menu_bar:
             return
 
-        self.__menuBar = self.menuBar()
-        menu = self.__menuBar.addMenu('&File')
+        self.__menu_bar = self.menuBar()
+        menu = self.__menu_bar.addMenu('&File')
 
         for action in self.__actions.get('io_actions'):
             menu.addAction(action)
 
     def init_toolbar(self):
-        if self.__toolBar:
+        if self.__tool_bar:
             return 
 
-        self.__toolBar = self.addToolBar('&File')
+        toolbar = self.addToolBar('Commands')
+        toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('task_list_actions'):
-            self.__toolBar.addAction(action)
+            toolbar.addAction(action)
+
+        toolbar.addSeparator()
+
+        for action in self.__actions.get('io_actions'):
+            toolbar.addAction(action)
+
+        self.__tool_bar = toolbar
         
     def clear_ui(self):
         if self.__main_layout:
@@ -192,12 +203,14 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         actions['io_actions'] = io_actions
 
         # Import tasks
-        import_tasks_action = QtWidgets.QAction(import_icon, '&Import Tasks', self)
-        io_actions.append(import_tasks_action)
+        import_task_list_parameters_action = QtWidgets.QAction(import_icon, '&Import Tasks', self)
+        import_task_list_parameters_action.triggered.connect(self.import_task_list_parameters)
+        io_actions.append(import_task_list_parameters_action)
 
         # Export tasks
-        export_tasks_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
-        io_actions.append(export_tasks_action)
+        export_task_list_parameters_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
+        export_task_list_parameters_action.triggered.connect(self.export_task_list_parameters)
+        io_actions.append(export_task_list_parameters_action)
 
         # Tasks actions -------
         task_list_actions = []
@@ -265,6 +278,28 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def clear_tasks(self):
         self.__task_list.clear_tasks()
         self.init_ui()
+
+    def import_task_list_parameters(self):
+        file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
+        file_path = file_info[0]
+
+        if not file_path:
+            return
+
+        params = TaskListParameters()
+        params.load(file_path)
+        self.__task_list.set_parameters(params)
+        self.init_ui()
+
+    def export_task_list_parameters(self):
+        file_info = QtWidgets.QFileDialog().getSaveFileName(self, 'Export TaskList Parameters', filter=JSON_FILTERS)
+        file_path = file_info[0]
+
+        if not file_path:
+            return
+
+        params = TaskListParameters(self.__task_list.get_parameters())
+        params.dump(file_path)
 
     def execute(self):
         self.inner_wgt.apply_parameters()
