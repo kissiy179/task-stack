@@ -8,14 +8,14 @@ import qtawesome as qta
 from ..core.task_list import TaskListParameters
 from .task_widget import TaskWidget
 from ..ui.task_list_menu import TaskListMenu
-import_icon = qta.icon('fa5s.folder-open', color='white')
-export_icon = qta.icon('fa5s.save', color='white')
+import_icon = qta.icon('fa5s.folder-open', color='lightgray')
+export_icon = qta.icon('fa5s.save', color='lightgray')
 close_icon = qta.icon('fa5s.trash-alt', color='lightgray')
 up_icon = qta.icon('fa5s.chevron-up', color='lightgray')
-down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
+down_icon = qta.icon('fa5s.chevron-down', color='')
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
-add_icon = qta.icon('fa5s.plus', color='white')
-detail_icon = qta.icon('fa5s.align-left', color='white')
+add_icon = qta.icon('fa5s.plus', color='lightgray')
+detail_icon = qta.icon('fa5s.align-left', color='lightgray')
 JSON_FILTERS = 'Json (*.json)'
 
 class HorizontalLine(QtWidgets.QFrame):
