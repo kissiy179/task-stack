@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import re
 from collections import OrderedDict
 import maya.cmds as cmds
 import taskstack.core.task as task
+DECIMAL_PATTERN = re.compile(r'^\d')
 
 class CreateNodesTask(task.Task):
     '''
@@ -12,7 +14,7 @@ class CreateNodesTask(task.Task):
         return OrderedDict((
             ('count', 1),
             ('nodeType', 'transform'),
-            ('key', 'test'),
+            ('name', 'node'),
         ))
         
     # def get_parameter_types(self):
@@ -26,7 +28,10 @@ class CreateNodesTask(task.Task):
         parameters = self.get_parameters()
         count = parameters.get('count')
         nodeType = parameters.get('nodeType')
-        key = parameters.get('key')
+        name = parameters.get('name')
+
+        if DECIMAL_PATTERN.match(name):
+            name = '_{}'.format(name)
         
         for i in range(count):
-            item = cmds.createNode(nodeType, name='node_{}'.format(key))
+            item = cmds.createNode(nodeType, name=name)
