@@ -13,6 +13,8 @@ class TaskListMenu(QtWidgets.QMenu):
 
     def __init__(self, *args, **kwargs):
         super(TaskListMenu, self).__init__(*args, **kwargs)
+        self.setTearOffEnabled(True)
+        self.setWindowTitle('Tasks')
         task_classes = task_list.get_task_classes()
         max_task_class_name_len = max([len(cls.__name__) for cls in task_classes.values()])
         lbls = ['{}: {}'.format(task_class.__name__.ljust(max_task_class_name_len), task_class.get_doc(first_line_only=True)) for task_class in task_classes.values()]
