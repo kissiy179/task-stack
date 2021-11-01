@@ -119,6 +119,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def __init__(self, task_list=None, *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
+        self.setMinimumHeight(400)
         self.__task_list = task_list if task_list else TaskList()
         self.__menu_bar = None
         self.__tool_bar = None
