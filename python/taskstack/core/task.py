@@ -26,6 +26,14 @@ class Task(object):
         '''
         raise NotImplemented()
 
+    @classmethod
+    def is_display_in_list(cls):
+        '''
+        クラス選択リストに表示するかどうか
+        classmethodにする必要がある
+        '''
+        return True
+        
     def get_parameter_types(self):
         '''
         使用するUIウィジェットを決定するための各パラメータの型を返す
