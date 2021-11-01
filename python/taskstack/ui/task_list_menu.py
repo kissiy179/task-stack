@@ -24,6 +24,10 @@ class TaskListMenu(QtWidgets.QMenu):
         for i, lbl in enumerate(lbls):
             action = QtWidgets.QAction(close_icon, lbl, self)
             task_class = task_classes.values()[i]
+            
+            if not task_class.is_display_in_list():
+                continue
+
             action.triggered.connect(partial(self.trigger, task_class))
             self.addAction(action)
 
