@@ -6,6 +6,7 @@ import json
 from .task import Task
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
+TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
 PYTHON_EXTENSIONS = ('.py', )
 
 def get_task_classes():
