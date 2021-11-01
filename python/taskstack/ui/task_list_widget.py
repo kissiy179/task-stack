@@ -17,7 +17,7 @@ exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='lightgray')
 detail_icon = qta.icon('fa5s.align-left', color='lightgray')
 JSON_FILTERS = 'Json (*.json)'
-TOOLBAR_POSITION = {
+TOOLBAR_POSITIONS = {
     'top': QtCore.Qt.TopToolBarArea,
     'bottom': QtCore.Qt.BottomToolBarArea,
     'left': QtCore.Qt.LeftToolBarArea,
@@ -184,13 +184,15 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         for action in self.__actions.get('io_actions'):
             menu.addAction(action)
 
-    def init_tool_bar(self, position='top'):
+    def init_tool_bar(self, position=''):
+        TOOLBAR_POSITION = TOOLBAR_POSITIONS.get(position)
+        
         if self.__tool_bar:
-            self.addToolBar(TOOLBAR_POSITION.get(position), self.__tool_bar)
+            self.addToolBar(TOOLBAR_POSITION, self.__tool_bar) if TOOLBAR_POSITION else None
             return 
 
         toolbar = QtWidgets.QToolBar('Commands')
-        self.addToolBar(TOOLBAR_POSITION.get(position), toolbar)
+        self.addToolBar(TOOLBAR_POSITION, toolbar) if TOOLBAR_POSITION else None
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('exec_actions'):
