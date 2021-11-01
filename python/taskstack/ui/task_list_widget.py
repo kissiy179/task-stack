@@ -122,6 +122,8 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
 class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
+    updated = QtCore.Signal()
+
     def __init__(self, task_list=None, *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
@@ -174,6 +176,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             # self.init_menu_bar()
             self.init_tool_bar(position=tool_bar_position)
             self.init_status_bar()
+
+        # Emit Signal
+        self.updated.emit()
 
     def init_menu_bar(self):
         if self.__menu_bar:
