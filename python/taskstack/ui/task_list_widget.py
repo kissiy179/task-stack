@@ -273,6 +273,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         task_list_actions.append(clear_tasks_action)
 
         return actions
+
+    def get_task_list(self):
+        return self.__task_list
         
     def select_task_class(self):
         self.__task_list_menu.move(QtGui.QCursor.pos())
