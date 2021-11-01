@@ -307,6 +307,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         if not file_path:
             return
 
+        self.inner_wgt.apply_parameters()
         params = TaskListParameters(self.__task_list.get_parameters())
         params.dump(file_path)
 
