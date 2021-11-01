@@ -122,6 +122,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list = task_list
         self.__menu_bar = None
         self.__tool_bar = None
+        self.__status_bar = None
         self.__main_layout = None
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
@@ -161,10 +162,11 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         buttons_lo.setContentsMargins(0,0,0,0)
 
         if executable:
-            # self.init_menubar()
-            self.init_toolbar()
+            # self.init_menu_bar()
+            self.init_tool_bar()
+            self.init_status_bar()
 
-    def init_menubar(self):
+    def init_menu_bar(self):
         if self.__menu_bar:
             return
 
@@ -174,7 +176,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         for action in self.__actions.get('io_actions'):
             menu.addAction(action)
 
-    def init_toolbar(self):
+    def init_tool_bar(self):
         if self.__tool_bar:
             return 
 
@@ -195,6 +197,14 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             toolbar.addAction(action)
 
         self.__tool_bar = toolbar
+
+    def init_status_bar(self):
+        if not self.__status_bar:
+            self.__status_bar = QtWidgets.QStatusBar()
+            self.setStatusBar(self.__status_bar)
+
+        task_count = len(self.__task_list.get_tasks())
+        self.__status_bar.showMessage('{} tasks.'.format(task_count))
         
     def clear_ui(self):
         if self.__main_layout:
