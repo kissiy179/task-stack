@@ -5,9 +5,9 @@ from collections import OrderedDict
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
 from . import WIDGET_TABLE
 import qtawesome as qta
-from ..core.task_list import TaskListParameters
+from ..core.task_list import TaskList, TaskListParameters
 from .task_widget import TaskWidget
-from ..ui.task_list_menu import TaskListMenu
+from .task_list_menu import TaskListMenu
 import_icon = qta.icon('fa5s.folder-open', color='lightgray')
 export_icon = qta.icon('fa5s.save', color='lightgray')
 close_icon = qta.icon('fa5s.trash-alt', color='lightgray')
@@ -116,10 +116,10 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
 class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
-    def __init__(self, task_list=(), *args, **kwargs):
+    def __init__(self, task_list=None, *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
-        self.__task_list = task_list
+        self.__task_list = task_list if task_list else TaskList()
         self.__menu_bar = None
         self.__tool_bar = None
         self.__status_bar = None
