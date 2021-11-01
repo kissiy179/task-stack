@@ -17,6 +17,12 @@ exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='lightgray')
 detail_icon = qta.icon('fa5s.align-left', color='lightgray')
 JSON_FILTERS = 'Json (*.json)'
+TOOLBAR_POSITION = {
+    'top': QtCore.Qt.TopToolBarArea,
+    'bottom': QtCore.Qt.BottomToolBarArea,
+    'left': QtCore.Qt.LeftToolBarArea,
+    'right': QtCore.Qt.RightToolBarArea,
+}
 
 class HorizontalLine(QtWidgets.QFrame):
 
@@ -131,7 +137,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
         self.resize(500, 600)
 
-    def init_ui(self, executable=True):
+    def init_ui(self, executable=True, tool_bar_position='top'):
         # Clear ui
         self.clear_ui()
 
@@ -165,7 +171,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         if executable:
             # self.init_menu_bar()
-            self.init_tool_bar()
+            self.init_tool_bar(position=tool_bar_position)
             self.init_status_bar()
 
     def init_menu_bar(self):
@@ -178,11 +184,13 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         for action in self.__actions.get('io_actions'):
             menu.addAction(action)
 
-    def init_tool_bar(self):
+    def init_tool_bar(self, position='top'):
         if self.__tool_bar:
+            self.addToolBar(TOOLBAR_POSITION.get(position), self.__tool_bar)
             return 
 
-        toolbar = self.addToolBar('Commands')
+        toolbar = QtWidgets.QToolBar('Commands')
+        self.addToolBar(TOOLBAR_POSITION.get(position), toolbar)
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('exec_actions'):
