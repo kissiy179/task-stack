@@ -74,7 +74,8 @@ class TaskList(object):
                 return
 
             task = task_class()
-            task.active = active
+
+        task.set_active(active)
 
         if not isinstance(parameters, dict):
             print('TaskStackError: Parameters must be dictionary.'.format(name))
