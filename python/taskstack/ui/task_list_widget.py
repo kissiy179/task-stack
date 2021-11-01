@@ -146,6 +146,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         # Scroll Aere
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setStyleSheet('QScrollArea {background-color: #2b2b2b;}')
         self.__main_layout.addWidget(self.scroll_area)
 
         # Parameters Widgets
