@@ -129,6 +129,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list = task_list if task_list else TaskList()
         self.__menu_bar = None
         self.__tool_bar = None
+        self.__tool_bar_position = None
         self.__status_bar = None
         self.__main_layout = None
         self.__actions = self.get_actions()
@@ -137,7 +138,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
         self.resize(500, 600)
 
-    def init_ui(self, executable=True, tool_bar_position='top'):
+    def init_ui(self, executable=True, tool_bar_position=''):
         # Clear ui
         self.clear_ui()
 
@@ -192,7 +193,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             return 
 
         toolbar = QtWidgets.QToolBar('Commands')
-        self.addToolBar(TOOLBAR_POSITION, toolbar) if TOOLBAR_POSITION else None
+        self.addToolBar(TOOLBAR_POSITION, toolbar) if TOOLBAR_POSITION else self.addToolBar(toolbar)
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('exec_actions'):
