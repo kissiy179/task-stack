@@ -25,7 +25,15 @@ class Task(object):
         タスクの実行処理
         このオブジェクトに格納されたパラメータを使用する場合はget_parametersメソッドを使用する
         '''
-        raise NotImplemented()
+        print('[TaskStack] {}.execute.'.format(type(self).__name__))
+
+    def undo(self):
+        '''
+        タスクのUndo処理
+        MayaのUndoが効かないコマンド(fileコマンドなど)を戻したい場合に実装する
+        親のTaskListでexecuteと逆の順番で実行される想定
+        '''
+        print('[TaskStack] {}.undo.'.format(type(self).__name__))
 
     @classmethod
     def is_display_in_list(cls):
@@ -109,4 +117,3 @@ class Task(object):
             return 
 
         self.execute()
-
