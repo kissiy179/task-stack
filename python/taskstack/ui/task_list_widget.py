@@ -348,4 +348,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def execute(self):
         self.inner_wgt.apply_parameters()
-        self.__task_list.execute()
+
+        # TaskListはwith文に渡すことでwitu文開始時にexecute、終了時にundoを行う
+        with self.__task_list:
+            pass

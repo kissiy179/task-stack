@@ -11,6 +11,12 @@ class TaskList(object):
         # self.__parameters = {}
         self.__tasks = []
 
+    def __enter__(self):
+        self.execute()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.undo()
+
     def get_parameters(self):
         params = []
 
@@ -75,8 +81,15 @@ class TaskList(object):
 
     def execute(self):
         print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self).__name__))
+
         for task in self.__tasks:
             task.execute_if_active()
+
+    def undo(self):
+        print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
+
+        for task in self.__tasks[::-1]:
+            task.undo_if_active()
 
 class TaskListParameters(list):
 

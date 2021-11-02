@@ -34,13 +34,14 @@ class Task(object):
         '''
         print('[TaskStack] {}.execute.'.format(type(self).__name__))
 
-    def undo(self):
+    def undo(self, inherit=False):
         '''
         タスクのUndo処理
         MayaのUndoが効かないコマンド(fileコマンドなど)を戻したい場合に実装する
         親のTaskListでexecuteと逆の順番で実行される想定
         '''
-        print('[TaskStack] {}.undo.'.format(type(self).__name__))
+        if inherit:
+            print('[TaskStack] {}.undo.'.format(type(self).__name__))
 
     @classmethod
     def get_task_classes(cls):
@@ -158,3 +159,12 @@ class Task(object):
             return 
 
         self.execute()
+
+    def undo_if_active(self):
+        '''
+        get_activeの戻り値がTrueの場合のみUndoする
+        '''
+        if not self.__active:
+            return 
+
+        self.undo()
