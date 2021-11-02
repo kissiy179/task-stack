@@ -74,6 +74,7 @@ class TaskList(object):
         del self.__tasks[:]
 
     def execute(self):
+        print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self).__name__))
         for task in self.__tasks:
             task.execute_if_active()
 
