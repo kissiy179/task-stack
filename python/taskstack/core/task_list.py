@@ -1,47 +1,15 @@
 from collections import OrderedDict
-import os
-import imp
-import abc
+# import abc
 import json
 from .task import Task
 
-TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
-TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
-PYTHON_EXTENSIONS = ('.py', )
-
-def get_task_classes():
-    task_classes = {}
-
-    for task_dir in TASK_DIRS.split(';'):
-        for dirpath, dirnames, filenames in os.walk(task_dir):
-            for filename in filenames:
-                basename, ext = os.path.splitext(filename)
-
-                if not ext in PYTHON_EXTENSIONS:
-                    continue
-
-                filepath = os.path.join(dirpath, filename)
-                module = imp.load_source(basename, filepath)
-
-                for name, obj in module.__dict__.items():
-                    if not isinstance(obj, type):
-                        continue
-
-                    if not Task in obj.__mro__:
-                        continue
-
-                    task_classes[obj.__name__] = obj
-
-    return task_classes
-
 class TaskList(object):
     
-    __metaclass__ = abc.ABCMeta
+    # __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         # self.__parameters = {}
         self.__tasks = []
-        self.__task_classes = get_task_classes()
 
     def get_parameters(self):
         params = []
@@ -67,10 +35,11 @@ class TaskList(object):
 
     def add_task(self, task=None, name='', active=True, parameters={}):
         if not task:
-            task_class = self.__task_classes.get(name)
+            task_classes = Task.get_task_classes()
+            task_class = task_classes.get(name)
 
             if not task_class:
-                print('TaskStackError: Task [{}] does not exist.'.format(name))
+                print('[TaskStackError] Task "{}" does not exist.'.format(name))
                 return
 
             task = task_class()
@@ -78,7 +47,7 @@ class TaskList(object):
         task.set_active(active)
 
         if not isinstance(parameters, dict):
-            print('TaskStackError: Parameters must be dictionary.'.format(name))
+            print('[TaskStackError] Parameters must be dictionary.'.format(name))
             return
 
         task.set_parameters(**parameters)

@@ -2,6 +2,7 @@
 import sys
 import os
 
+# 環境変数TASKSTACK_TASK_DIRSにこのパッケージ内のtasksフォルダを追加
 tasks_path = os.path.realpath(os.path.join(__file__, r'..\tasks'))
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 
