@@ -2,9 +2,9 @@
 from collections import OrderedDict
 import maya.cmds as cmds
 import pymel.core as pm
-import taskstack.core.task as task
+from taskstack.core.task import Task
 
-class SetAttributeTask(task.Task):
+class SetAttributeTask(Task):
     '''
     指定したノードタイプのオブジェクトにアトリビュートを設定するタスク
     '''
@@ -17,6 +17,7 @@ class SetAttributeTask(task.Task):
         ))
         
     def execute(self):
+        super(SetAttributeTask, self).execute()
         parameters = self.get_parameters()
         nodeType = parameters.get('nodeType')
         attrName = parameters.get('attrName')

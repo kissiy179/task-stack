@@ -1,9 +1,9 @@
 # encoding: UTF-8
 from collections import OrderedDict
 import maya.cmds as cmds
-import taskstack.core.task as task
+from taskstack.core.task import Task
 
-class NewSceneTask(task.Task):
+class NewSceneTask(Task):
     '''
     新しいシーンを開くタスク
     '''
@@ -12,4 +12,5 @@ class NewSceneTask(task.Task):
         return OrderedDict()
        
     def execute(self):
+        super(NewSceneTask, self).execute()
         cmds.file(new=True,force=True)

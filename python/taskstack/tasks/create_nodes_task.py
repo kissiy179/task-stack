@@ -2,10 +2,10 @@
 import re
 from collections import OrderedDict
 import maya.cmds as cmds
-import taskstack.core.task as task
+from taskstack.core.task import Task
 DECIMAL_PATTERN = re.compile(r'^\d')
 
-class CreateNodesTask(task.Task):
+class CreateNodesTask(Task):
     '''
     指定したタイプのノードを指定数作成するタスク
     '''
@@ -25,6 +25,7 @@ class CreateNodesTask(task.Task):
     #     ))
          
     def execute(self):
+        super(CreateNodesTask, self).execute()
         parameters = self.get_parameters()
         count = parameters.get('count')
         nodeType = parameters.get('nodeType')
