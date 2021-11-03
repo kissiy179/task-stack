@@ -21,6 +21,11 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
         self.resize(300, 0)
+        self.updated.connect(self.apply_parameters)
+        self.updated.connect(self.log_parameters)
+
+    def log_parameters(self):
+        print(self.__task.get_parameters())
 
     def init_ui(self, executable=True, show_parameters=True, label_prefix=''):
         # uiクリア
