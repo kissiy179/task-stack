@@ -22,10 +22,10 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.init_ui()
         self.resize(300, 0)
         self.updated.connect(self.apply_parameters)
-        # self.updated.connect(self.log_parameters)
+        self.updated.connect(self.log_parameters)
 
     def log_parameters(self):
-        print(self.__task.get_parameters())
+        print(self.__task.get_active(), self.__task.get_parameters())
 
     def init_ui(self, executable=True, show_parameters=True, label_prefix=''):
         # uiクリア
@@ -48,7 +48,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.group_box.setCheckable(True)
         self.group_box.setChecked(task.get_active())
         # self.group_box.setStyle(QtWidgets.QStyleFactory.create("plastique"))
-        self.group_box.toggled.connect(self.toggle_active)
+        self.group_box.toggled.connect(self.updated)
         self.__main_layout.addWidget(self.group_box)
         self.group_lo = QtWidgets.QVBoxLayout()
         self.group_box.setLayout(self.group_lo)
@@ -107,14 +107,12 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         if self.__main_layout:
             QtWidgets.QWidget().setLayout(self.__main_layout)
 
-    def toggle_active(self):
-        active = self.group_box.isChecked()
-        self.__task.set_active(active)
-
     def apply_parameters(self):
         task = self.__task
         params = {}
         param_types = self.__parameter_types
+        active = self.group_box.isChecked()
+        self.__task.set_active(active)
 
         for param_name, widget in self.__widgets.items():
             param_type = param_types.get(param_name)
