@@ -8,6 +8,8 @@ exec_icon = qta.icon('fa5s.play', color='lightgreen')
 
 class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
+    updated = QtCore.Signal()
+
     def __init__(self, task, *args, **kwargs):
         super(TaskWidget, self).__init__(*args, **kwargs)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -88,7 +90,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
             try:
                 getattr(widget, set_method)(value)
-                getattr(widget, update_signal).connect(self.apply_parameters)
+                getattr(widget, update_signal).connect(self.updated)
 
             except:
                 pass

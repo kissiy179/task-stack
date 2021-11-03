@@ -36,6 +36,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     remove_task = QtCore.Signal(int)
     moveup_task = QtCore.Signal(int)
     movedown_task = QtCore.Signal(int)
+    updated = QtCore.Signal()
 
     def __init__(self, tasks, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
@@ -98,6 +99,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             # Task widget
             task_wdiget = TaskWidget(task)
             task_wdiget.init_ui(show_parameters=self.__show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
+            task_wdiget.updated.connect(self.updated)
             hlo.addWidget(task_wdiget)
             self.__task_widgets.append(task_wdiget)
 
@@ -165,6 +167,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.inner_wgt.remove_task.connect(self.remove_task)
         self.inner_wgt.moveup_task.connect(self.moveup_task)
         self.inner_wgt.movedown_task.connect(self.movedown_task)
+        self.inner_wgt.updated.connect(self.updated)
         self.scroll_area.setWidget(self.inner_wgt)
 
         # Buttons
@@ -178,7 +181,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             self.init_status_bar()
 
         # Emit Signal
-        self.updated.emit()
+        # self.updated.emit()
 
     def init_menu_bar(self):
         if self.__menu_bar:
