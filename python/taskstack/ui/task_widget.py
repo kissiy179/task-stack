@@ -1,5 +1,6 @@
 # encoding: UTF-8
 from pprint import pprint
+from functools import partial
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
 import qtawesome as qta
 from . import WIDGET_TABLE
@@ -81,11 +82,13 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
             widget_class = widget_info.get('class')
             set_method = widget_info.get('set_method')
+            update_signal = widget_info.get('update_signal')
             widget = widget_class()
             value = parametrs.get(param_name)
 
             try:
                 getattr(widget, set_method)(value)
+                getattr(widget, update_signal).connect(self.apply_parameters)
 
             except:
                 pass
