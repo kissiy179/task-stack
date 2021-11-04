@@ -55,7 +55,7 @@ class MayaSceneEdit(FilePathEdit):
     '''
 
     def open_dialog(self):
-        pj_path = cmds.workspace(query=True, directory=True)
+        pj_path = cmds.workspace(query=True, rootDirectory=True)
         file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter='Maya scene files (*.ma *.mb);;FBX files (*.fbx)')
         file_path = file_obj[0]
         file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
