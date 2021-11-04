@@ -31,7 +31,9 @@ class FilePathEdit(QtWidgets.QWidget):
     def open_dialog(self):
         file_obj = QtWidgets.QFileDialog.getOpenFileName()
         file_path = file_obj[0]
-        self.setText(file_path)
+
+        if file_path:
+            self.setText(file_path)
 
     def text(self):
         return self.line_edit.text()
@@ -46,7 +48,9 @@ class DirectoryPathEdit(FilePathEdit):
 
     def open_dialog(self):
         dir_path = QtWidgets.QFileDialog.getExistingDirectory(self)
-        self.setText(dir_path)
+
+        if dir_path:
+            self.setText(dir_path)
 
 class MayaSceneEdit(FilePathEdit):
     '''
@@ -58,8 +62,10 @@ class MayaSceneEdit(FilePathEdit):
         pj_path = cmds.workspace(query=True, rootDirectory=True)
         file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter='Maya scene files (*.ma *.mb);;FBX files (*.fbx)')
         file_path = file_obj[0]
-        file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
-        self.setText(file_path)
+
+        if file_path:
+            file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
+            self.setText(file_path)
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
