@@ -52,7 +52,7 @@ class Task(object):
         if cls.__task_classes:
             return cls.__task_classes
 
-        task_classes = {}
+        task_classes = OrderedDict()
 
         for task_dir in TASK_DIRS.split(';'):
             for dirpath, dirnames, filenames in os.walk(task_dir):
@@ -69,9 +69,9 @@ class Task(object):
                         if not isinstance(obj, type):
                             continue
 
-                        if not Task in obj.__mro__:
+                        if not Task in obj.__mro__ or obj == Task:
                             continue
-
+                        
                         task_classes[obj.__name__] = obj
 
         cls.__task_classes = task_classes
