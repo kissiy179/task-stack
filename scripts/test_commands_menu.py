@@ -14,6 +14,7 @@ def show_message(message):
 
 def open_tasklist(*args):
     import taskstack; reload(taskstack)
+    import taskstack.ui; reload(taskstack.ui)
     import taskstack.ui.task_list_widget as task_list_widget
 
     wgt = task_list_widget.TaskListWidget()

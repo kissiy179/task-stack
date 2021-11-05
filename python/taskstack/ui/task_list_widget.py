@@ -141,6 +141,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list_menu.triggered.connect(self.add_task_class)
         self.init_ui()
         self.resize(500, 600)
+        # self.updated.connect(self.log)
+
+    def log(self):
+        print(self.__task_list.get_parameters())
 
     def init_ui(self, executable=True, tool_bar_position=''):
         # Clear ui
@@ -181,7 +185,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             self.init_status_bar()
 
         # Emit Signal
-        # self.updated.emit()
+        self.updated.emit()
 
     def init_menu_bar(self):
         if self.__menu_bar:
