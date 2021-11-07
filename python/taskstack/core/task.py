@@ -158,7 +158,7 @@ class Task(object):
         if not self.__active:
             return 
 
-        self.execute()
+        return self.execute()
 
     def undo_if_active(self):
         '''
@@ -167,4 +167,4 @@ class Task(object):
         if not self.__active:
             return 
 
-        self.undo()
+        return self.undo()
