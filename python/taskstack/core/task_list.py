@@ -65,16 +65,18 @@ class TaskList(object):
     def moveup_task(self, idx):
         tasks = self.__tasks
         src_task = tasks[idx]
-        tgt_task = tasks[idx -1]
+        tgt_idx = idx -1
+        tgt_task = tasks[tgt_idx]
         tasks[idx] = tgt_task
-        tasks[idx -1] = src_task
+        tasks[tgt_idx] = src_task
 
     def movedown_task(self, idx):
         tasks = self.__tasks
         src_task = tasks[idx]
-        tgt_task = tasks[idx +1]
+        tgt_idx = (idx +1) % len(tasks)
+        tgt_task = tasks[tgt_idx]
         tasks[idx] = tgt_task
-        tasks[idx +1] = src_task
+        tasks[tgt_idx] = src_task
 
     def clear_tasks(self):
         del self.__tasks[:]
