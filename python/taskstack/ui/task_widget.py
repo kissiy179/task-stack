@@ -83,6 +83,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             self.err_lbl = QtWidgets.QLabel(self.__error_message)
             self.err_lbl.setStyleSheet('background-color: crimson')
             self.err_lbl.setMargin(5)
+            self.err_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.err_lbl)
 
         # Parameters
