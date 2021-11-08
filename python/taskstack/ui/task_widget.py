@@ -1,11 +1,14 @@
 # encoding: UTF-8
+import re
 from pprint import pprint
 from functools import partial
 import traceback
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
 import qtawesome as qta
 from . import WIDGET_TABLE
+
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
+ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*Error: .*$)', re.MULTILINE | re.DOTALL)
 
 class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
@@ -144,10 +147,12 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             self.set_error_message('')
 
         except Exception as e:
-            msg = traceback.format_exc().strip('\n')
-            self.set_error_message(msg)
+            err = traceback.format_exc().strip('\n')
+            match = ERROR_PATTERN.match(err)
+            main_err = match.group('main_err')
+            self.set_error_message(main_err)
             raise
 
-    def set_error_message(self, msg):
-        self.__error_message = msg
+    def set_error_message(self, err):
+        self.__error_message = err
         self.init_ui()
