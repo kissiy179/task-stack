@@ -1,6 +1,7 @@
 # encoding: UTF-8
 from pprint import pprint
 from functools import partial
+import traceback
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
 import qtawesome as qta
 from . import WIDGET_TABLE
@@ -17,6 +18,8 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__widgets = {}
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
+        self.__error_message = ''
+        self.__label_prefix = ''
         self.__main_layout = None
         self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
@@ -42,8 +45,11 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.setLayout(self.__main_layout)
 
         # Group box
+        if label_prefix:
+            self.__label_prefix = label_prefix
+
         label = type(task).__name__
-        label = '{}{}'.format(label_prefix, label) if label else label
+        label = '{}{}'.format(self.__label_prefix, label) if label else label
         self.group_box = QtWidgets.QGroupBox(label)
         self.group_box.setCheckable(True)
         self.group_box.setChecked(task.get_active())
@@ -67,10 +73,17 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         # Description
         self.group_lo.addLayout(doc_lo)
-        doc_lbl = QtWidgets.QLabel(doc)
-        doc_lbl.setStyleSheet('background-color: #555')
-        doc_lbl.setMargin(5)
-        doc_lo.addWidget(doc_lbl)
+        self.doc_lbl = QtWidgets.QLabel(doc)
+        self.doc_lbl.setStyleSheet('background-color: #555')
+        self.doc_lbl.setMargin(5)
+        doc_lo.addWidget(self.doc_lbl)
+
+        # Error message
+        if self.__error_message:
+            self.err_lbl = QtWidgets.QLabel(self.__error_message)
+            self.err_lbl.setStyleSheet('background-color: crimson')
+            self.err_lbl.setMargin(5)
+            self.group_lo.addWidget(self.err_lbl)
 
         # Parameters
         if show_parameters:
@@ -124,4 +137,16 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
     def execute(self):
         self.apply_parameters()
-        self.__task.execute_if_active()
+
+        try:
+            self.__task.execute_if_active()
+            self.set_error_message('')
+
+        except Exception as e:
+            msg = traceback.format_exc().strip('\n')
+            self.set_error_message(msg)
+            raise
+
+    def set_error_message(self, msg):
+        self.__error_message = msg
+        self.init_ui()
