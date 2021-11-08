@@ -38,10 +38,12 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     movedown_task = QtCore.Signal(int)
     updated = QtCore.Signal()
 
-    def __init__(self, tasks, *args, **kwargs):
+    def __init__(self, taks_list, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
+        self.__task_list = taks_list
         self.__task_widgets = []
         self.__show_details = True
+        tasks = self.__task_list.get_tasks()
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;} InnerTaskListWidget{background-color: #3f3f3f}')
         lo = QtWidgets.QVBoxLayout()
@@ -109,6 +111,17 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
         lo.addStretch()
 
+    def __enter__(self):
+        # UI状にエラー表示したいのでTaskもしくはTaskListクラスのexecuteを呼び出すのではなく各Widgetから実行する
+        print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self.__task_list).__name__))
+
+        for task_widget in self.__task_widgets:
+            task_widget.execute()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # 終了処理はUI的には特にやることがないのでTaskListのexecuteを直接呼び出す
+        self.__task_list.__exit__(exc_type, exc_value, traceback)
+
     def _remove_task(self, idx):
         self.remove_task.emit(idx)
 
@@ -166,8 +179,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__main_layout.addWidget(self.scroll_area)
 
         # Parameters Widgets
-        tasks = self.__task_list.get_tasks()
-        self.inner_wgt = InnerTaskListWidget(tasks)
+        # tasks = self.__task_list.get_tasks()
+        self.inner_wgt = InnerTaskListWidget(self.__task_list)
         self.inner_wgt.remove_task.connect(self.remove_task)
         self.inner_wgt.moveup_task.connect(self.moveup_task)
         self.inner_wgt.movedown_task.connect(self.movedown_task)
@@ -355,7 +368,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def execute(self):
         self.inner_wgt.apply_parameters()
+        self.init_ui()
 
-        # TaskListはwith文に渡すことでwitu文開始時にexecute、終了時にundoを行う
-        with self.__task_list:
+        # TaskListはwith文に渡すことで実行、後処理を行う
+        with self.inner_wgt:
             pass
