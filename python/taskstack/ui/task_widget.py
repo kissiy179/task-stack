@@ -29,6 +29,8 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.resize(300, 0)
         self.updated.connect(self.apply_parameters)
         # self.updated.connect(self.log_parameters)
+        self.__task.get_emitter().executed.connect(self.set_error_message)
+        self.__task.get_emitter().error_raised.connect(self.recieve_error)
 
     def log_parameters(self):
         print(self.__task.get_active(), self.__task.get_parameters())
@@ -139,20 +141,19 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         task.set_parameters(**params)
 
-    def execute(self):
-        self.apply_parameters()
-
-        try:
-            self.__task.execute_if_active()
-            self.set_error_message('')
-
-        except Exception as e:
-            err = traceback.format_exc().strip('\n')
-            match = ERROR_PATTERN.match(err)
-            main_err = match.group('main_err')
-            self.set_error_message(main_err)
-            raise
-
-    def set_error_message(self, err):
+    def set_error_message(self, err=''):
         self.__error_message = err
         self.init_ui()
+        
+    def recieve_error(self):
+        err = traceback.format_exc().strip('\n')
+        match = ERROR_PATTERN.match(err)
+        main_err = match.group('main_err')
+        self.set_error_message(main_err)
+        raise
+
+    def execute(self):
+        self.apply_parameters()
+        self.__task.execute_if_active()
+        return
+
