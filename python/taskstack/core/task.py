@@ -3,20 +3,29 @@ import os
 import imp
 import abc
 from collections import OrderedDict
+from mayaqt import QtCore
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
 PYTHON_EXTENSIONS = ('.py', )
 
+class SignalEmitter(QtCore.QObject):
+    executed = QtCore.Signal()
+    error_raised = QtCore.Signal()
+
 class Task(object):
     
     __metaclass__ = abc.ABCMeta
     __task_classes = []
-    
+
     def __init__(self):
         self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
         self.__active = True
+        self.__emitter = SignalEmitter()
+
+    def get_emitter(self):
+        return self.__emitter
 
     @abc.abstractmethod
     def get_default_parameters(self):
@@ -157,8 +166,15 @@ class Task(object):
         '''
         if not self.__active:
             return 
+            
+        try:
+            rtn = self.execute()
+            self.__emitter.executed.emit()
+            return rtn
 
-        return self.execute()
+        except:
+            self.__emitter.error_raised.emit()
+            raise
 
     def undo_if_active(self):
         '''
@@ -168,3 +184,4 @@ class Task(object):
             return 
 
         return self.undo()
+
