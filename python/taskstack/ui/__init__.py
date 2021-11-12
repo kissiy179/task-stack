@@ -82,6 +82,7 @@ class CustomDoubleSpinBox(QtWidgets.QDoubleSpinBox):
         super(CustomDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setMinimum(-100000)
         self.setMaximum(100000)
+        self.setDecimals(3)
 
 WIDGET_TABLE = {
     'bool': {'class': QtWidgets.QCheckBox, 'get_method': 'isChecked', 'set_method': 'setChecked', 'update_signal': 'stateChanged'},
