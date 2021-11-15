@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
+import sys
 import os
 import imp
 import abc
+import re
+import traceback
 from collections import OrderedDict
 from mayaqt import QtCore
+from . import TaskStackError, TaskStackWarning
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
 PYTHON_EXTENSIONS = ('.py', )
+ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*(Error|Warning): .*$)', re.MULTILINE | re.DOTALL)
 
 class SignalEmitter(QtCore.QObject):
     executed = QtCore.Signal()
-    error_raised = QtCore.Signal()
+    error_raised = QtCore.Signal(str)
+    warning_raised = QtCore.Signal(str)
 
 class Task(object):
     
@@ -173,8 +179,21 @@ class Task(object):
             return rtn
 
         except:
-            self.__emitter.error_raised.emit()
-            raise
+            err_msg = traceback.format_exc().strip('\n')
+            type_, value, traceback_ = sys.exc_info()
+            match = ERROR_PATTERN.match(err_msg)
+            err_msg = match.group('main_err')
+
+            # TaskStackWarningの場合はwarning_raisedシグナルを発信してスルー
+            if type_ == TaskStackWarning:
+                print(err_msg)
+                self.__emitter.warning_raised.emit(err_msg)
+
+            # それ以外(TaskStackError含む)の場合はerror_raisedシグナルを発信して処理を止める
+            else:
+                self.__emitter.error_raised.emit(err_msg)
+                raise
+
 
     def undo_if_active(self):
         '''

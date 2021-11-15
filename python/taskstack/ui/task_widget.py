@@ -22,6 +22,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__task = task
         self.__parameter_types = task.get_parameter_types()
         self.__error_message = ''
+        self.__warning_message = ''
         self.__label_prefix = ''
         self.__main_layout = None
         self.setWindowTitle(type(self.__task).__name__)
@@ -29,8 +30,12 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.resize(300, 0)
         self.updated.connect(self.apply_parameters)
         # self.updated.connect(self.log_parameters)
+        self.__task.get_emitter().executed.connect(self.set_warning_message)
         self.__task.get_emitter().executed.connect(self.set_error_message)
-        self.__task.get_emitter().error_raised.connect(self.recieve_error)
+        self.__task.get_emitter().warning_raised.connect(self.set_warning_message)
+        self.__task.get_emitter().warning_raised.connect(self.set_error_message)
+        self.__task.get_emitter().error_raised.connect(self.set_warning_message)
+        self.__task.get_emitter().error_raised.connect(self.set_error_message)
 
     def log_parameters(self):
         print(self.__task.get_active(), self.__task.get_parameters())
@@ -86,10 +91,18 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         # Error message
         if self.__error_message:
             self.err_lbl = QtWidgets.QLabel(self.__error_message)
-            self.err_lbl.setStyleSheet('background-color: indianred')
+            self.err_lbl.setStyleSheet('color: white; background-color: indianred')
             self.err_lbl.setMargin(5)
             self.err_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.err_lbl)
+
+        # Warning message
+        if self.__warning_message:
+            self.warn_lbl = QtWidgets.QLabel(self.__warning_message)
+            self.warn_lbl.setStyleSheet('color: white; background-color: darkorange')
+            self.warn_lbl.setMargin(5)
+            self.warn_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+            self.group_lo.addWidget(self.warn_lbl)
 
         # Parameters
         if show_parameters:
@@ -97,7 +110,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
     def init_parameters_ui(self, parametrs, parameter_types):
         lo = QtWidgets.QFormLayout()
-        lo.setVerticalSpacing(0)
+        lo.setVerticalSpacing(2)
         self.group_lo.addLayout(lo)
 
         for param_name, param_type in parameter_types.items():
@@ -145,13 +158,10 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__error_message = err
         self.init_ui()
         
-    def recieve_error(self):
-        err = traceback.format_exc().strip('\n')
-        match = ERROR_PATTERN.match(err)
-        main_err = match.group('main_err')
-        self.set_error_message(main_err)
-        raise
-
+    def set_warning_message(self, err=''):
+        self.__warning_message = err
+        self.init_ui()
+        
     def execute(self):
         self.apply_parameters()
         self.__task.execute_if_active()
