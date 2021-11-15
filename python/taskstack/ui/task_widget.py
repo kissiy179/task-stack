@@ -98,11 +98,13 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         # Warning message
         if self.__warning_message:
+            print('warning raised---------', self.__warning_message)
             self.warn_lbl = QtWidgets.QLabel(self.__warning_message)
             self.warn_lbl.setStyleSheet('color: white; background-color: darkorange')
             self.warn_lbl.setMargin(5)
             self.warn_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.warn_lbl)
+            print self.warn_lbl
 
         # Parameters
         if show_parameters:
@@ -160,6 +162,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         
     def set_warning_message(self, err=''):
         self.__warning_message = err
+        print(err, '---')
         self.init_ui()
         
     def execute(self):

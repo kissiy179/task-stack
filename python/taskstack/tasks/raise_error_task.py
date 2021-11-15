@@ -24,8 +24,9 @@ class RaiseErrorTask(Task):
         print(raise_warning, raise_error)
 
         if raise_warning:
-            raise TaskStackWarning('Raise Warning')
+            self.raise_warning('Warn')
 
         if raise_error:
-            raise TaskStackError('Raise Error')
+            self.raise_error('Err')
+
 

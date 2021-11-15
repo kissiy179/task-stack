@@ -204,3 +204,23 @@ class Task(object):
 
         return self.undo()
 
+    def _raise_error(self, message, exception=TaskStackError):
+        try:
+            raise exception(message)
+
+        except:
+            err_msg = traceback.format_exc().strip('\n')
+            type_, value, traceback_ = sys.exc_info()
+            match = ERROR_PATTERN.match(err_msg)
+            err_msg = match.group('main_err')
+            return err_msg
+
+    def raise_error(self, message='Error', exception=TaskStackError):
+        err_msg = self._raise_error(message, exception)
+        self.__emitter.error_raised.emit(err_msg)
+        raise TaskStackError(err_msg)
+
+    def raise_warning(self, message='Warning', exception=TaskStackWarning):
+        err_msg = self._raise_error(message, exception)
+        self.__emitter.warning_raised.emit(err_msg)
+
