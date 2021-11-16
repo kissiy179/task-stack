@@ -21,10 +21,8 @@ class RaiseErrorTask(Task):
         raise_warning = parameters.get('Raise Warning')
         raise_error = parameters.get('Raise Error')
 
-        print(raise_warning, raise_error)
-
         if raise_warning:
-            self.raise_warning('Warn')
+            self.raise_warning('Warning')
 
         if raise_error:
             self.raise_error('Err')

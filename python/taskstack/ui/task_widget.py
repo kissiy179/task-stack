@@ -30,11 +30,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.resize(300, 0)
         self.updated.connect(self.apply_parameters)
         # self.updated.connect(self.log_parameters)
-        self.__task.get_emitter().executed.connect(self.set_warning_message)
-        self.__task.get_emitter().executed.connect(self.set_error_message)
         self.__task.get_emitter().warning_raised.connect(self.set_warning_message)
-        self.__task.get_emitter().warning_raised.connect(self.set_error_message)
-        self.__task.get_emitter().error_raised.connect(self.set_warning_message)
         self.__task.get_emitter().error_raised.connect(self.set_error_message)
 
     def log_parameters(self):
@@ -67,6 +63,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.group_box.toggled.connect(self.updated)
         self.__main_layout.addWidget(self.group_box)
         self.group_lo = QtWidgets.QVBoxLayout()
+        self.group_lo.setSpacing(2)
         self.group_box.setLayout(self.group_lo)
 
         # Exec button
@@ -98,13 +95,11 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         # Warning message
         if self.__warning_message:
-            print('warning raised---------', self.__warning_message)
             self.warn_lbl = QtWidgets.QLabel(self.__warning_message)
-            self.warn_lbl.setStyleSheet('color: white; background-color: darkorange')
+            self.warn_lbl.setStyleSheet('color: white; background-color: peru')
             self.warn_lbl.setMargin(5)
             self.warn_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.warn_lbl)
-            print self.warn_lbl
 
         # Parameters
         if show_parameters:
@@ -162,11 +157,16 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         
     def set_warning_message(self, err=''):
         self.__warning_message = err
-        print(err, '---')
         self.init_ui()
         
     def execute(self):
+        # パラメータ適用
         self.apply_parameters()
+
+        # エラーメッセージ初期化
+        self.set_error_message()
+        self.set_warning_message()
+
+        # activeの場合は実行
         self.__task.execute_if_active()
         return
-
