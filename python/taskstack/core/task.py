@@ -6,7 +6,7 @@ import abc
 import re
 import traceback
 from collections import OrderedDict
-from mayaqt import QtCore
+from qtpy import QtCore
 from . import TaskStackError, TaskStackWarning
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
@@ -222,5 +222,6 @@ class Task(object):
 
     def raise_warning(self, message='Warning', exception=TaskStackWarning):
         err_msg = self._raise_error(message, exception)
+        print('# {}'.format(err_msg))
         self.__emitter.warning_raised.emit(err_msg)
 
