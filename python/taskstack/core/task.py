@@ -1,22 +1,37 @@
 # -*- coding: utf-8 -*-
+import sys
 import os
 import imp
 import abc
+import re
+import traceback
 from collections import OrderedDict
+from mayaqt import QtCore
+from . import TaskStackError, TaskStackWarning
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
 PYTHON_EXTENSIONS = ('.py', )
+ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*(Error|Warning): .*$)', re.MULTILINE | re.DOTALL)
+
+class SignalEmitter(QtCore.QObject):
+    executed = QtCore.Signal()
+    error_raised = QtCore.Signal(str)
+    warning_raised = QtCore.Signal(str)
 
 class Task(object):
     
     __metaclass__ = abc.ABCMeta
     __task_classes = []
-    
+
     def __init__(self):
         self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
         self.__active = True
+        self.__emitter = SignalEmitter()
+
+    def get_emitter(self):
+        return self.__emitter
 
     @abc.abstractmethod
     def get_default_parameters(self):
@@ -157,8 +172,28 @@ class Task(object):
         '''
         if not self.__active:
             return 
+            
+        try:
+            rtn = self.execute()
+            self.__emitter.executed.emit()
+            return rtn
 
-        return self.execute()
+        except:
+            err_msg = traceback.format_exc().strip('\n')
+            type_, value, traceback_ = sys.exc_info()
+            match = ERROR_PATTERN.match(err_msg)
+            err_msg = match.group('main_err')
+
+            # TaskStackWarningの場合はwarning_raisedシグナルを発信してスルー
+            if type_ == TaskStackWarning:
+                print(err_msg)
+                self.__emitter.warning_raised.emit(err_msg)
+
+            # それ以外(TaskStackError含む)の場合はerror_raisedシグナルを発信して処理を止める
+            else:
+                self.__emitter.error_raised.emit(err_msg)
+                raise
+
 
     def undo_if_active(self):
         '''
@@ -168,3 +203,24 @@ class Task(object):
             return 
 
         return self.undo()
+
+    def _raise_error(self, message, exception=TaskStackError):
+        try:
+            raise exception(message)
+
+        except:
+            err_msg = traceback.format_exc().strip('\n')
+            type_, value, traceback_ = sys.exc_info()
+            match = ERROR_PATTERN.match(err_msg)
+            err_msg = match.group('main_err')
+            return err_msg
+
+    def raise_error(self, message='Error', exception=TaskStackError):
+        err_msg = self._raise_error(message, exception)
+        self.__emitter.error_raised.emit(err_msg)
+        raise TaskStackError(err_msg)
+
+    def raise_warning(self, message='Warning', exception=TaskStackWarning):
+        err_msg = self._raise_error(message, exception)
+        self.__emitter.warning_raised.emit(err_msg)
+
