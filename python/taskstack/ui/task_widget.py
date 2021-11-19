@@ -85,6 +85,10 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.doc_lbl.setMargin(5)
         doc_lo.addWidget(self.doc_lbl)
 
+        # Parameters
+        if show_parameters:
+            self.init_parameters_ui(params, param_types)
+
         # Error message
         if self.__error_message:
             self.err_lbl = QtWidgets.QLabel(self.__error_message)
@@ -100,10 +104,6 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             self.warn_lbl.setMargin(5)
             self.warn_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.warn_lbl)
-
-        # Parameters
-        if show_parameters:
-            self.init_parameters_ui(params, param_types)
 
     def init_parameters_ui(self, parametrs, parameter_types):
         lo = QtWidgets.QFormLayout()

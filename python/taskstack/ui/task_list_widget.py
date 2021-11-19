@@ -2,6 +2,7 @@
 from pprint import pprint
 from functools import partial
 from collections import OrderedDict
+from re import L
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
 from . import WIDGET_TABLE
 import qtawesome as qta
@@ -38,6 +39,10 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     movedown_task = QtCore.Signal(int)
     updated = QtCore.Signal()
     execute_task = QtCore.Signal(int)
+    executed = QtCore.Signal()
+    error_raised = QtCore.Signal(str)
+    warning_raised = QtCore.Signal(str)
+    increment = QtCore.Signal()
 
     def __init__(self, taks_list, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
@@ -51,6 +56,13 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         lo.setContentsMargins(0,0,0,0)
         lo.setSpacing(0)
         self.setLayout(lo)
+
+        # Connect signals
+        task_list_emitter = self.__task_list.get_emitter()
+        task_list_emitter.executed.connect(self.executed)
+        task_list_emitter.error_raised.connect(self.error_raised)
+        task_list_emitter.warning_raised.connect(self.warning_raised)
+        task_list_emitter.increment.connect(self.increment)
 
         for i, task in enumerate(tasks):
             hlo = QtWidgets.QHBoxLayout()
@@ -103,17 +115,9 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
         lo.addStretch()
 
-    def __enter__(self):
-        # UI状にエラー表示したいのでTaskもしくはTaskListクラスのexecuteを呼び出すのではなく各Widgetから実行する
-        print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self.__task_list).__name__))
-
-        for i, task_widget in enumerate(self.__task_widgets):
-            task_widget.execute()
-            self.execute_task.emit(i + 1)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        # 終了処理はUI的には特にやることがないのでTaskListのexecuteを直接呼び出す
-        self.__task_list.__exit__(exc_type, exc_value, traceback)
+    def execute(self):
+        with self.__task_list:
+            pass
 
     def _remove_task(self, idx):
         self.remove_task.emit(idx)
@@ -127,6 +131,15 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     def apply_parameters(self):
         for task_widget in self.__task_widgets:
             task_widget.apply_parameters()
+
+class CustomProgressBar(QtWidgets.QProgressBar):
+
+    def __init__(self, *args, **kwargs):
+        super(CustomProgressBar, self).__init__(*args, **kwargs)
+
+    def increment(self):
+        value = self.value()
+        self.setValue(value + 1)
 
 class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
@@ -191,7 +204,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             self.init_status_bar()
 
             # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
-            self.inner_wgt.execute_task.connect(self.progress_bar.setValue)
+            self.inner_wgt.increment.connect(self.__progress_bar.increment)
 
 
         # Emit Signal
@@ -237,19 +250,20 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         if not self.__status_bar:
             self.__status_bar = QtWidgets.QStatusBar()
             self.setStatusBar(self.__status_bar)
-            self.progress_bar = QtWidgets.QProgressBar()
-            self.__status_bar.addPermanentWidget(self.progress_bar)
-            # self.progress_bar.setMaximumWidth(100)
-            self.progress_bar.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+            self.__progress_bar = CustomProgressBar()
+            self.__progress_bar.setValue(0)
+            self.__status_bar.addPermanentWidget(self.__progress_bar)
+            # self.__progress_bar.setMaximumWidth(100)
+            self.__progress_bar.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
 
         task_count = len(self.__task_list.get_tasks())
         self.__status_bar.showMessage('{} tasks.'.format(task_count))
         self.__status_bar.setSizeGripEnabled(False)
-        self.progress_bar.setVisible(False)
+        self.__progress_bar.setVisible(False)
 
         if task_count > 0:
-            self.progress_bar.setMaximum(task_count)
-            self.progress_bar.setValue(0)
+            self.__progress_bar.setMaximum(task_count)
+            self.__progress_bar.setValue(0)
 
     def clear_ui(self):
         if self.__main_layout:
@@ -376,8 +390,5 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def execute(self):
         self.inner_wgt.apply_parameters()
         self.init_ui()
-        self.progress_bar.setVisible(True)
-
-        # TaskListはwith文に渡すことで実行、後処理を行う
-        with self.inner_wgt:
-            pass
+        self.__progress_bar.setVisible(True)
+        self.inner_wgt.execute()

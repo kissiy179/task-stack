@@ -1,7 +1,14 @@
 from collections import OrderedDict
 # import abc
 import json
+from qtpy import QtCore
 from .task import Task
+
+class SignalEmitter(QtCore.QObject):
+    executed = QtCore.Signal()
+    error_raised = QtCore.Signal(str)
+    warning_raised = QtCore.Signal(str)
+    increment = QtCore.Signal()
 
 class TaskList(object):
     
@@ -10,6 +17,10 @@ class TaskList(object):
     def __init__(self):
         # self.__parameters = {}
         self.__tasks = []
+        self.__emitter = SignalEmitter()
+
+    def get_emitter(self):
+        return self.__emitter
 
     def __enter__(self):
         self.execute()
@@ -50,6 +61,12 @@ class TaskList(object):
 
             task = task_class()
 
+        # Connect signals
+        task_emitter = task.get_emitter()
+        task_emitter.error_raised.connect(self.__emitter.error_raised)
+        task_emitter.warning_raised.connect(self.__emitter.warning_raised)
+        task_emitter.executed.connect(self.__emitter.increment)
+        # task_emitter.executed.connect(self.log)
         task.set_active(active)
 
         if not isinstance(parameters, dict):
@@ -86,6 +103,8 @@ class TaskList(object):
 
         for task in self.__tasks:
             task.execute_if_active()
+
+        self.__emitter.executed.emit()
 
     def undo(self):
         print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
