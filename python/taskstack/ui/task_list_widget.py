@@ -38,6 +38,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     moveup_task = QtCore.Signal(int)
     movedown_task = QtCore.Signal(int)
     updated = QtCore.Signal()
+    start_execute = QtCore.Signal()
     execute_task = QtCore.Signal(int)
     executed = QtCore.Signal()
     error_raised = QtCore.Signal(str)
@@ -59,6 +60,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
         # Connect signals
         task_list_emitter = self.__task_list.get_emitter()
+        task_list_emitter.start_execute.connect(self.start_execute)
         task_list_emitter.executed.connect(self.executed)
         task_list_emitter.error_raised.connect(self.error_raised)
         task_list_emitter.warning_raised.connect(self.warning_raised)
@@ -191,6 +193,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.inner_wgt.moveup_task.connect(self.moveup_task)
         self.inner_wgt.movedown_task.connect(self.movedown_task)
         self.inner_wgt.updated.connect(self.updated)
+        self.inner_wgt.start_execute.connect(self.execute_preprocess)
         self.scroll_area.setWidget(self.inner_wgt)
 
         # Buttons
@@ -387,8 +390,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         params = TaskListParameters(self.__task_list.get_parameters())
         params.dump(file_path)
 
-    def execute(self):
+    def execute_preprocess(self):
         self.inner_wgt.apply_parameters()
         self.init_ui()
         self.__progress_bar.setVisible(True)
+
+    def execute(self):
         self.inner_wgt.execute()

@@ -5,6 +5,7 @@ from qtpy import QtCore
 from .task import Task
 
 class SignalEmitter(QtCore.QObject):
+    start_execute = QtCore.Signal()
     executed = QtCore.Signal()
     error_raised = QtCore.Signal(str)
     warning_raised = QtCore.Signal(str)
@@ -100,6 +101,8 @@ class TaskList(object):
 
     def execute(self):
         print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self).__name__))
+
+        self.__emitter.start_execute.emit()
 
         for task in self.__tasks:
             task.execute_if_active()
