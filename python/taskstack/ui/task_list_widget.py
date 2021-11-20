@@ -71,8 +71,8 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             hlo.setSpacing(0)
             hlo.setContentsMargins(3,0,0,0)
             lo.addLayout(hlo)
-            vlo = QtWidgets.QVBoxLayout()
-            hlo.addLayout(vlo)
+            vlo = QtWidgets.QVBoxLayout()   
+            hlo.addLayout(vlo, 1)
             vlo.setSpacing(0)
 
             # Stretch
@@ -108,7 +108,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             task_wdiget = TaskWidget(task)
             task_wdiget.init_ui(show_parameters=self.__show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
             task_wdiget.updated.connect(self.updated)
-            hlo.addWidget(task_wdiget)
+            hlo.addWidget(task_wdiget, 100)
             self.__task_widgets.append(task_wdiget)
 
             # Line
@@ -264,10 +264,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__status_bar.setSizeGripEnabled(False)
         self.__progress_bar.setVisible(False)
 
-        if task_count > 0:
-            self.__progress_bar.setMaximum(task_count)
-            self.__progress_bar.setValue(0)
-
     def clear_ui(self):
         if self.__main_layout:
             QtWidgets.QWidget().setLayout(self.__main_layout)
@@ -394,6 +390,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.inner_wgt.apply_parameters()
         self.init_ui()
         self.__progress_bar.setVisible(True)
+        tasks = self.__task_list.get_tasks()
+        self.__progress_bar.setMaximum(len([task for task in tasks if task.get_active()]))
+        self.__progress_bar.setValue(0)
+
 
     def execute(self):
         self.inner_wgt.execute()
