@@ -64,8 +64,8 @@ class Task(object):
         環境変数で指定されたフォルダ内のpyファイルをロードしてこのクラスから派生したタスククラスを取得
         タスク生成タイミングなどで呼ぶと使用しているタスクオブジェクトのクラスを書き換えてしまったりするのでtaskstackパッケージ読み込み時に1度だけ行う
         '''
-        # if cls.__task_classes:
-        #     return cls.__task_classes
+        if cls.__task_classes:
+            return cls.__task_classes
 
         task_classes = OrderedDict()
 
