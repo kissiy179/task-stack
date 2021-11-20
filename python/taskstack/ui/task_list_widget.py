@@ -45,11 +45,11 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     warning_raised = QtCore.Signal(str)
     increment = QtCore.Signal()
 
-    def __init__(self, taks_list, *args, **kwargs):
+    def __init__(self, taks_list, show_details=True, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
         self.__task_list = taks_list
         self.__task_widgets = []
-        self.__show_details = True
+        self.show_details = show_details
         tasks = self.__task_list.get_tasks()
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;} InnerTaskListWidget{background-color: #3f3f3f}')
@@ -106,7 +106,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
             # Task widget
             task_wdiget = TaskWidget(task)
-            task_wdiget.init_ui(show_parameters=self.__show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
+            task_wdiget.init_ui(show_parameters=self.show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
             task_wdiget.updated.connect(self.updated)
             hlo.addWidget(task_wdiget, 100)
             self.__task_widgets.append(task_wdiget)
@@ -160,6 +160,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
+        self.show_details = True
         self.init_ui()
         self.resize(500, 600)
         # self.updated.connect(self.log)
@@ -167,7 +168,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def log(self):
         print(self.__task_list.get_parameters())
 
-    def init_ui(self, executable=True, tool_bar_position=''):
+    def init_ui(self, executable=True, show_details=None, tool_bar_position=''):
+        # Result show details
+        show_details = show_details if show_details else self.show_details
+
         # Clear ui
         self.clear_ui()
 
@@ -188,7 +192,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Tasks Widgets
         # tasks = self.__task_list.get_tasks()
-        self.inner_wgt = InnerTaskListWidget(self.__task_list)
+        self.inner_wgt = InnerTaskListWidget(self.__task_list, show_details=show_details)
         self.inner_wgt.remove_task.connect(self.remove_task)
         self.inner_wgt.moveup_task.connect(self.moveup_task)
         self.inner_wgt.movedown_task.connect(self.movedown_task)
@@ -303,6 +307,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         add_task_action.triggered.connect(self.select_task_class)
         task_list_actions.append(add_task_action)
 
+        toggle_task_details_visible = QtWidgets.QAction(detail_icon, 'Toggle Show Ditails', self)
+        toggle_task_details_visible.triggered.connect(self.toggle_show_details)
+        task_list_actions.append(toggle_task_details_visible)
+
         # Toggle deetails
         # toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
         # task_list_actions.append(toggle_task_details_action)
@@ -394,6 +402,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__progress_bar.setMaximum(len([task for task in tasks if task.get_active()]))
         self.__progress_bar.setValue(0)
 
-
     def execute(self):
         self.inner_wgt.execute()
+
+    def toggle_show_details(self):
+        self.show_details = not self.show_details
+        self.init_ui(show_details=self.show_details)
