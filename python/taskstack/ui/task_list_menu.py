@@ -40,6 +40,7 @@ class TaskListMenu(QtWidgets.QMenu):
         action = QtWidgets.QAction(reload_icon, 'Reload Tasks', self)
         action.triggered.connect(self.reload_task_classes)
         self.addAction(action)
+        action.setEnabled(False)
 
     def trigger(self, task_name):
         task_class = self.__task_classes.get(task_name)
