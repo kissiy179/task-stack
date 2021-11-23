@@ -48,6 +48,8 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         # Main layout
         self.__main_layout = QtWidgets.QVBoxLayout()
+        # self.__main_layout.setSpacing(3)
+        self.__main_layout.setContentsMargins(0,4,6,6)
         self.setLayout(self.__main_layout)
 
         # Group box
@@ -86,8 +88,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         doc_lo.addWidget(self.doc_lbl)
 
         # Parameters
-        if show_parameters:
-            self.init_parameters_ui(params, param_types)
+        self.init_parameters_ui(params, param_types, show_parameters)
 
         # Error message
         if self.__error_message:
@@ -105,10 +106,16 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             self.warn_lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
             self.group_lo.addWidget(self.warn_lbl)
 
-    def init_parameters_ui(self, parametrs, parameter_types):
+    def init_parameters_ui(self, parametrs, parameter_types, show_parameters=True):
+        if not parametrs:
+            return
+
+        wgt = QtWidgets.QWidget()
         lo = QtWidgets.QFormLayout()
+        wgt.setLayout(lo)
         lo.setVerticalSpacing(2)
-        self.group_lo.addLayout(lo)
+        self.group_lo.addWidget(wgt)
+        wgt.setVisible(show_parameters)
 
         for param_name, param_type in parameter_types.items():
             widget_info = WIDGET_TABLE.get(param_type)
