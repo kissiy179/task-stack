@@ -81,6 +81,9 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             doc_lo.addWidget(exec_btn)
 
         # Description
+        if not show_parameters:
+            doc = doc.split('\n')[0]
+            
         self.group_lo.addLayout(doc_lo)
         self.doc_lbl = QtWidgets.QLabel(doc)
         self.doc_lbl.setStyleSheet('background-color: #555')
