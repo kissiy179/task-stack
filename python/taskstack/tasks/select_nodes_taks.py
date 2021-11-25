@@ -2,7 +2,6 @@
 import re
 from collections import OrderedDict
 import maya.cmds as cmds
-import forcesLib as flib; 
 import taskstack.core.task as task
 DECIMAL_PATTERN = re.compile(r'^\d')
 
