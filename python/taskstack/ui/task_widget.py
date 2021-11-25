@@ -34,7 +34,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__task.get_emitter().error_raised.connect(self.set_error_message)
 
     def log_parameters(self):
-        print(self.__task.get_active(), self.__task.get_parameters())
+        print(self.__task.get_active(), self.__task.get_parameters(consider_keywords=False))
 
     def init_ui(self, executable=True, show_parameters=True, label_prefix=''):
         # uiクリア
@@ -44,7 +44,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         task = self.__task
         doc = task.get_doc()
         param_types = self.__parameter_types
-        params = task.get_parameters()
+        params = task.get_parameters(consider_keywords=False)
 
         # Main layout
         self.__main_layout = QtWidgets.QVBoxLayout()
@@ -112,6 +112,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         wgt = QtWidgets.QWidget()
         lo = QtWidgets.QFormLayout()
+        lo.setContentsMargins(0,0,0,0)
         wgt.setLayout(lo)
         lo.setVerticalSpacing(2)
         self.group_lo.addWidget(wgt)

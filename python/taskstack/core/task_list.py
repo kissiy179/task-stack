@@ -29,12 +29,12 @@ class TaskList(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.undo()
 
-    def get_parameters(self):
+    def get_parameters(self, consider_keywords=False):
         params = []
 
         for task in self.__tasks:
             task_active = task.get_active()
-            task_params = task.get_parameters()
+            task_params = task.get_parameters(consider_keywords=consider_keywords)
             params.append({'name': type(task).__name__, 'active': task_active, 'parameters': task_params})
 
         return params

@@ -13,6 +13,7 @@ TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
 TASK_DIRS = TASK_DIRS if TASK_DIRS else ''
 PYTHON_EXTENSIONS = ('.py', )
 ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*(Error|Warning): .*$)', re.MULTILINE | re.DOTALL)
+KEYWORD_PATTERN = re.compile(r'({([\w ]+)})')
 
 class SignalEmitter(QtCore.QObject):
     executed = QtCore.Signal()
@@ -27,6 +28,7 @@ class Task(object):
     def __init__(self):
         self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
+        self.__extraparameters = OrderedDict()
         self.__active = True
         self.__emitter = SignalEmitter()
 
@@ -113,10 +115,34 @@ class Task(object):
 
         return parameter_types
     
-    def get_parameters(self):
+    def get_parameters(self, consider_keywords=True):
         '''
         このオブジェクトに格納されたパラメータを返す
+        consider_keywords=Trueの場合「{}」を含む文字列の場合「{}」は他のパラメータへのリンクとみなし値を置き換える
+        ex)
+        Name = 'Bob'
+        Node Name = 'Node_{Name}'
+        RESOLVED: Node Name = 'Node_Bob'
         '''
+        parameters = self.__parameters
+
+        if consider_keywords:
+            for name, value in parameters.items():
+                if not isinstance(value, basestring):
+                    continue
+
+                key_infos = KEYWORD_PATTERN.findall(value)
+
+                for key_info in key_infos:
+                    key_string = key_info[0]
+                    key = key_info[1]
+                    key_value = parameters.get(key)
+
+                    if key_value:
+                        value = value.replace(key_string, key_value)
+                
+                parameters[name] = value
+
         return self.__parameters
         
     def set_parameters(self, **parameters):
