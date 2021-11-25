@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from collections import OrderedDict
 import maya.cmds as cmds
 import pymel.core as pm
@@ -11,18 +12,25 @@ class SetAttributeTask(Task):
     
     def get_default_parameters(self):
         return OrderedDict((
-            ('nodeType', 'transform'),
-            ('attrName', 'tx'),
-            ('value', 10.0),
+            ('Node Type', 'transform'),
+            ('Node Name', '*'),
+            ('Attribute Name', 'tx'),
+            ('Value', 10.0),
         ))
         
     def execute(self):
         super(SetAttributeTask, self).execute()
         parameters = self.get_parameters()
-        nodeType = parameters.get('nodeType')
-        attrName = parameters.get('attrName')
-        value = parameters.get('value')
-        nodes = pm.ls(type=nodeType)
+        nodeType = parameters.get('Node Type')
+        nodeName = parameters.get('Node Name')
+        attrName = parameters.get('Attribute Name')
+        value = parameters.get('Value')
+
+        if nodeType:
+            nodes = pm.ls(nodeName, type=nodeType)
+
+        else:
+            nodes = pm.ls(nodeName)
         
         for node in nodes:
             node.attr(attrName).set(value)

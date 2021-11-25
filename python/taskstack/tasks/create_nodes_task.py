@@ -12,9 +12,9 @@ class CreateNodesTask(Task):
     
     def get_default_parameters(self):
         return OrderedDict((
-            ('count', 1),
-            ('nodeType', 'transform'),
-            ('name', 'node'),
+            ('Count', 1),
+            ('Node Type', 'transform'),
+            ('Node Name', '{Node Type}'),
         ))
         
     # def get_parameter_types(self):
@@ -27,12 +27,13 @@ class CreateNodesTask(Task):
     def execute(self):
         super(CreateNodesTask, self).execute()
         parameters = self.get_parameters()
-        count = parameters.get('count')
-        nodeType = parameters.get('nodeType')
-        name = parameters.get('name')
+        count = parameters.get('Count')
+        nodeType = parameters.get('Node Type')
+        nodeName = parameters.get('Node Name')
 
-        if DECIMAL_PATTERN.match(name):
-            name = '_{}'.format(name)
+        if DECIMAL_PATTERN.match(nodeName):
+            nodeName = '_{}'.format(nodeName)
         
         for i in range(count):
-            item = cmds.createNode(nodeType, name=name)
+            item = cmds.createNode(nodeType, name=nodeName)
+            
