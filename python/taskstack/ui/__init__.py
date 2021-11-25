@@ -84,6 +84,14 @@ class CustomDoubleSpinBox(QtWidgets.QDoubleSpinBox):
         self.setMaximum(100000)
         self.setDecimals(3)
 
+class CustomTextEdit(QtWidgets.QTextEdit):
+
+    def __init__(self, *args, **kwargs):
+        super(CustomTextEdit, self).__init__(*args, **kwargs)
+        self.setFixedHeight(80)
+        self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
+
+
 WIDGET_TABLE = {
     'bool': {'class': QtWidgets.QCheckBox, 'get_method': 'isChecked', 'set_method': 'setChecked', 'update_signal': 'stateChanged'},
     'int': {'class': CustomSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
@@ -92,6 +100,7 @@ WIDGET_TABLE = {
     'file': {'class': FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
 }
 
 import task_list_menu; reload(task_list_menu)

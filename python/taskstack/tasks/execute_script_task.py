@@ -14,6 +14,11 @@ class ExecuteScriptTask(task.Task):
         return OrderedDict((
             ('Script', 'print(cmds.ls(sl=True))'),
         ))
+
+    def get_parameter_types(self):
+        parameter_types = super(ExecuteScriptTask, self).get_parameter_types()
+        parameter_types['Script'] = 'multi_line_str'
+        return parameter_types
         
     def execute(self):
         super(ExecuteScriptTask, self).execute()
