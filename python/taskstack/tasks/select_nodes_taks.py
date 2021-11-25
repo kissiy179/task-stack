@@ -30,7 +30,8 @@ class SelectNodesTask(task.Task):
         p = re.compile(regex_name)
 
         # 指定ノードタイプのノードをリストアップ/正規表現でフィルタリング
-        item_names = cmds.ls(type=node_type)
+        kwargs = {'type': node_type} if node_type else {}
+        item_names = cmds.ls(**kwargs)
         item_names = [item_name for item_name in item_names if p.match(item_name)]
 
         # 選択
