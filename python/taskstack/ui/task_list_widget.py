@@ -197,7 +197,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.inner_wgt.moveup_task.connect(self.moveup_task)
         self.inner_wgt.movedown_task.connect(self.movedown_task)
         self.inner_wgt.updated.connect(self.updated)
-        self.inner_wgt.start_execute.connect(self.execute_preprocess)
+        self.inner_wgt.start_execute.connect(self.preprocess)
         self.scroll_area.setWidget(self.inner_wgt)
 
         # Buttons
@@ -394,9 +394,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         params = TaskListParameters(self.__task_list.get_parameters())
         params.dump(file_path)
 
-    def execute_preprocess(self):
-        self.inner_wgt.apply_parameters()
-        self.init_ui()
+    def preprocess(self):
         self.__progress_bar.setVisible(True)
         tasks = self.__task_list.get_tasks()
         self.__progress_bar.setMaximum(len([task for task in tasks if task.get_active()]))
