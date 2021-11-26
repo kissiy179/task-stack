@@ -30,8 +30,11 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.resize(300, 0)
         self.updated.connect(self.apply_parameters)
         # self.updated.connect(self.log_parameters)
-        self.__task.get_emitter().warning_raised.connect(self.set_warning_message)
-        self.__task.get_emitter().error_raised.connect(self.set_error_message)
+        task_emitter = self.__task.get_emitter()
+        task_emitter.execute_start.connect(self.preprocess)
+        task_emitter.executed.connect(self.postprocess)
+        task_emitter.warning_raised.connect(self.set_warning_message)
+        task_emitter.error_raised.connect(self.set_error_message)
 
     def log_parameters(self):
         print(self.__task.get_active(), self.__task.get_parameters(consider_keywords=False))
@@ -168,16 +171,17 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         
     def set_warning_message(self, err=''):
         self.__warning_message = err
-        self.init_ui()
-        
-    def execute(self):
-        # パラメータ適用
-        self.apply_parameters()
+        # self.init_ui()
 
+    def preprocess(self):
         # エラーメッセージ初期化
         self.set_error_message()
         self.set_warning_message()
 
+    def postprocess(self):
+        self.init_ui()
+        
+    def execute(self):
         # activeの場合は実行
         self.__task.execute_if_active()
         return
