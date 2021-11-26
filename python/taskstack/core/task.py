@@ -17,6 +17,7 @@ KEYWORD_PATTERN = re.compile(r'({([\w ]+)})')
 
 class SignalEmitter(QtCore.QObject):
     executed = QtCore.Signal()
+    execute_start = QtCore.Signal()
     error_raised = QtCore.Signal(str)
     warning_raised = QtCore.Signal(str)
 
@@ -200,6 +201,7 @@ class Task(object):
             return 
             
         try:
+            self.__emitter.execute_start.emit()
             rtn = self.execute()
             self.__emitter.executed.emit()
             return rtn
