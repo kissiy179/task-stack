@@ -17,7 +17,7 @@ def open_tasklist(*args):
     import taskstack.ui; reload(taskstack.ui)
     import taskstack.ui.task_list_widget as task_list_widget
 
-    wgt = task_list_widget.TaskListWidget()
+    wgt = task_list_widget.TaskListWidget(use_recent_tasks=True)
     wgt.show()
 
 @reloadable_menu.reloadable_menu('Test Commands')

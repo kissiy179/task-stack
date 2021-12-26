@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from pprint import pprint
 from functools import partial
 from collections import OrderedDict
@@ -24,6 +25,9 @@ TOOLBAR_POSITIONS = {
     'left': QtCore.Qt.LeftToolBarArea,
     'right': QtCore.Qt.RightToolBarArea,
 }
+PRESET_DIR = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
+RECENT_TASKS = os.path.join(PRESET_DIR, 'recent_tasks.json')
+
 
 class HorizontalLine(QtWidgets.QFrame):
 
@@ -147,11 +151,18 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     updated = QtCore.Signal()
 
-    def __init__(self, task_list=None, *args, **kwargs):
+    def __init__(self, task_list=None, use_recent_tasks=False, *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
         self.setMinimumHeight(400)
-        self.__task_list = task_list if task_list else TaskList()
+
+        if task_list:
+            self.__task_list = task_list
+            use_recent_tasks = False # taks_listの指定がある場合RECENT_TASKSは使用しない
+
+        else:
+            self.__task_list = TaskList()
+
         self.__menu_bar = None
         self.__tool_bar = None
         self.__tool_bar_position = None
@@ -164,6 +175,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
         self.resize(500, 600)
         # self.updated.connect(self.log)
+
+        if use_recent_tasks:
+            self.import_task_list_parameters(RECENT_TASKS)
+            self.updated.connect(partial(self.export_task_list_parameters, RECENT_TASKS))
 
     def log(self):
         print(self.__task_list.get_parameters())
@@ -371,11 +386,12 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list.clear_tasks()
         self.init_ui()
 
-    def import_task_list_parameters(self):
-        file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
-        file_path = file_info[0]
-
+    def import_task_list_parameters(self, file_path=''):
         if not file_path:
+            file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
+            file_path = file_info[0]
+
+        if not file_path or not os.path.exists(file_path):
             return
 
         params = TaskListParameters()
@@ -383,12 +399,18 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list.set_parameters(params)
         self.init_ui()
 
-    def export_task_list_parameters(self):
-        file_info = QtWidgets.QFileDialog().getSaveFileName(self, 'Export TaskList Parameters', filter=JSON_FILTERS)
-        file_path = file_info[0]
+    def export_task_list_parameters(self, file_path=''):
+        if not file_path:
+            file_info = QtWidgets.QFileDialog().getSaveFileName(self, 'Export TaskList Parameters', filter=JSON_FILTERS)
+            file_path = file_info[0]
 
         if not file_path:
             return
+
+        dir_path = os.path.dirname(file_path)
+
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
         self.inner_wgt.apply_parameters()
         params = TaskListParameters(self.__task_list.get_parameters())
