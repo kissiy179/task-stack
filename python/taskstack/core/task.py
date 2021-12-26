@@ -4,6 +4,7 @@ import os
 import imp
 import abc
 import re
+import copy
 import traceback
 from collections import OrderedDict
 from qtpy import QtCore
@@ -125,7 +126,7 @@ class Task(object):
         Node Name = 'Node_{Name}'
         RESOLVED: Node Name = 'Node_Bob'
         '''
-        parameters = self.__parameters
+        parameters = copy.deepcopy(self.__parameters)
 
         if consider_keywords:
             for name, value in parameters.items():
@@ -144,14 +145,13 @@ class Task(object):
                 
                 parameters[name] = value
 
-        return self.__parameters
+        return parameters
         
     def set_parameters(self, **parameters):
         '''
         このオブジェクトにパラメータを設定する
         '''
-        for key in self.__parameters:
-            self.__parameters[key] = parameters.get(key, self.__parameters.get(key))
+        self.__parameters.update(parameters)
 
     @classmethod
     def get_doc(self, first_line_only=False):
