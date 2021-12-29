@@ -25,8 +25,8 @@ TOOLBAR_POSITIONS = {
     'left': QtCore.Qt.LeftToolBarArea,
     'right': QtCore.Qt.RightToolBarArea,
 }
-PRESET_DIR = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
-RECENT_TASKS = os.path.join(PRESET_DIR, 'recent_tasks.json')
+PRESET_DIR_PATH = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
+RECENT_TASKS_FILE_PATH = os.path.join(PRESET_DIR_PATH, 'recent_tasks.json')
 
 
 class HorizontalLine(QtWidgets.QFrame):
@@ -158,7 +158,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         if task_list:
             self.__task_list = task_list
-            use_recent_tasks = False # taks_listの指定がある場合RECENT_TASKSは使用しない
+            use_recent_tasks = False # taks_listの指定がある場合RECENT_TASKS_FILE_PATHは使用しない
 
         else:
             self.__task_list = TaskList()
@@ -177,8 +177,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         # self.updated.connect(self.log)
 
         if use_recent_tasks:
-            self.import_task_list_parameters(RECENT_TASKS)
-            self.updated.connect(partial(self.export_task_list_parameters, RECENT_TASKS))
+            self.import_task_list_parameters(RECENT_TASKS_FILE_PATH)
+            self.updated.connect(partial(self.export_task_list_parameters, RECENT_TASKS_FILE_PATH))
 
     def log(self):
         print(self.__task_list.get_parameters())
