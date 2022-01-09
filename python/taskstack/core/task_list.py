@@ -11,13 +11,11 @@ class SignalEmitter(QtCore.QObject):
     warning_raised = QtCore.Signal(str)
     increment = QtCore.Signal()
 
-class TaskList(object):
+class TaskList(list):
     
     # __metaclass__ = abc.ABCMeta
 
     def __init__(self):
-        # self.__parameters = {}
-        self.__tasks = []
         self.__emitter = SignalEmitter()
 
     def get_emitter(self):
@@ -32,7 +30,7 @@ class TaskList(object):
     def get_parameters(self, consider_keywords=False):
         params = []
 
-        for task in self.__tasks:
+        for task in self:
             task_active = task.get_active()
             task_params = task.get_parameters(consider_keywords=consider_keywords)
             params.append({'name': type(task).__name__, 'active': task_active, 'parameters': task_params})
@@ -47,9 +45,6 @@ class TaskList(object):
             task_active = task_info.get('active', True)
             task_params = task_info.get('parameters')
             self.add_task(name=task_name, active=task_active, parameters=task_params)
-
-    def get_tasks(self):
-        return self.__tasks
 
     def add_task(self, task=None, name='', active=True, parameters={}):
         if not task:
@@ -75,36 +70,34 @@ class TaskList(object):
             return
 
         task.set_parameters(**parameters)
-        self.__tasks.append(task)
+        self.append(task)
 
     def remove_task(self, idx):
-        del self.__tasks[idx]
+        del self[idx]
 
     def moveup_task(self, idx):
-        tasks = self.__tasks
-        src_task = tasks[idx]
+        src_task = self[idx]
         tgt_idx = idx -1
-        tgt_task = tasks[tgt_idx]
-        tasks[idx] = tgt_task
-        tasks[tgt_idx] = src_task
+        tgt_task = self[tgt_idx]
+        self[idx] = tgt_task
+        self[tgt_idx] = src_task
 
     def movedown_task(self, idx):
-        tasks = self.__tasks
-        src_task = tasks[idx]
-        tgt_idx = (idx +1) % len(tasks)
-        tgt_task = tasks[tgt_idx]
-        tasks[idx] = tgt_task
-        tasks[tgt_idx] = src_task
+        src_task = self[idx]
+        tgt_idx = (idx +1) % len(self)
+        tgt_task = self[tgt_idx]
+        self[idx] = tgt_task
+        self[tgt_idx] = src_task
 
     def clear_tasks(self):
-        del self.__tasks[:]
+        del self[:]
 
     def execute(self):
         print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self).__name__))
 
         self.__emitter.start_execute.emit()
 
-        for task in self.__tasks:
+        for task in self:
             task.execute_if_active()
 
         self.__emitter.executed.emit()
@@ -112,7 +105,7 @@ class TaskList(object):
     def undo(self):
         print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
 
-        for task in self.__tasks[::-1]:
+        for task in self[::-1]:
             task.undo_if_active()
 
 class TaskListParameters(list):

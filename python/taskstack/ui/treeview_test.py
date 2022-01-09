@@ -102,7 +102,7 @@ class TaskModel(QtCore.QAbstractItemModel):
         task_list_ = task_list_ if task_list_ else self.__task_list
         self.rootItem.clear()
         self.beginResetModel()
-        tasks = task_list_.get_tasks()
+        tasks = task_list_
         
         for task_ in tasks:
             item = TaskItem(task_, self.rootItem)

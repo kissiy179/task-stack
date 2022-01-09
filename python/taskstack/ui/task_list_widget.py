@@ -54,7 +54,6 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         self.__task_list = taks_list
         self.__task_widgets = []
         self.show_details = show_details
-        tasks = self.__task_list.get_tasks()
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;} InnerTaskListWidget{background-color: #3f3f3f}')
         lo = QtWidgets.QVBoxLayout()
@@ -70,7 +69,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         task_list_emitter.warning_raised.connect(self.warning_raised)
         task_list_emitter.increment.connect(self.increment)
 
-        for i, task in enumerate(tasks):
+        for i, task in enumerate(self.__task_list):
             hlo = QtWidgets.QHBoxLayout()
             hlo.setSpacing(0)
             hlo.setContentsMargins(3,0,0,0)
@@ -278,7 +277,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             # self.__progress_bar.setMaximumWidth(100)
             self.__progress_bar.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
 
-        task_count = len(self.__task_list.get_tasks())
+        task_count = len(self.__task_list)
         self.__status_bar.showMessage('{} tasks.'.format(task_count))
         self.__status_bar.setSizeGripEnabled(False)
         self.__progress_bar.setVisible(False)
@@ -418,7 +417,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def preprocess(self):
         self.__progress_bar.setVisible(True)
-        tasks = self.__task_list.get_tasks()
+        tasks = self.__task_list
         self.__progress_bar.setMaximum(len([task for task in tasks if task.get_active()]))
         self.__progress_bar.setValue(0)
 
