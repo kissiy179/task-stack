@@ -233,6 +233,8 @@ class Task(object):
         return self.undo()
 
     def _raise_error(self, message, exception=TaskStackError):
+        message = message.encode('utf-8') # 日本語も扱えるようにutf-8でエンコード
+
         try:
             raise exception(message)
 
