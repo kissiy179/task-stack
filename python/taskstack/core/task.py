@@ -181,6 +181,9 @@ class Task(object):
 
         return '\n'.join(lines_)
 
+    def get_name(self):
+        return type(self).__name__
+
     def get_active(self):
         '''
         このタスクを実行するかどうかを返す
