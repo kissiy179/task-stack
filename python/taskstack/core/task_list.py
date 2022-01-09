@@ -139,3 +139,17 @@ class TaskListParameters(list):
     def dumps(self):
         s = json.dumps(self, indent=4)
         return s
+
+    def load_task(self, task):
+        task_list = TaskList()
+        task_list.add_task(task)
+        self.load_task_list(task_list)
+
+    def load_task_list(self, task_list):
+        params = task_list.get_parameters(consider_keywords=False)
+        self.__init__(params)
+
+    def create_task_list(self):
+        task_list = TaskList()
+        task_list.set_parameters(self)
+        return task_list
