@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mayaqt import *
 import sys
 import cPickle as pickle
@@ -8,8 +9,7 @@ from taskstack.ui import task_list_widget
 from taskstack.core import task, task_list
 
 class BaseItem(object):
-    def __init__(self, name, parent=None):
-        self.name = name
+    def __init__(self, parent=None):
         self.children = []
         self.parent = parent
         
@@ -24,23 +24,41 @@ class BaseItem(object):
         self.children.pop(row)
     
     def child(self, row):
-        # return self.children[row]
         if len(self.children) > row:
             return self.children[row]
 
         return None
     
-    def __len__(self):
+    def rowCount(self):
         return len(self.children)
+
+    def columnCount(self):
+        return 1
     
     def row(self):
         if self.parent is not None:
             return self.parent.children.index(self)
 
+    def data(self, column, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.DisplayRole:
+            return type(self).__class__.__name__
+
 class TaskItem(BaseItem):
 
-    def __init__(self, name, parent=None):
-        super(TaskItem, self).__init__(name, parent)
+    def __init__(self, task_, parent=None):
+        super(TaskItem, self).__init__(parent)
+        self._task = task_
+
+    def get_task(self):
+        return self._task
+
+    def data(self, column, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.DisplayRole:
+            if column == 0:
+                return self.row()
+
+            else:
+                return self._task.get_name()
         
 #====================================================================
 
@@ -76,7 +94,40 @@ class PyObjMime(QtCore.QMimeData):
             pass 
 
         return None
-    
+
+class TaskMime(QtCore.QMimeData):
+    MIMETYPE = 'application/json'
+
+    def __init__(self, item=None): 
+        super(TaskMime, self).__init__()
+        
+        if item:
+            task_ = item.get_task()
+            params = task_.get_parameters(consider_keywords=False)
+            params = [{'name': task_.get_name(), 'parameters': params}]
+            params_obj = task_list.TaskListParameters(params)
+            data = params_obj.dumps()
+            # print(type(data))
+            self.setData(self.MIMETYPE, data)
+            self.setText(data)
+
+    def itemInstance(self):
+        text = self.text()
+        params_obj = task_list.TaskListParameters()
+        params_obj.loads(text)
+        first_params = params_obj[0]
+        task_name = first_params.get('name')
+        params = first_params.get('parameters')
+        task_class = task.Task.get_task_classes().get(task_name)
+
+        if not task_class:
+            return None
+
+        task_ = task_class()
+        task_.set_parameters(**params)
+        item = TaskItem(task_)
+        return item
+
 #====================================================================
 
 class TreeModel(QtCore.QAbstractItemModel):
@@ -88,7 +139,8 @@ class TreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
 
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
+        # return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
     
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction | QtCore.Qt.CopyAction
@@ -102,16 +154,21 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def rowCount(self, index):
         item = self.itemFromIndex(index)
-        return len(item)
+        return item.rowCount()
     
     def columnCount(self, index):
-        return 1
+        return 2
     
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
             item = self.itemFromIndex(index)
-            return item.name
+            return item.data(index.column(), role)
     
+    def headerData(self, section, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return ['index', 'task name']
+            
+        return None
     def index(self, row, column, parentIndex):
         parentItem = self.itemFromIndex(parentIndex)
         item = parentItem.child(row)
@@ -170,20 +227,27 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def mimeTypes(self):
         types = []
-        types.append('application/x-pyobj')
+        # types.append('application/x-pyobj')
+        types.append('application/json')
         return types
     
     def mimeData(self, index):
         item = self.itemFromIndex(index[0])
-        mimedata = PyObjMime(item)
+        # mimedata = PyObjMime(item)
+        mimedata = TaskMime(item)
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
-        item = mimedata.itemInstance()
         dropParent = self.itemFromIndex(parentIndex)
-        itemCopy = copy.deepcopy(item)
-        dropParent.addChild(itemCopy)
-        self.insertRows(len(dropParent)-1, 1, parentIndex)
+
+        if dropParent != self.root:
+            return
+
+        item = mimedata.itemInstance()
+        # itemCopy = copy.deepcopy(item)
+        dropParent.children.insert(row, item)
+        # self.insertRows(len(dropParent)-1, 1, parentIndex)
+        self.insertRows(row, 1, parentIndex) # beginInsertRows, endInsertRowsの呼び出しが必要？
         self.dataChanged.emit(parentIndex, parentIndex)
         return True
 
@@ -196,19 +260,19 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         params.load(file_path)
         task_list_ = params.create_task_list()
 
-        root = TaskItem('root')
+        root = BaseItem()
 
-        # for task_ in task_list_:
-        #     TaskItem(task_.get_name(), root)
+        for task_ in task_list_:
+            TaskItem(task_, root)
         
-        itemA = TaskItem( 'ItemA', root )
-        itemB = TaskItem( 'ItemB', root )
-        itemC = TaskItem( 'ItemC', root )
-        itemG = TaskItem( 'ItemG', root )
-        itemD = TaskItem( 'ItemD', itemA )
-        itemE = TaskItem( 'ItemE', itemB )
-        itemF = TaskItem( 'ItemF', itemC )
-        itemH = TaskItem( 'ItemH', itemG)
+        # itemA = TaskItem( 'ItemA', root )
+        # itemB = TaskItem( 'ItemB', root )
+        # itemC = TaskItem( 'ItemC', root )
+        # itemG = TaskItem( 'ItemG', root )
+        # itemD = TaskItem( 'ItemD', itemA )
+        # itemE = TaskItem( 'ItemE', itemB )
+        # itemF = TaskItem( 'ItemF', itemC )
+        # itemH = TaskItem( 'ItemH', itemG)
 
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
