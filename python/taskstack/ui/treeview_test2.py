@@ -14,10 +14,14 @@ class BaseItem(object):
         self.parent = parent
         
         if parent is not None:
-            self.parent.addChild( self )
+            self.parent.addChild(self)
         
     def addChild(self, child):
         self.children.append(child)
+        child.parent = self
+
+    def insertChild(self, row, child):
+        self.children.insert(row, child)
         child.parent = self
     
     def removeChild(self, row):
@@ -245,7 +249,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         item = mimedata.itemInstance()
         # itemCopy = copy.deepcopy(item)
-        dropParent.children.insert(row, item)
+        dropParent.insertChild(row, item)
         # self.insertRows(len(dropParent)-1, 1, parentIndex)
         self.insertRows(row, 1, parentIndex) # beginInsertRows, endInsertRowsの呼び出しが必要？
         self.dataChanged.emit(parentIndex, parentIndex)
