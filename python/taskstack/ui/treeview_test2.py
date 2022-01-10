@@ -4,9 +4,10 @@ import cPickle as pickle
 import cStringIO
 import copy
 from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
+from taskstack.ui import task_list_widget
+from taskstack.core import task, task_list
 
-
-class Item(object):
+class BaseItem(object):
     def __init__(self, name, parent=None):
         self.name = name
         self.children = []
@@ -35,6 +36,11 @@ class Item(object):
     def row(self):
         if self.parent is not None:
             return self.parent.children.index(self)
+
+class TaskItem(BaseItem):
+
+    def __init__(self, name, parent=None):
+        super(TaskItem, self).__init__(name, parent)
         
 #====================================================================
 
@@ -81,6 +87,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
+
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
     
     def supportedDropActions(self):
@@ -184,15 +191,24 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(TestWindow, self).__init__(parent)
-        root = Item( 'root' )
-        itemA = Item( 'ItemA', root )
-        itemB = Item( 'ItemB', root )
-        itemC = Item( 'ItemC', root )
-        itemG = Item( 'ItemG', root )
-        itemD = Item( 'ItemD', itemA )
-        itemE = Item( 'ItemE', itemB )
-        itemF = Item( 'ItemF', itemC )
-        itemH = Item( 'ItemH', itemG)
+        file_path = task_list_widget.RECENT_TASKS_FILE_PATH
+        params = task_list.TaskListParameters()
+        params.load(file_path)
+        task_list_ = params.create_task_list()
+
+        root = TaskItem('root')
+
+        # for task_ in task_list_:
+        #     TaskItem(task_.get_name(), root)
+        
+        itemA = TaskItem( 'ItemA', root )
+        itemB = TaskItem( 'ItemB', root )
+        itemC = TaskItem( 'ItemC', root )
+        itemG = TaskItem( 'ItemG', root )
+        itemD = TaskItem( 'ItemD', itemA )
+        itemE = TaskItem( 'ItemE', itemB )
+        itemF = TaskItem( 'ItemF', itemC )
+        itemH = TaskItem( 'ItemH', itemG)
 
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
