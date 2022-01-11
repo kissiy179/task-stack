@@ -12,6 +12,7 @@ class BaseItem(object):
     def __init__(self, parent=None):
         self.children = []
         self.parent = parent
+        self.headers = ['Name']
         
         if parent is not None:
             self.parent.addChild(self)
@@ -37,7 +38,7 @@ class BaseItem(object):
         return len(self.children)
 
     def columnCount(self):
-        return 1
+        return max(1, len(self.headers))
     
     def row(self):
         if self.parent is not None:
@@ -58,11 +59,7 @@ class TaskItem(BaseItem):
 
     def data(self, column, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
-            if column == 0:
-                return self.row()
-
-            else:
-                return self._task.get_name()
+            return self._task.get_name()
         
 #====================================================================
 
@@ -161,7 +158,8 @@ class TreeModel(QtCore.QAbstractItemModel):
         return item.rowCount()
     
     def columnCount(self, index):
-        return 2
+        item = self.itemFromIndex(index)
+        return item.columnCount()
     
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
@@ -170,7 +168,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return ['index', 'task name']
+            return self.root.headers[section]
             
         return None
     def index(self, row, column, parentIndex):
