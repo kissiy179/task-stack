@@ -173,21 +173,8 @@ class TreeModel(QtCore.QAbstractItemModel):
         return None
     def index(self, row, column, parentIndex):
         parentItem = self.itemFromIndex(parentIndex)
-        item = parentItem.child(row)
-        # print(parentItem)
-
-        # if not item:
-        #     return None
-            
+        item = parentItem.child(row)           
         return self.createIndex(row, column, item)
-
-        # if item:
-        #     index_ = self.createIndex(row, column, item)
-
-        # else:
-        #     index_ = self.createIndex(row, column, parentItem)
-
-        # return index_
     
     def parent(self, index):
         if not index.isValid():
@@ -213,16 +200,11 @@ class TreeModel(QtCore.QAbstractItemModel):
         return True
     
     def removeRows(self, row, count, parentIndex):
-        try:
-            # print count
-            # print 'start removeRows'
-            # print parentIndex, row, row + count-1
+        try: # エラーが出るタイミングがあるのでエラー処理
             self.beginRemoveRows(parentIndex, row, row + count-1)
-            # print 'beginRemoveRows'
             parent = self.itemFromIndex(parentIndex)
             parent.removeChild(row)
             self.endRemoveRows()
-            # print 'end removeRows'
             return True
 
         except: pass
