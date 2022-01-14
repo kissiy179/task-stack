@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
@@ -10,6 +11,8 @@ class FilePathEdit(QtWidgets.QWidget):
     ファイルパス用ウィジェット
     '''
 
+    filter = 'All files (*)'
+    pj_path = ''
     textChanged = QtCore.Signal()
     
     def __init__(self, *args, **kwargs):
@@ -28,18 +31,44 @@ class FilePathEdit(QtWidgets.QWidget):
         self.dialog_btn.clicked.connect(self.open_dialog)
         hlo.addWidget(self.dialog_btn)
 
+        self.pj_path = cmds.workspace(query=True, rootDirectory=True) # Maya専用処理なので後で分離する
+
     def open_dialog(self):
-        file_obj = QtWidgets.QFileDialog.getOpenFileName()
+        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=self.pj_path, filter=self.filter)
         file_path = file_obj[0]
 
         if file_path:
             self.setText(file_path)
 
     def text(self):
-        return self.line_edit.text()
+        path = self.line_edit.text()
+        path = self.getAbsolutePath(path)
+        return path
 
     def setText(self, text):
-        self.line_edit.setText(text)
+        path = self.getRelativePath(text)
+        self.line_edit.setText(path)
+
+    def getRelativePath(self, path=None):
+        if path is None:
+            path = self.text()
+            
+        if path:
+            path = path.replace('\\', '/')
+            path = path.replace('//', '/')
+            path = path.replace(self.pj_path, '') # 相対パスに変換
+            path = path.strip('/')
+
+        return path
+
+    def getAbsolutePath(self, path=None):
+        if path is None:
+            path = self.text()
+
+        if path:
+            path = '/'.join([self.pj_path, path])
+
+        return path
 
 class DirectoryPathEdit(FilePathEdit):
     '''
@@ -57,15 +86,7 @@ class MayaSceneEdit(FilePathEdit):
     Mayaシーンパス用ウィジェット
     .ma, .mb, .fbxが有効
     '''
-
-    def open_dialog(self):
-        pj_path = cmds.workspace(query=True, rootDirectory=True)
-        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter='Maya scene files (*.ma *.mb);;FBX files (*.fbx)')
-        file_path = file_obj[0]
-
-        if file_path:
-            file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
-            self.setText(file_path)
+    filter = 'Maya scene files (*.ma *.mb);;FBX files (*.fbx)'
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
