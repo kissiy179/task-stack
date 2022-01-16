@@ -4,6 +4,7 @@ import inspect
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
+from .. import util
 
 dir_icon = qta.icon('fa5s.folder', color='lightgray')
 
@@ -66,6 +67,8 @@ class FilePathEdit(QtWidgets.QWidget):
         if result:
             self.setText(result)
 
+        return result
+
     def text(self):
         return self.line_edit.text()
 
@@ -77,6 +80,17 @@ class DirectoryPathEdit(FilePathEdit):
     ディレクトリパス用ウィジェット
     '''
     open_method = getExistingDirectory
+
+class FilePathInMayaProjectEdit(FilePathEdit):
+
+    def open_dialog(self):
+        result = super(FilePathInMayaProjectEdit, self).open_dialog()
+
+        if not result:
+            return
+
+        rel_path = util.get_relatvie_path_in_maya_project(result)
+        self.line_edit.setText(rel_path)
 
 class MayaSceneEdit(FilePathEdit):
     '''
@@ -126,6 +140,7 @@ WIDGET_TABLE = {
     'float': {'class': CustomDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file': {'class': FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file_in_project': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
