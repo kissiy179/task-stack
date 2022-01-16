@@ -82,6 +82,9 @@ class DirectoryPathEdit(FilePathEdit):
     open_method = getExistingDirectory
 
 class FilePathInMayaProjectEdit(FilePathEdit):
+    '''
+    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ウィジェット
+    '''
 
     def open_dialog(self):
         result = super(FilePathInMayaProjectEdit, self).open_dialog()
@@ -92,22 +95,18 @@ class FilePathInMayaProjectEdit(FilePathEdit):
         rel_path = util.get_relatvie_path_in_maya_project(result)
         self.line_edit.setText(rel_path)
 
-class MayaSceneEdit(FilePathEdit):
+class DirectoryPathInMayaProjectEdit(FilePathInMayaProjectEdit):
+    '''
+    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ディレクトリパス用ウィジェット
+    '''
+    open_method = getExistingDirectory
+
+class MayaSceneEdit(FilePathInMayaProjectEdit):
     '''
     Mayaシーンパス用ウィジェット
     .ma, .mb, .fbxが有効
     '''
-
     filter = 'Maya scene files (*.ma *.mb);;FBX files (*.fbx)'
-
-    def open_dialog(self):
-        pj_path = cmds.workspace(query=True, rootDirectory=True)
-        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter=self.filter)
-        file_path = file_obj[0]
-
-        if file_path:
-            file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
-            self.setText(file_path)
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
@@ -140,8 +139,9 @@ WIDGET_TABLE = {
     'float': {'class': CustomDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file': {'class': FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file_in_project': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file_in_pj': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'dir_in_pj': {'class': DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
 }
