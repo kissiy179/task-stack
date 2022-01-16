@@ -54,7 +54,7 @@ class FilePathEdit(QtWidgets.QWidget):
         hlo.addWidget(self.dialog_btn)
 
     def open_dialog(self):
-        crr_path = self.line_edit.text()
+        crr_path = self.text()
         crr_dir = os.path.dirname(crr_path) if os.path.isfile(crr_path) else crr_path
         kwargs = {
                 'dir': crr_dir,
@@ -86,14 +86,15 @@ class FilePathInMayaProjectEdit(FilePathEdit):
     Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ウィジェット
     '''
 
-    def open_dialog(self):
-        result = super(FilePathInMayaProjectEdit, self).open_dialog()
+    def text(self):
+        text = self.line_edit.text()
+        text = util.get_absolute_path_in_maya_project(text)
+        return text
 
-        if not result:
-            return
+    def setText(self, text):
+        text = util.get_relatvie_path_in_maya_project(text)
+        super(FilePathInMayaProjectEdit, self).setText(text)
 
-        rel_path = util.get_relatvie_path_in_maya_project(result)
-        self.line_edit.setText(rel_path)
 
 class DirectoryPathInMayaProjectEdit(FilePathInMayaProjectEdit):
     '''
