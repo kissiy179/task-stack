@@ -1,15 +1,37 @@
 # -*- coding: utf-8 -*-
+import os
+import inspect
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
 
 dir_icon = qta.icon('fa5s.folder', color='lightgray')
 
+def getOpenFileName(parent, dir='', filter=''):
+    '''
+    QtWidgets.QFileDialog.getOpenFileName が inspect.argspec に通らないので関数でラップ
+    '''
+    file_obj = QtWidgets.QFileDialog.getOpenFileName(parent, dir=dir, filter=filter)
+
+    if file_obj:
+        return file_obj[0]
+
+    return ''
+
+def getExistingDirectory(parent, dir=''):
+    '''
+    QtWidgets.QFileDialog.getExistingDirectory が inspect.argspec に通らないので関数でラップ
+    '''
+    dir = QtWidgets.QFileDialog.getExistingDirectory(parent, dir=dir)
+    return dir
+
 class FilePathEdit(QtWidgets.QWidget):
     '''
     ファイルパス用ウィジェット
     '''
 
+    filter = 'All files (*)'
+    open_method = getOpenFileName
     textChanged = QtCore.Signal()
     
     def __init__(self, *args, **kwargs):
@@ -19,21 +41,30 @@ class FilePathEdit(QtWidgets.QWidget):
         hlo.setSpacing(0)
         self.setLayout(hlo)
 
+        # LineEdit
         self.line_edit = QtWidgets.QLineEdit()
         self.line_edit.textChanged.connect(self.textChanged)
         hlo.addWidget(self.line_edit)
 
+        # Dialog Button
         self.dialog_btn = QtWidgets.QPushButton()
         self.dialog_btn.setIcon(dir_icon)
         self.dialog_btn.clicked.connect(self.open_dialog)
         hlo.addWidget(self.dialog_btn)
 
     def open_dialog(self):
-        file_obj = QtWidgets.QFileDialog.getOpenFileName()
-        file_path = file_obj[0]
+        crr_path = self.line_edit.text()
+        crr_dir = os.path.dirname(crr_path) if os.path.isfile(crr_path) else crr_path
+        kwargs = {
+                'dir': crr_dir,
+                'filter': self.filter,
+                }
+        argspec = inspect.getargspec(self.open_method)
+        kwargs = {key: value for key, value in kwargs.items() if key in argspec.args}
+        result = self.open_method(**kwargs)
 
-        if file_path:
-            self.setText(file_path)
+        if result:
+            self.setText(result)
 
     def text(self):
         return self.line_edit.text()
@@ -45,12 +76,7 @@ class DirectoryPathEdit(FilePathEdit):
     '''
     ディレクトリパス用ウィジェット
     '''
-
-    def open_dialog(self):
-        dir_path = QtWidgets.QFileDialog.getExistingDirectory(self)
-
-        if dir_path:
-            self.setText(dir_path)
+    open_method = getExistingDirectory
 
 class MayaSceneEdit(FilePathEdit):
     '''
@@ -58,9 +84,11 @@ class MayaSceneEdit(FilePathEdit):
     .ma, .mb, .fbxが有効
     '''
 
+    filter = 'Maya scene files (*.ma *.mb);;FBX files (*.fbx)'
+
     def open_dialog(self):
         pj_path = cmds.workspace(query=True, rootDirectory=True)
-        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter='Maya scene files (*.ma *.mb);;FBX files (*.fbx)')
+        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter=self.filter)
         file_path = file_obj[0]
 
         if file_path:
