@@ -5,8 +5,11 @@ import cPickle as pickle
 import cStringIO
 import copy
 from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
+import qtawesome as qta
 from taskstack.ui import task_list_widget
 from taskstack.core import task, task_list
+
+import_icon = qta.icon('fa5s.folder-open', color='lightgray')
 
 class BaseItem(object):
     def __init__(self, parent=None):
@@ -44,9 +47,9 @@ class BaseItem(object):
         if self.parent is not None:
             return self.parent.children.index(self)
 
-    def data(self, column, role=QtCore.Qt.DisplayRole):
+    def data(self, column=0, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
-            return type(self).__class__.__name__
+            return type(self).__name__
 
 class TaskItem(BaseItem):
 
@@ -57,10 +60,13 @@ class TaskItem(BaseItem):
     def get_task(self):
         return self._task
 
-    def data(self, column, role=QtCore.Qt.DisplayRole):
+    def data(self, column=0, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
             return self._task.get_name()
         
+        elif role == QtCore.Qt.DecorationRole:
+            return import_icon
+
 #====================================================================
 
 class PyObjMime(QtCore.QMimeData):
@@ -132,6 +138,9 @@ class TaskMime(QtCore.QMimeData):
 #====================================================================
 
 class TreeModel(QtCore.QAbstractItemModel):
+
+    showIndex = False
+
     def __init__(self, root, parent=None):
         super(TreeModel, self).__init__(parent)
         self.root = root
@@ -159,18 +168,34 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def columnCount(self, index):
         item = self.itemFromIndex(index)
-        return item.columnCount()
+        columnCount = item.columnCount()
+
+        if self.showIndex:
+            columnCount += 1
+
+        return columnCount
     
     def data(self, index, role):
-        if role == QtCore.Qt.DisplayRole:
-            item = self.itemFromIndex(index)
-            return item.data(index.column(), role)
+        # インデックス表示ON、0列目の場合行番号を返す
+        if self.showIndex and index.column() == 0:
+            return index.row()
+            
+        # それ以外はアイテムに任せる
+        item = self.itemFromIndex(index)
+        data = item.data(index.column(), role)
+        return data
     
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.root.headers[section]
+            headers = copy.deepcopy(self.root.headers)
+
+            if self.showIndex:
+                headers.insert(0, 'Index')  
+
+            return headers[section]
             
         return None
+        
     def index(self, row, column, parentIndex):
         parentItem = self.itemFromIndex(parentIndex)
         item = parentItem.child(row)           
@@ -260,15 +285,26 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
-        model = TreeModel(root) 
-        tree = QtWidgets.QTreeView()
-        tree.setModel( model ) 
-        tree.setDragEnabled(True)
-        tree.setAcceptDrops(True)
-        tree.setDragDropMode( QtWidgets.QAbstractItemView.InternalMove )
-        tree.show()
-        tree.expandAll()
-        lo.addWidget(tree)
+        self.model = TreeModel(root) 
+        # model.showIndex = True
+        self.tree = QtWidgets.QTreeView()
+        self.tree.setModel(self.model)
+        self.tree.setDragEnabled(True)
+        self.tree.setAcceptDrops(True)
+        self.tree.setDragDropMode( QtWidgets.QAbstractItemView.InternalMove )
+        self.tree.show()
+        self.tree.expandAll()
+        lo.addWidget(self.tree)
+
+        tglBtn = QtWidgets.QPushButton('Show Index')
+        tglBtn.clicked.connect(self.toggle)
+        lo.addWidget(tglBtn)
+
+    def toggle(self):
+        showIndex = not self.model.showIndex
+        self.model = TreeModel(self.model.root) 
+        self.model.showIndex = showIndex
+        self.tree.setModel(self.model)
 
 def main():
     win = TestWindow()
