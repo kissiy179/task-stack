@@ -1,15 +1,38 @@
 # -*- coding: utf-8 -*-
+import os
+import inspect
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
+from .. import util
 
 dir_icon = qta.icon('fa5s.folder', color='lightgray')
+
+def getOpenFileName(parent, dir='', filter=''):
+    '''
+    QtWidgets.QFileDialog.getOpenFileName が inspect.argspec に通らないので関数でラップ
+    '''
+    file_obj = QtWidgets.QFileDialog.getOpenFileName(parent, dir=dir, filter=filter)
+
+    if file_obj:
+        return file_obj[0]
+
+    return ''
+
+def getExistingDirectory(parent, dir=''):
+    '''
+    QtWidgets.QFileDialog.getExistingDirectory が inspect.argspec に通らないので関数でラップ
+    '''
+    dir = QtWidgets.QFileDialog.getExistingDirectory(parent, dir=dir)
+    return dir
 
 class FilePathEdit(QtWidgets.QWidget):
     '''
     ファイルパス用ウィジェット
     '''
 
+    filter = 'All files (*)'
+    open_method = getOpenFileName
     textChanged = QtCore.Signal()
     
     def __init__(self, *args, **kwargs):
@@ -19,21 +42,32 @@ class FilePathEdit(QtWidgets.QWidget):
         hlo.setSpacing(0)
         self.setLayout(hlo)
 
+        # LineEdit
         self.line_edit = QtWidgets.QLineEdit()
         self.line_edit.textChanged.connect(self.textChanged)
         hlo.addWidget(self.line_edit)
 
+        # Dialog Button
         self.dialog_btn = QtWidgets.QPushButton()
         self.dialog_btn.setIcon(dir_icon)
         self.dialog_btn.clicked.connect(self.open_dialog)
         hlo.addWidget(self.dialog_btn)
 
     def open_dialog(self):
-        file_obj = QtWidgets.QFileDialog.getOpenFileName()
-        file_path = file_obj[0]
+        crr_path = self.text()
+        crr_dir = os.path.dirname(crr_path) if os.path.isfile(crr_path) else crr_path
+        kwargs = {
+                'dir': crr_dir,
+                'filter': self.filter,
+                }
+        argspec = inspect.getargspec(self.open_method)
+        kwargs = {key: value for key, value in kwargs.items() if key in argspec.args}
+        result = self.open_method(**kwargs)
 
-        if file_path:
-            self.setText(file_path)
+        if result:
+            self.setText(result)
+
+        return result
 
     def text(self):
         return self.line_edit.text()
@@ -45,27 +79,35 @@ class DirectoryPathEdit(FilePathEdit):
     '''
     ディレクトリパス用ウィジェット
     '''
+    open_method = getExistingDirectory
 
-    def open_dialog(self):
-        dir_path = QtWidgets.QFileDialog.getExistingDirectory(self)
+class FilePathInMayaProjectEdit(FilePathEdit):
+    '''
+    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ウィジェット
+    '''
 
-        if dir_path:
-            self.setText(dir_path)
+    def text(self):
+        text = self.line_edit.text()
+        text = util.get_absolute_path_in_maya_project(text)
+        return text
 
-class MayaSceneEdit(FilePathEdit):
+    def setText(self, text):
+        text = util.get_relatvie_path_in_maya_project(text)
+        super(FilePathInMayaProjectEdit, self).setText(text)
+
+
+class DirectoryPathInMayaProjectEdit(FilePathInMayaProjectEdit):
+    '''
+    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ディレクトリパス用ウィジェット
+    '''
+    open_method = getExistingDirectory
+
+class MayaSceneEdit(FilePathInMayaProjectEdit):
     '''
     Mayaシーンパス用ウィジェット
     .ma, .mb, .fbxが有効
     '''
-
-    def open_dialog(self):
-        pj_path = cmds.workspace(query=True, rootDirectory=True)
-        file_obj = QtWidgets.QFileDialog.getOpenFileName(dir=pj_path, filter='Maya scene files (*.ma *.mb);;FBX files (*.fbx)')
-        file_path = file_obj[0]
-
-        if file_path:
-            file_path = file_path.replace(pj_path, '{}/'.format(pj_path)) # 相対パスに変換
-            self.setText(file_path)
+    filter = 'Maya scene files (*.ma *.mb);;FBX files (*.fbx)'
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
@@ -99,6 +141,8 @@ WIDGET_TABLE = {
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file': {'class': FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file_in_pj': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'dir_in_pj': {'class': DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
 }

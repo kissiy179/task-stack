@@ -18,4 +18,5 @@ TASK_DIRS = ';'.join(task_dirs)
 os.environ['TASKSTACK_TASK_DIRS'] = TASK_DIRS 
 
 import core; reload(core)
+import util; reload(util)
 # import ui; reload(ui) # 常にimportはエラーになる可能性がある
