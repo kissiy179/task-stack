@@ -178,7 +178,11 @@ class TreeModel(QtCore.QAbstractItemModel):
     def data(self, index, role):
         # インデックス表示ON、0列目の場合行番号を返す
         if self.showIndex and index.column() == 0:
-            return index.row()
+            if role == QtCore.Qt.DisplayRole:
+                return str(index.row())
+
+            else:
+                return None
             
         # それ以外はアイテムに任せる
         item = self.itemFromIndex(index)
