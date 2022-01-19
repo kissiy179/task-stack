@@ -289,26 +289,49 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
-        self.model = TreeModel(root) 
+        self.model = TreeModel(root)
+        self.model.rowsInserted.connect(self.selectItem)
+        # self.sel_model = QtCore.QItemSelectionModel()
+        # self.sel_model.selectionChanged.connect(self.log)
         # model.showIndex = True
         self.tree = QtWidgets.QTreeView()
         self.tree.setModel(self.model)
+        # self.tree.setSelectionModel(self.sel_model)
         self.tree.setDragEnabled(True)
         self.tree.setAcceptDrops(True)
-        self.tree.setDragDropMode( QtWidgets.QAbstractItemView.InternalMove )
-        self.tree.show()
+        self.tree.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        # self.tree.show()
         self.tree.expandAll()
         lo.addWidget(self.tree)
 
+        self.tree2 = QtWidgets.QTreeView()
+        self.tree2.setModel(self.model)
+        self.tree2.setSelectionModel(self.tree.selectionModel())
+        lo.addWidget(self.tree2)
+
+        self.sel_model = self.tree.selectionModel()
+        self.sel_model.selectionChanged.connect(self.log)
+
         tglBtn = QtWidgets.QPushButton('Show Index')
-        tglBtn.clicked.connect(self.toggle)
+        tglBtn.clicked.connect(self.selectItem)
         lo.addWidget(tglBtn)
+
+    def log(self, selection, command):
+        print('test')
+        print(selection, command)
 
     def toggle(self):
         showIndex = not self.model.showIndex
         self.model = TreeModel(self.model.root) 
         self.model.showIndex = showIndex
         self.tree.setModel(self.model)
+
+    def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
+        item = self.model.itemFromIndex(parent)
+        child_item = item.children[first]
+        child = self.model.createIndex(first, 0, child_item)
+        # print self.model.itemFromIndex(child)
+        self.sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
 def main():
     win = TestWindow()
