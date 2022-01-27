@@ -13,6 +13,10 @@ class TemplateTask(task.Task):
             ('Test Bool', True),
             ('Test Number', 0.0),
         ))
+
+    # def get_default_parameters(self):
+    #     return OrderedDict((
+    #     ))
         
     def execute(self):
         super(TemplateTask, self).execute()
