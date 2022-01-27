@@ -290,7 +290,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
         self.model = TreeModel(root)
-        self.model.rowsInserted.connect(self.selectItem)
+        self.model.rowsInserted.connect(self.selectItem, QtCore.Qt.QueuedConnection) # すべて終わってから処理するのでQueuedConnectionが必要
         # self.sel_model = QtCore.QItemSelectionModel()
         # self.sel_model.selectionChanged.connect(self.log)
         # model.showIndex = True
@@ -331,7 +331,10 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         child_item = item.children[first]
         child = self.model.createIndex(first, 0, child_item)
         # print self.model.itemFromIndex(child)
-        self.sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
+
+        # セレクションモデルはすでに削除されているのでItemViewから再取得
+        sel_model = self.tree.selectionModel()
+        sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
 def main():
     win = TestWindow()
