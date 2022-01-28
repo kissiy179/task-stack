@@ -248,6 +248,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         item = self.itemFromIndex(index[0])
         # mimedata = PyObjMime(item)
         mimedata = TaskMime(item)
+        self.dragging_index = index[0]
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
@@ -292,15 +293,12 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.model = TreeModel(root)
         self.model.rowsInserted.connect(self.selectItem, QtCore.Qt.QueuedConnection) # すべて終わってから処理するのでQueuedConnectionが必要
         # self.sel_model = QtCore.QItemSelectionModel()
-        # self.sel_model.selectionChanged.connect(self.log)
         # model.showIndex = True
         self.tree = QtWidgets.QTreeView()
         self.tree.setModel(self.model)
-        # self.tree.setSelectionModel(self.sel_model)
         self.tree.setDragEnabled(True)
         self.tree.setAcceptDrops(True)
         self.tree.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
-        # self.tree.show()
         self.tree.expandAll()
         lo.addWidget(self.tree)
 
@@ -310,10 +308,9 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         lo.addWidget(self.tree2)
 
         self.sel_model = self.tree.selectionModel()
-        self.sel_model.selectionChanged.connect(self.log)
 
         tglBtn = QtWidgets.QPushButton('Show Index')
-        tglBtn.clicked.connect(self.selectItem)
+        tglBtn.clicked.connect(self.toggle)
         lo.addWidget(tglBtn)
 
     def log(self, selection, command):
@@ -327,6 +324,11 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.tree.setModel(self.model)
 
     def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
+        dragging_row = self.model.dragging_index.row()
+
+        if first > dragging_row:
+            first -= 1
+
         item = self.model.itemFromIndex(parent)
         child_item = item.children[first]
         child = self.model.createIndex(first, 0, child_item)
