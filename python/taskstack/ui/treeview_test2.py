@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from mayaqt import *
 import sys
 import cPickle as pickle
 import cStringIO
 import copy
+import random
 from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
 import qtawesome as qta
 from taskstack.ui import task_list_widget
@@ -117,8 +117,10 @@ class TaskMime(QtCore.QMimeData):
             # print(type(data))
             self.setData(self.MIMETYPE, data)
             self.setText(data)
+            self.setUrls([r'https://srinikom.github.io/pyside-docs/PySide/QtCore/QMimeData.html'])
 
     def itemInstance(self):
+        text = str(self.data(self.MIMETYPE))
         text = self.text()
         params_obj = task_list.TaskListParameters()
         params_obj.loads(text)
@@ -258,11 +260,9 @@ class TreeModel(QtCore.QAbstractItemModel):
             return
 
         item = mimedata.itemInstance()
-        # itemCopy = copy.deepcopy(item)
+        self.beginInsertRows(parentIndex, row, row)
         dropParent.insertChild(row, item)
-        # self.insertRows(len(dropParent)-1, 1, parentIndex)
-        self.insertRows(row, 1, parentIndex) # beginInsertRows, endInsertRowsの呼び出しが必要？
-        self.dataChanged.emit(parentIndex, parentIndex)
+        self.endInsertRows()
         return True
 
 class TestWindow(maya_base_mixin, QtWidgets.QWidget):
@@ -324,10 +324,13 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.tree.setModel(self.model)
 
     def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
-        dragging_row = self.model.dragging_index.row()
+        try:
+            dragging_row = self.model.dragging_index.row()
 
-        if first > dragging_row:
-            first -= 1
+            if first > dragging_row:
+                first -= 1
+            
+        except: pass
 
         item = self.model.itemFromIndex(parent)
         child_item = item.children[first]
