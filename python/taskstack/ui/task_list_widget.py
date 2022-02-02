@@ -122,7 +122,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
 
     def execute(self):
         with self.__task_list:
-            pass
+            self.__task_list.execute()
 
     def _remove_task(self, idx):
         self.remove_task.emit(idx)

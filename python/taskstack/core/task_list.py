@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import OrderedDict
 # import abc
 import json
@@ -17,12 +18,14 @@ class TaskList(list):
 
     def __init__(self):
         self.__emitter = SignalEmitter()
+        self.__executed = False
 
     def get_emitter(self):
         return self.__emitter
 
     def __enter__(self):
-        self.execute()
+        # self.execute()
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.undo()
@@ -101,12 +104,23 @@ class TaskList(list):
             task.execute_if_active()
 
         self.__emitter.executed.emit()
+        self.__executed = True
+        print(type(self.__emitter.executed))
 
     def undo(self):
+        '''
+        各タスクのundo処理を実行
+        executeされた後のみ実行される
+        '''
+        if not self.__executed:
+            return
+
         print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
 
         for task in self[::-1]:
             task.undo_if_active()
+
+        self.__executed = False
 
 class TaskListParameters(list):
 

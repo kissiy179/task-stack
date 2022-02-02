@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from mayaqt import *
 import sys
 import cPickle as pickle
 import cStringIO
 import copy
+import random
 from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
+import qtawesome as qta
 from taskstack.ui import task_list_widget
 from taskstack.core import task, task_list
+
+import_icon = qta.icon('fa5s.folder-open', color='lightgray')
 
 class BaseItem(object):
     def __init__(self, parent=None):
@@ -44,9 +47,9 @@ class BaseItem(object):
         if self.parent is not None:
             return self.parent.children.index(self)
 
-    def data(self, column, role=QtCore.Qt.DisplayRole):
+    def data(self, column=0, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
-            return type(self).__class__.__name__
+            return type(self).__name__
 
 class TaskItem(BaseItem):
 
@@ -57,10 +60,13 @@ class TaskItem(BaseItem):
     def get_task(self):
         return self._task
 
-    def data(self, column, role=QtCore.Qt.DisplayRole):
+    def data(self, column=0, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
             return self._task.get_name()
         
+        elif role == QtCore.Qt.DecorationRole:
+            return import_icon
+
 #====================================================================
 
 class PyObjMime(QtCore.QMimeData):
@@ -111,8 +117,10 @@ class TaskMime(QtCore.QMimeData):
             # print(type(data))
             self.setData(self.MIMETYPE, data)
             self.setText(data)
+            self.setUrls([r'https://srinikom.github.io/pyside-docs/PySide/QtCore/QMimeData.html'])
 
     def itemInstance(self):
+        text = str(self.data(self.MIMETYPE))
         text = self.text()
         params_obj = task_list.TaskListParameters()
         params_obj.loads(text)
@@ -132,6 +140,9 @@ class TaskMime(QtCore.QMimeData):
 #====================================================================
 
 class TreeModel(QtCore.QAbstractItemModel):
+
+    showIndex = False
+
     def __init__(self, root, parent=None):
         super(TreeModel, self).__init__(parent)
         self.root = root
@@ -159,18 +170,38 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def columnCount(self, index):
         item = self.itemFromIndex(index)
-        return item.columnCount()
+        columnCount = item.columnCount()
+
+        if self.showIndex:
+            columnCount += 1
+
+        return columnCount
     
     def data(self, index, role):
-        if role == QtCore.Qt.DisplayRole:
-            item = self.itemFromIndex(index)
-            return item.data(index.column(), role)
+        # インデックス表示ON、0列目の場合行番号を返す
+        if self.showIndex and index.column() == 0:
+            if role == QtCore.Qt.DisplayRole:
+                return str(index.row())
+
+            else:
+                return None
+            
+        # それ以外はアイテムに任せる
+        item = self.itemFromIndex(index)
+        data = item.data(index.column(), role)
+        return data
     
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.root.headers[section]
+            headers = copy.deepcopy(self.root.headers)
+
+            if self.showIndex:
+                headers.insert(0, 'Index')  
+
+            return headers[section]
             
         return None
+        
     def index(self, row, column, parentIndex):
         parentItem = self.itemFromIndex(parentIndex)
         item = parentItem.child(row)           
@@ -219,6 +250,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         item = self.itemFromIndex(index[0])
         # mimedata = PyObjMime(item)
         mimedata = TaskMime(item)
+        self.dragging_index = index[0]
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
@@ -228,11 +260,9 @@ class TreeModel(QtCore.QAbstractItemModel):
             return
 
         item = mimedata.itemInstance()
-        # itemCopy = copy.deepcopy(item)
+        self.beginInsertRows(parentIndex, row, row)
         dropParent.insertChild(row, item)
-        # self.insertRows(len(dropParent)-1, 1, parentIndex)
-        self.insertRows(row, 1, parentIndex) # beginInsertRows, endInsertRowsの呼び出しが必要？
-        self.dataChanged.emit(parentIndex, parentIndex)
+        self.endInsertRows()
         return True
 
 class TestWindow(maya_base_mixin, QtWidgets.QWidget):
@@ -260,15 +290,56 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
-        model = TreeModel(root) 
-        tree = QtWidgets.QTreeView()
-        tree.setModel( model ) 
-        tree.setDragEnabled(True)
-        tree.setAcceptDrops(True)
-        tree.setDragDropMode( QtWidgets.QAbstractItemView.InternalMove )
-        tree.show()
-        tree.expandAll()
-        lo.addWidget(tree)
+        self.model = TreeModel(root)
+        self.model.rowsInserted.connect(self.selectItem, QtCore.Qt.QueuedConnection) # すべて終わってから処理するのでQueuedConnectionが必要
+        # self.sel_model = QtCore.QItemSelectionModel()
+        # model.showIndex = True
+        self.tree = QtWidgets.QTreeView()
+        self.tree.setModel(self.model)
+        self.tree.setDragEnabled(True)
+        self.tree.setAcceptDrops(True)
+        self.tree.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        self.tree.expandAll()
+        lo.addWidget(self.tree)
+
+        self.tree2 = QtWidgets.QTreeView()
+        self.tree2.setModel(self.model)
+        self.tree2.setSelectionModel(self.tree.selectionModel())
+        lo.addWidget(self.tree2)
+
+        self.sel_model = self.tree.selectionModel()
+
+        tglBtn = QtWidgets.QPushButton('Show Index')
+        tglBtn.clicked.connect(self.toggle)
+        lo.addWidget(tglBtn)
+
+    def log(self, selection, command):
+        print('test')
+        print(selection, command)
+
+    def toggle(self):
+        showIndex = not self.model.showIndex
+        self.model = TreeModel(self.model.root) 
+        self.model.showIndex = showIndex
+        self.tree.setModel(self.model)
+
+    def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
+        try:
+            dragging_row = self.model.dragging_index.row()
+
+            if first > dragging_row:
+                first -= 1
+            
+        except: pass
+
+        item = self.model.itemFromIndex(parent)
+        child_item = item.children[first]
+        child = self.model.createIndex(first, 0, child_item)
+        # print self.model.itemFromIndex(child)
+
+        # セレクションモデルはすでに削除されているのでItemViewから再取得
+        sel_model = self.tree.selectionModel()
+        sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
 def main():
     win = TestWindow()
