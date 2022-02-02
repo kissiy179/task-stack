@@ -91,6 +91,9 @@ class FilePathInMayaProjectEdit(FilePathEdit):
         text = util.get_absolute_path_in_maya_project(text)
         return text
 
+    def row_text(self):
+        return super(FilePathInMayaProjectEdit, self).text()
+
     def setText(self, text):
         text = util.get_relatvie_path_in_maya_project(text)
         super(FilePathInMayaProjectEdit, self).setText(text)
