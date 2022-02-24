@@ -14,10 +14,11 @@ class TemplateTask(task.Task):
             ('Test Number', 0.0),
         ))
 
-    # def get_default_parameters(self):
-    #     return OrderedDict((
-    #     ))
-        
+    # def get_parameter_types(self):
+    #     parameter_types = super(TemplateTask, self).get_parameter_types()
+    #     parameter_types['Test Text'] = 'file_in_pj'
+    #     return parameter_types
+
     def execute(self):
         super(TemplateTask, self).execute()
         parameters = self.get_parameters()
