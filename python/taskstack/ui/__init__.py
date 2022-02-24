@@ -40,8 +40,8 @@ WIDGET_TABLE = {
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file': {'class': path_edit.FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': path_edit.DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file_in_pj': {'class': path_in_project_edit.FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'dir_in_pj': {'class': path_in_project_edit.DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file_in_pj': {'class': path_in_project_edit.FilePathInProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'dir_in_pj': {'class': path_in_project_edit.DirectoryPathInProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': path_in_project_edit.MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
 }
