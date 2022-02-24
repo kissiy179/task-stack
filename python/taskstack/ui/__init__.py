@@ -5,9 +5,9 @@ from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
 from .. import util
-from pyside_components.widgets import file_path_edit, directory_path_edit
+from pyside_components.widgets import path_edit
 
-class FilePathInMayaProjectEdit(file_path_edit.FilePathEdit):
+class FilePathInMayaProjectEdit(path_edit.FilePathEdit):
     '''
     Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ウィジェット
     '''
@@ -29,7 +29,7 @@ class DirectoryPathInMayaProjectEdit(FilePathInMayaProjectEdit):
     '''
     Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ディレクトリパス用ウィジェット
     '''
-    open_method = directory_path_edit.getExistingDirectory
+    open_method = path_edit.getExistingDirectory
 
 class MayaSceneEdit(FilePathInMayaProjectEdit):
     '''
@@ -68,8 +68,8 @@ WIDGET_TABLE = {
     'int': {'class': CustomSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
     'float': {'class': CustomDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file': {'class': file_path_edit.FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'dir': {'class': directory_path_edit.DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file': {'class': path_edit.FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'dir': {'class': path_edit.DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file_in_pj': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir_in_pj': {'class': DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
