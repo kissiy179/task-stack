@@ -67,6 +67,12 @@ class TaskItem(BaseItem):
         elif role == QtCore.Qt.DecorationRole:
             return import_icon
 
+        elif role == QtCore.Qt.CheckStateRole:
+            return self._task.get_active()
+
+        elif role == QtCore.Qt.BackgroundRole:
+            return QtGui.QColor(65,65,65)
+
 #====================================================================
 
 class PyObjMime(QtCore.QMimeData):
@@ -111,7 +117,7 @@ class TaskMime(QtCore.QMimeData):
         if item:
             task_ = item.get_task()
             params = task_.get_parameters(consider_keywords=False)
-            params = [{'name': task_.get_name(), 'parameters': params}]
+            params = [{'name': task_.get_name(), 'active': task_.get_active(), 'parameters': params}]
             params_obj = task_list.TaskListParameters(params)
             data = params_obj.dumps()
             # print(type(data))
@@ -126,6 +132,7 @@ class TaskMime(QtCore.QMimeData):
         params_obj.loads(text)
         first_params = params_obj[0]
         task_name = first_params.get('name')
+        task_active = first_params.get('active')
         params = first_params.get('parameters')
         task_class = task.Task.get_task_classes().get(task_name)
 
@@ -133,6 +140,7 @@ class TaskMime(QtCore.QMimeData):
             return None
 
         task_ = task_class()
+        task_.set_active(task_active)
         task_.set_parameters(**params)
         item = TaskItem(task_)
         return item
