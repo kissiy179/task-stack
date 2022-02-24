@@ -1,1 +1,2 @@
 mayaqt @ git+https://github.com/kissiy179/mayaqt.git
+pyside_components @ git+https://github.com/kissiy179/pyside_components.git
