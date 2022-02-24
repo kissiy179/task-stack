@@ -6,37 +6,7 @@ import qtawesome as qta
 import maya.cmds as cmds
 from .. import util
 from pyside_components.widgets import path_edit
-
-class FilePathInMayaProjectEdit(path_edit.FilePathEdit):
-    '''
-    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ウィジェット
-    '''
-
-    def text(self):
-        text = self.line_edit.text()
-        text = util.get_absolute_path_in_maya_project(text)
-        return text
-
-    def row_text(self):
-        return super(FilePathInMayaProjectEdit, self).text()
-
-    def setText(self, text):
-        text = util.get_relatvie_path_in_maya_project(text)
-        super(FilePathInMayaProjectEdit, self).setText(text)
-
-
-class DirectoryPathInMayaProjectEdit(FilePathInMayaProjectEdit):
-    '''
-    Mayaプロジェクト内の場合相対パスとして記憶するファイルパス用ディレクトリパス用ウィジェット
-    '''
-    open_method = path_edit.getExistingDirectory
-
-class MayaSceneEdit(FilePathInMayaProjectEdit):
-    '''
-    Mayaシーンパス用ウィジェット
-    .ma, .mb, .fbxが有効
-    '''
-    filter = 'Maya scene files (*.ma *.mb);;FBX files (*.fbx)'
+from maya_pyside_components.widgets import path_in_project_edit
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
@@ -70,9 +40,9 @@ WIDGET_TABLE = {
     'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'file': {'class': path_edit.FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'dir': {'class': path_edit.DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file_in_pj': {'class': FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'dir_in_pj': {'class': DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'scn': {'class': MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'file_in_pj': {'class': path_in_project_edit.FilePathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'dir_in_pj': {'class': path_in_project_edit.DirectoryPathInMayaProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'scn': {'class': path_in_project_edit.MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
     'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
 }
 
