@@ -63,12 +63,12 @@ class Task(object):
             print('[TaskStack] {}.undo.'.format(type(self).__name__))
 
     @classmethod
-    def get_task_classes(cls):
+    def get_task_classes(cls, force=False):
         '''
         環境変数で指定されたフォルダ内のpyファイルをロードしてこのクラスから派生したタスククラスを取得
         タスク生成タイミングなどで呼ぶと使用しているタスクオブジェクトのクラスを書き換えてしまったりするのでtaskstackパッケージ読み込み時に1度だけ行う
         '''
-        if cls.__task_classes:
+        if not force and cls.__task_classes:
             return cls.__task_classes
 
         task_classes = OrderedDict()
@@ -92,6 +92,7 @@ class Task(object):
                             continue
                         
                         task_classes[obj.__name__] = obj
+                        print('Import task. [{}]'.format(obj.__name__))
 
         cls.__task_classes = task_classes
         return task_classes
