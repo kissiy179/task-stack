@@ -25,6 +25,7 @@ class TaskListMenu(QtWidgets.QMenu):
         max_task_class_name_lens = [len(task_class_name) for task_class_name in task_class_names]
         max_task_class_name_len = max(max_task_class_name_lens) if max_task_class_name_lens else 0
         lbls = ['{}: {}'.format(task_class_names[i].ljust(max_task_class_name_len), task_class.get_doc(first_line_only=True)) for i, task_class in enumerate(self.__task_classes.values())]
+        lbls.sort()
         self.clear()
 
         for i, lbl in enumerate(lbls):
