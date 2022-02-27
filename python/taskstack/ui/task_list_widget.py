@@ -170,6 +170,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
+        self.__task_list_menu.reloaded.connect(partial(self.import_task_list_parameters, RECENT_TASKS_FILE_PATH))
         self.show_details = True
         self.init_ui()
         self.resize(500, 600)
