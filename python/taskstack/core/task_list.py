@@ -105,7 +105,6 @@ class TaskList(list):
 
         self.__emitter.executed.emit()
         self.__executed = True
-        print(type(self.__emitter.executed))
 
     def undo(self):
         '''
