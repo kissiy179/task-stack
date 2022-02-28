@@ -6,7 +6,7 @@ import taskstack.core.task as task
 
 class ExecuteScriptTask(task.Task):
     '''
-    1行スクリプトを実行するタスク
+    記述したスクリプトを実行するタスク
     maya.cmds(cmds), pymel.core(pm)を使用可能
     '''
     
