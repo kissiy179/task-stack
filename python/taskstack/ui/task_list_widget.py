@@ -18,6 +18,7 @@ down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
 exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='lightgray')
 detail_icon = qta.icon('fa5s.align-left', color='lightgray')
+code_icon = qta.icon('fa5s.code', color='lightgray')
 JSON_FILTERS = 'Json (*.json)'
 TOOLBAR_POSITIONS = {
     'top': QtCore.Qt.TopToolBarArea,
@@ -149,6 +150,7 @@ class CustomProgressBar(QtWidgets.QProgressBar):
 class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     updated = QtCore.Signal()
+    show_raw_text = False
 
     def __init__(self, task_list=None, use_recent_tasks=False, *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
@@ -199,21 +201,29 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__main_layout.setContentsMargins(0,0,0,0)
         main_wgt.setLayout(self.__main_layout)
 
-        # Scroll Aere
+        # Scroll aere
         self.scroll_area = QtWidgets.QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setStyleSheet('QScrollArea {background-color: #2b2b2b;}')
         self.__main_layout.addWidget(self.scroll_area)
 
-        # Tasks Widgets
-        # tasks = self.__task_list.get_tasks()
+        # Tasks widgets
         self.inner_wgt = InnerTaskListWidget(self.__task_list, show_details=show_details)
-        self.inner_wgt.remove_task.connect(self.remove_task)
-        self.inner_wgt.moveup_task.connect(self.moveup_task)
-        self.inner_wgt.movedown_task.connect(self.movedown_task)
-        self.inner_wgt.updated.connect(self.updated)
-        self.inner_wgt.start_execute.connect(self.preprocess)
-        self.scroll_area.setWidget(self.inner_wgt)
+        self.raw_text = QtWidgets.QTextEdit()
+
+        if not self.show_raw_text:
+            self.inner_wgt.remove_task.connect(self.remove_task)
+            self.inner_wgt.moveup_task.connect(self.moveup_task)
+            self.inner_wgt.movedown_task.connect(self.movedown_task)
+            self.inner_wgt.updated.connect(self.updated)
+            self.inner_wgt.start_execute.connect(self.preprocess)
+            self.scroll_area.setWidget(self.inner_wgt)
+
+        # Row Text
+        else:
+            params = TaskListParameters(self.__task_list.get_parameters())
+            self.raw_text.setText(params.dumps())
+            self.scroll_area.setWidget(self.raw_text)
 
         # Buttons
         buttons_lo = QtWidgets.QHBoxLayout()
@@ -317,14 +327,20 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         task_list_actions = []
         actions['task_list_actions'] = task_list_actions
 
-        # Add Task
+        # Add task
         add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
         add_task_action.triggered.connect(self.select_task_class)
         task_list_actions.append(add_task_action)
 
+        # Toggle details
         toggle_task_details_visible = QtWidgets.QAction(detail_icon, 'Toggle Show Ditails', self)
         toggle_task_details_visible.triggered.connect(self.toggle_show_details)
         task_list_actions.append(toggle_task_details_visible)
+
+        # Toggle row string
+        tobble_row_strings = QtWidgets.QAction(code_icon, 'Toggle Row strings', self)
+        tobble_row_strings.triggered.connect(self.toggle_raw_strings)
+        task_list_actions.append(tobble_row_strings)
 
         # Toggle deetails
         # toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
@@ -428,3 +444,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def toggle_show_details(self):
         self.show_details = not self.show_details
         self.init_ui(show_details=self.show_details)
+
+    def toggle_raw_strings(self):
+        self.show_raw_text = not self.show_raw_text
+        self.init_ui()
