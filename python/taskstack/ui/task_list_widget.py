@@ -223,6 +223,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         else:
             params = TaskListParameters(self.__task_list.get_parameters())
             self.raw_text.setText(params.dumps())
+            self.raw_text.setReadOnly(True)
             self.scroll_area.setWidget(self.raw_text)
 
         # Buttons
