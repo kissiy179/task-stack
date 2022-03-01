@@ -172,7 +172,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
-        self.__task_list_menu.reloaded.connect(partial(self.import_task_list_parameters, RECENT_TASKS_FILE_PATH))
+        # self.__task_list_menu.start_reload.connect(self.)
+        self.__task_list_menu.end_reload.connect(partial(self.import_task_list_parameters, RECENT_TASKS_FILE_PATH))
         self.show_details = True
         self.init_ui()
         self.resize(500, 600)
@@ -362,8 +363,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
         
     def select_task_class(self):
-        self.__task_list_menu.move(QtGui.QCursor.pos())
-        self.__task_list_menu.show()
+        # self.__task_list_menu.move(QtGui.QCursor.pos())
+        # self.__task_list_menu.show()
+        self.__task_list_menu.exec_(QtGui.QCursor.pos())
 
     def add_task_class(self, task_class):
         task = task_class()

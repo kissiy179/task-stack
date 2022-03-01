@@ -12,13 +12,16 @@ reload_icon = qta.icon('fa5s.sync-alt', color='lightgray')
 class TaskListMenu(QtWidgets.QMenu):
 
     triggered = QtCore.Signal(Task)
-    reloaded = QtCore.Signal()
+    start_realod = QtCore.Signal()
+    end_reload = QtCore.Signal()
 
     def __init__(self, *args, **kwargs):
         super(TaskListMenu, self).__init__(*args, **kwargs)
         self.setTearOffEnabled(True)
         self.setTitle('Tasks')
-        self.reload_task_classes()
+        self.__task_classes = Task.get_task_classes(force=False)
+        self.init_ui()
+        # self.reload_task_classes()
         # self.init_ui() # reload_taks_classesに含まれる
 
     def init_ui(self):
@@ -57,4 +60,4 @@ class TaskListMenu(QtWidgets.QMenu):
     def reload_task_classes(self):
         self.__task_classes = Task.get_task_classes(force=True)
         self.init_ui()
-        self.reloaded.emit()
+        self.end_reload.emit()
