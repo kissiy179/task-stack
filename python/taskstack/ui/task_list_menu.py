@@ -12,7 +12,7 @@ reload_icon = qta.icon('fa5s.sync-alt', color='lightgray')
 class TaskListMenu(QtWidgets.QMenu):
 
     triggered = QtCore.Signal(Task)
-    start_realod = QtCore.Signal()
+    start_reload = QtCore.Signal()
     end_reload = QtCore.Signal()
 
     def __init__(self, *args, **kwargs):
@@ -58,6 +58,7 @@ class TaskListMenu(QtWidgets.QMenu):
         self.triggered.emit(task_class)
 
     def reload_task_classes(self):
+        self.start_reload.emit()
         self.__task_classes = Task.get_task_classes(force=True)
         self.init_ui()
         self.end_reload.emit()

@@ -173,7 +173,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
         # self.__task_list_menu.start_reload.connect(self.)
-        self.__task_list_menu.end_reload.connect(partial(self.import_task_list_parameters, RECENT_TASKS_FILE_PATH))
+        self.__task_list_menu.start_reload.connect(self.store_task_list_parameters)
+        self.__task_list_menu.end_reload.connect(self.restore_task_list_parameters)
+        self.__task_list_parameters = ''
         self.show_details = True
         self.init_ui()
         self.resize(500, 600)
@@ -403,6 +405,19 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def clear_tasks(self):
         self.__task_list.clear_tasks()
+        self.init_ui()
+
+    def store_task_list_parameters(self):
+        self.inner_wgt.apply_parameters()
+        params = TaskListParameters(self.__task_list.get_parameters())
+        text = params.dumps()
+        self.__task_list_parameters = text
+
+    def restore_task_list_parameters(self):
+        params = TaskListParameters()
+        text = self.__task_list_parameters
+        params.loads(text)
+        self.__task_list.set_parameters(params)
         self.init_ui()
 
     def import_task_list_parameters(self, file_path=''):
