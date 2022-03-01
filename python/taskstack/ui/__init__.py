@@ -4,7 +4,6 @@ import inspect
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
 import maya.cmds as cmds
-from .. import util
 from pyside_components.widgets import path_edit
 from maya_pyside_components.widgets import path_in_project_edit
 
