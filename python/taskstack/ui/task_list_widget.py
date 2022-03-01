@@ -198,7 +198,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Main layout
         self.__main_layout = QtWidgets.QVBoxLayout()
-        self.__main_layout.setContentsMargins(0,0,0,0)
+        # self.__main_layout.setContentsMargins(0,0,0,0)
         main_wgt.setLayout(self.__main_layout)
 
         # Scroll aere
