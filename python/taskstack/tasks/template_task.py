@@ -55,4 +55,4 @@ class TemplateTask(task.Task):
         '''
         必要な場合Undo処理を書く
         '''
-        super(TemplateMayaTask, self).undo(True)
+        super(TemplateTask, self).undo(True)
