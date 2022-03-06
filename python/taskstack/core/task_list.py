@@ -16,9 +16,10 @@ class TaskList(list):
     
     # __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
+    def __init__(self, undo=False):
         self.__emitter = SignalEmitter()
         self.__executed = False
+        self.__undo = undo
 
     def get_emitter(self):
         return self.__emitter
@@ -28,7 +29,7 @@ class TaskList(list):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.undo()
+        self.undo_if_executed()
 
     def get_parameters(self, consider_keywords=False):
         params = []
@@ -111,14 +112,19 @@ class TaskList(list):
         各タスクのundo処理を実行
         executeされた後のみ実行される
         '''
-        if not self.__executed:
-            return
-
         print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
 
         for task in self[::-1]:
             task.undo_if_active()
 
+    def undo_if_executed(self):
+        '''
+        実行済みの場合のみUndo処理を行う
+        '''
+        if not self.__executed or not self.__undo:
+            return
+
+        self.undo()
         self.__executed = False
 
 class TaskListParameters(list):
