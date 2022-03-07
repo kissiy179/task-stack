@@ -4,6 +4,7 @@ from collections import OrderedDict
 import json
 from qtpy import QtCore
 from .task import Task
+import maya.cmds as cmds
 
 class SignalEmitter(QtCore.QObject):
     start_execute = QtCore.Signal()
@@ -16,10 +17,10 @@ class TaskList(list):
     
     # __metaclass__ = abc.ABCMeta
 
-    def __init__(self, undo=False):
+    def __init__(self, undo_enabled=False):
         self.__emitter = SignalEmitter()
         self.__executed = False
-        self.__undo = undo
+        self.__undo_enabled = undo_enabled
 
     def get_emitter(self):
         return self.__emitter
@@ -107,12 +108,19 @@ class TaskList(list):
         self.__emitter.executed.emit()
         self.__executed = True
 
+    def get_undo_enabled(self):
+        return self.__undo_enabled
+
+    def set_undo_enabled(self, undo_enabled):
+        self.__undo_enabled = undo_enabled
+
     def undo(self):
         '''
         各タスクのundo処理を実行
         executeされた後のみ実行される
         '''
         print('[TaskStack] {0} {1}.undo. {0}'.format('-'*20, type(self).__name__))
+        cmds.undo()
 
         for task in self[::-1]:
             task.undo_if_active()
@@ -121,7 +129,7 @@ class TaskList(list):
         '''
         実行済みの場合のみUndo処理を行う
         '''
-        if not self.__executed or not self.__undo:
+        if not self.__executed or not self.__undo_enabled:
             return
 
         self.undo()
