@@ -178,6 +178,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list_menu.start_reload.connect(self.store_task_list_parameters)
         self.__task_list_menu.end_reload.connect(self.restore_task_list_parameters)
         self.__task_list_parameters = ''
+        self.__ignored_actions = []
         self.show_details = True
         self.init_ui()
         self.resize(500, 600)
@@ -270,22 +271,26 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('exec_actions'):
-            toolbar.addAction(action)
+            if not action.text() in self.__ignored_actions:
+                toolbar.addAction(action)
 
         toolbar.addSeparator() #-----
 
         for action in self.__actions.get('task_list_actions'):
-            toolbar.addAction(action)
+            if not action.text() in self.__ignored_actions:
+                toolbar.addAction(action)
 
         toolbar.addSeparator() #-----
 
         for action in self.__actions.get('io_actions'):
-            toolbar.addAction(action)
+            if not action.text() in self.__ignored_actions:
+                toolbar.addAction(action)
 
         toolbar.addSeparator() #-----
 
         for action in self.__actions.get('flow_actions'):
-            toolbar.addAction(action)
+            if not action.text() in self.__ignored_actions:
+                toolbar.addAction(action)
 
         self.__tool_bar = toolbar
 
@@ -485,3 +490,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def toggle_undo_enabled(self):
         checked = self.toggle_undo_action.isChecked()
         self.__task_list.set_undo_enabled(checked)
+
+    def set_ignore_actions(self, action_names=()):
+        self.__ignored_actions = action_names
