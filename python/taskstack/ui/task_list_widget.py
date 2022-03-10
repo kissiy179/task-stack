@@ -375,7 +375,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         actions['flow_actions'] = flow_actions
 
         # Toggle ukndo enabled
-        self.toggle_undo_action = QtWidgets.QAction(undo_icon, 'Toggle undo enabled', checkable=True, parent=self)
+        self.toggle_undo_action = QtWidgets.QAction(undo_icon, 'Toggle undo enabled', self)
         self.toggle_undo_action.triggered.connect(self.toggle_undo_enabled)
         flow_actions.append(self.toggle_undo_action)
         return actions
