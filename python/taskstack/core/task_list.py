@@ -17,20 +17,23 @@ class TaskList(list):
     
     # __metaclass__ = abc.ABCMeta
 
-    def __init__(self, undo_enabled=False):
+    def __init__(self):
         self.__emitter = SignalEmitter()
         self.__executed = False
-        self.__undo_enabled = undo_enabled
+        self.__undo_enabled = False
 
     def get_emitter(self):
         return self.__emitter
 
     def __enter__(self):
         # self.execute()
+        cmds.undoInfo(openChunk=True)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        cmds.undoInfo(closeChunk=True)
         self.undo_if_executed()
+        self.__executed = False
 
     def get_parameters(self, consider_keywords=False):
         params = []
@@ -101,12 +104,12 @@ class TaskList(list):
         print('[TaskStack] {0} {1}.execute. {0}'.format('-'*20, type(self).__name__))
 
         self.__emitter.start_execute.emit()
+        self.__executed = True
 
         for task in self:
             task.execute_if_active()
 
         self.__emitter.executed.emit()
-        self.__executed = True
 
     def get_undo_enabled(self):
         return self.__undo_enabled
@@ -133,7 +136,6 @@ class TaskList(list):
             return
 
         self.undo()
-        self.__executed = False
 
 class TaskListParameters(list):
 

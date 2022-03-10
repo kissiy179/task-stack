@@ -19,6 +19,8 @@ exec_icon = qta.icon('fa5s.play', color='lightgreen')
 add_icon = qta.icon('fa5s.plus', color='lightgray')
 detail_icon = qta.icon('fa5s.align-left', color='lightgray')
 code_icon = qta.icon('fa5s.code', color='lightgray')
+undo_icon = qta.icon('fa5s.angle-double-left', color='lightgray')
+undo_icon = qta.icon('fa5s.backward', color='lightgray')
 JSON_FILTERS = 'Json (*.json)'
 TOOLBAR_POSITIONS = {
     'top': QtCore.Qt.TopToolBarArea,
@@ -280,6 +282,11 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         for action in self.__actions.get('io_actions'):
             toolbar.addAction(action)
 
+        toolbar.addSeparator() #-----
+
+        for action in self.__actions.get('flow_actions'):
+            toolbar.addAction(action)
+
         self.__tool_bar = toolbar
 
     def init_status_bar(self):
@@ -332,29 +339,37 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         actions['task_list_actions'] = task_list_actions
 
         # Add task
-        add_task_action = QtWidgets.QAction(add_icon, 'Add Task', self)
+        add_task_action = QtWidgets.QAction(add_icon, 'Add task', self)
         add_task_action.triggered.connect(self.select_task_class)
         task_list_actions.append(add_task_action)
 
         # Toggle details
-        toggle_task_details_visible = QtWidgets.QAction(detail_icon, 'Toggle Show Ditails', self)
-        toggle_task_details_visible.triggered.connect(self.toggle_show_details)
-        task_list_actions.append(toggle_task_details_visible)
+        toggle_details_action = QtWidgets.QAction(detail_icon, 'Toggle show ditails', checkable=True, parent=self)
+        toggle_details_action.triggered.connect(self.toggle_show_details)
+        task_list_actions.append(toggle_details_action)
 
         # Toggle row string
-        tobble_row_strings = QtWidgets.QAction(code_icon, 'Toggle Row strings', self)
-        tobble_row_strings.triggered.connect(self.toggle_raw_strings)
-        task_list_actions.append(tobble_row_strings)
+        toggle_raw_action = QtWidgets.QAction(code_icon, 'Toggle raw strings', checkable=True, parent=self)
+        toggle_raw_action.triggered.connect(self.toggle_raw_strings)
+        task_list_actions.append(toggle_raw_action)
 
         # Toggle deetails
         # toggle_task_details_action = QtWidgets.QAction(detail_icon, 'Toggle Task Details', self)
         # task_list_actions.append(toggle_task_details_action)
 
         # Clear Tasks
-        clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear Tasks', self)
+        clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear tasks', self)
         clear_tasks_action.triggered.connect(self.clear_tasks)
         task_list_actions.append(clear_tasks_action)
 
+        # Flow actions -------
+        flow_actions = []
+        actions['flow_actions'] = flow_actions
+
+        # Toggle ukndo enabled
+        self.toggle_undo_action = QtWidgets.QAction(undo_icon, 'Toggle undo enabled', checkable=True, parent=self)
+        self.toggle_undo_action.triggered.connect(self.toggle_undo_enabled)
+        flow_actions.append(self.toggle_undo_action)
         return actions
 
     def get_task_list(self):
@@ -466,3 +481,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def toggle_raw_strings(self):
         self.show_raw_text = not self.show_raw_text
         self.init_ui()
+
+    def toggle_undo_enabled(self):
+        checked = self.toggle_undo_action.isChecked()
+        self.__task_list.set_undo_enabled(checked)
