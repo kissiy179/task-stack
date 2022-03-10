@@ -349,12 +349,14 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         task_list_actions.append(add_task_action)
 
         # Toggle details
-        toggle_details_action = QtWidgets.QAction(detail_icon, 'Toggle show ditails', checkable=True, parent=self)
+        toggle_details_action = QtWidgets.QAction(detail_icon, 'Toggle show ditails', self)
+        toggle_details_action.setCheckable(True)
         toggle_details_action.triggered.connect(self.toggle_show_details)
         task_list_actions.append(toggle_details_action)
 
         # Toggle row string
-        toggle_raw_action = QtWidgets.QAction(code_icon, 'Toggle raw strings', checkable=True, parent=self)
+        toggle_raw_action = QtWidgets.QAction(code_icon, 'Toggle raw strings', self)
+        toggle_raw_action.setCheckable(True)
         toggle_raw_action.triggered.connect(self.toggle_raw_strings)
         task_list_actions.append(toggle_raw_action)
 
@@ -364,6 +366,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Clear Tasks
         clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear tasks', self)
+        clear_tasks_action.setCheckable(True)
         clear_tasks_action.triggered.connect(self.clear_tasks)
         task_list_actions.append(clear_tasks_action)
 
