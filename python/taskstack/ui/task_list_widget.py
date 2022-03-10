@@ -366,7 +366,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Clear Tasks
         clear_tasks_action = QtWidgets.QAction(close_icon, 'Clear tasks', self)
-        clear_tasks_action.setCheckable(True)
         clear_tasks_action.triggered.connect(self.clear_tasks)
         task_list_actions.append(clear_tasks_action)
 
@@ -376,6 +375,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Toggle ukndo enabled
         self.toggle_undo_action = QtWidgets.QAction(undo_icon, 'Toggle undo enabled', self)
+        self.toggle_undo_action.setCheckable(True)
         self.toggle_undo_action.triggered.connect(self.toggle_undo_enabled)
         flow_actions.append(self.toggle_undo_action)
         return actions
