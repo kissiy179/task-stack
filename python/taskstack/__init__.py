@@ -19,3 +19,5 @@ os.environ['TASKSTACK_TASK_DIRS'] = TASK_DIRS
 
 import core; reload(core)
 # import ui; reload(ui) # 常にimportはエラーになる可能性がある
+
+print('{0:_^100}'.format('Succeeded to import package [{0}].'.format(__name__)))

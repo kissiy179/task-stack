@@ -33,7 +33,7 @@ class TemplateTask(task.Task):
         使用できるタイプはtaskstack.ui.__init__.pyのWIDGET_TABLEを参照
         '''
         parameter_types = super(TemplateTask, self).get_parameter_types()
-        parameter_types['Test File'] = 'file'
+        parameter_types['Test File'] = 'file_in_pj'
         return parameter_types
 
     def execute(self):
