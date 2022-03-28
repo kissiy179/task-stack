@@ -83,19 +83,17 @@ class TaskList(list):
     def remove_task(self, idx):
         del self[idx]
 
-    def moveup_task(self, idx):
+    def move_task(self, idx, move=1):
         src_task = self[idx]
-        tgt_idx = idx -1
-        tgt_task = self[tgt_idx]
-        self[idx] = tgt_task
-        self[tgt_idx] = src_task
+        tgt_idx = (idx + move) % len(self)
+        del self[idx]
+        self.insert(tgt_idx, src_task)
+
+    def moveup_task(self, idx):
+        self.move_task(idx, -1)
 
     def movedown_task(self, idx):
-        src_task = self[idx]
-        tgt_idx = (idx +1) % len(self)
-        tgt_task = self[tgt_idx]
-        self[idx] = tgt_task
-        self[tgt_idx] = src_task
+        self.move_task(idx, 1)
 
     def clear_tasks(self):
         del self[:]

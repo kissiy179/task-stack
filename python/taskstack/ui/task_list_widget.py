@@ -399,32 +399,32 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def add_task(self, task=None, name='NewSceneTask', parameters={}):
         self.__task_list.add_task(task=task, name=name, parameters=parameters)
         self.init_ui()
-        varticalBar = self.scroll_area.verticalScrollBar()
-        varticalBar.setSliderPosition(varticalBar.maximum())
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        vertical_bar.setSliderPosition(vertical_bar.maximum())
 
     def remove_task(self, idx):
-        varticalBar = self.scroll_area.verticalScrollBar()
-        crr_position = varticalBar.sliderPosition()
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        crr_position = vertical_bar.sliderPosition()
         self.__task_list.remove_task(idx)
         self.init_ui()
-        varticalBar = self.scroll_area.verticalScrollBar()
-        varticalBar.setSliderPosition(crr_position)
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        vertical_bar.setSliderPosition(crr_position)
 
     def moveup_task(self, idx):
-        varticalBar = self.scroll_area.verticalScrollBar()
-        crr_position = varticalBar.sliderPosition()
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        crr_position = vertical_bar.sliderPosition()
         self.__task_list.moveup_task(idx)
         self.init_ui()
-        varticalBar = self.scroll_area.verticalScrollBar()
-        varticalBar.setSliderPosition(crr_position)
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        vertical_bar.setSliderPosition(crr_position)
 
     def movedown_task(self, idx):
-        varticalBar = self.scroll_area.verticalScrollBar()
-        crr_position = varticalBar.sliderPosition()
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        crr_position = vertical_bar.sliderPosition()
         self.__task_list.movedown_task(idx)
         self.init_ui()
-        varticalBar = self.scroll_area.verticalScrollBar()
-        varticalBar.setSliderPosition(crr_position)
+        vertical_bar = self.scroll_area.verticalScrollBar()
+        vertical_bar.setSliderPosition(crr_position)
 
     def clear_tasks(self):
         self.__task_list.clear_tasks()
