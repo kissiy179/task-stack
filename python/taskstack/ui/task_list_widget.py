@@ -31,7 +31,6 @@ TOOLBAR_POSITIONS = {
 PRESET_DIR_PATH = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
 RECENT_TASKS_FILE_PATH = os.path.join(PRESET_DIR_PATH, 'recent_tasks.json')
 
-
 class HorizontalLine(QtWidgets.QFrame):
 
     def __init__(self, *args, **kwargs):
@@ -227,9 +226,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Row Text
         else:
+            self.raw_text.textChanged.connect(self.set_task_list_parameters_from_raw_text_widget)
             params = TaskListParameters(self.__task_list.get_parameters())
             self.raw_text.setText(params.dumps())
-            self.raw_text.setReadOnly(True)
+            # self.raw_text.setReadOnly(True)
             self.scroll_area.setWidget(self.raw_text)
 
         # Buttons
@@ -442,6 +442,24 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         params.loads(text)
         self.__task_list.set_parameters(params)
         self.init_ui()
+
+    def set_task_list_parameters(self, params=''):
+        if isinstance(params, basestring):
+            param_text = params
+            params = TaskListParameters()
+            params.loads(param_text)
+
+        self.__task_list.set_parameters(params)
+        # self.init_ui()
+
+    def set_task_list_parameters_from_raw_text_widget(self):
+        text = self.raw_text.toPlainText()
+
+        try:
+            self.set_task_list_parameters(text)
+
+        except:
+            pass
 
     def import_task_list_parameters(self, file_path=''):
         if not file_path:
