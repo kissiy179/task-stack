@@ -139,7 +139,11 @@ class Task(object):
                 for key_info in key_infos:
                     key_string = key_info[0]
                     key = key_info[1]
-                    key_value = parameters.get(key)
+
+                    if key == name:
+                        continue
+                    
+                    key_value = str(parameters.get(key))
 
                     if key_value:
                         value = value.replace(key_string, key_value)
