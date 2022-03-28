@@ -191,7 +191,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def log(self):
         print(self.__task_list.get_parameters())
 
-    def init_ui(self, executable=True, show_details=None, tool_bar_position=''):
+    def init_ui(self, executable=True, show_details=None, tool_bar_position='', emitt_signal=True):
         # Result show details
         show_details = show_details if show_details else self.show_details
 
@@ -245,9 +245,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
             self.inner_wgt.increment.connect(self.__progress_bar.increment)
 
-
         # Emit Signal
-        self.updated.emit()
+        if emitt_signal:
+            self.updated.emit()
 
     def init_menu_bar(self):
         if self.__menu_bar:
@@ -383,9 +383,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def get_task_list(self):
         return self.__task_list
 
-    def set_task_list(self, task_list):
+    def set_task_list(self, task_list, emitt_signal=True):
         self.__task_list = task_list
-        self.init_ui()
+        self.init_ui(emitt_signal=emitt_signal)
         
     def select_task_class(self):
         # self.__task_list_menu.move(QtGui.QCursor.pos())
