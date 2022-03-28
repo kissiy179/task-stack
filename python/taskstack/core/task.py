@@ -30,7 +30,7 @@ class Task(object):
     def __init__(self):
         self.__default_parameters = self.get_default_parameters()
         self.__parameters = self.get_default_parameters()
-        self.__extraparameters = OrderedDict()
+        self.__extra_parameters = OrderedDict()
         self.__active = True
         self.__emitter = SignalEmitter()
 
@@ -128,6 +128,8 @@ class Task(object):
         RESOLVED: Node Name = 'Node_Bob'
         '''
         parameters = copy.deepcopy(self.__parameters)
+        parameter_sources = self.get_extra_parameters()
+        parameter_sources.update(parameters)
 
         if consider_keywords:
             for name, value in parameters.items():
@@ -142,8 +144,8 @@ class Task(object):
 
                     if key == name:
                         continue
-                    
-                    key_value = str(parameters.get(key))
+
+                    key_value = str(parameter_sources.get(key))
 
                     if key_value:
                         value = value.replace(key_string, key_value)
@@ -157,6 +159,18 @@ class Task(object):
         このオブジェクトにパラメータを設定する
         '''
         self.__parameters.update(parameters)
+
+    def get_extra_parameters(self):
+        '''
+        拡張パラメータを取得する
+        '''
+        return self.__extra_parameters
+
+    def set_extra_parameters(self, **parameters):
+        '''
+        拡張パラメータを設定する
+        '''
+        self.__extra_parameters.update(parameters)
 
     @classmethod
     def get_doc(self, first_line_only=False):
@@ -229,7 +243,6 @@ class Task(object):
             else:
                 self.__emitter.error_raised.emit(err_msg)
                 raise
-
 
     def undo_if_active(self):
         '''
