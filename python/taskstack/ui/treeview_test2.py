@@ -8,6 +8,7 @@ from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
 import qtawesome as qta
 from taskstack.ui import task_list_widget
 from taskstack.core import task, task_list
+from pyside_components.widgets.tag_item_button import string_to_color
 
 import_icon = qta.icon('fa5s.folder-open', color='lightgray')
 
@@ -16,6 +17,7 @@ class BaseItem(object):
         self.children = []
         self.parent = parent
         self.headers = ['Name']
+        self.color = 65, 65, 65
         
         if parent is not None:
             self.parent.addChild(self)
@@ -71,7 +73,8 @@ class TaskItem(BaseItem):
             return self._task.get_active()
 
         elif role == QtCore.Qt.BackgroundRole:
-            return QtGui.QColor(65,65,65)
+            color = string_to_color(self._task.get_name())
+            return QtGui.QColor(*color)
 
 #====================================================================
 
@@ -262,14 +265,15 @@ class TreeModel(QtCore.QAbstractItemModel):
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
-        dropParent = self.itemFromIndex(parentIndex)
+        parentItem = self.itemFromIndex(parentIndex)
 
-        if dropParent != self.root:
+        if parentItem != self.root:
             return
 
+        row = row if not row == -1 else parentItem.rowCount()
         item = mimedata.itemInstance()
         self.beginInsertRows(parentIndex, row, row)
-        dropParent.insertChild(row, item)
+        parentItem.insertChild(row, item)
         self.endInsertRows()
         return True
 
@@ -285,7 +289,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         root = BaseItem()
 
         for task_ in task_list_:
-            TaskItem(task_, root)
+            item = TaskItem(task_, root)
         
         # itemA = TaskItem( 'ItemA', root )
         # itemB = TaskItem( 'ItemB', root )
@@ -312,7 +316,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         self.tree2 = QtWidgets.QTreeView()
         self.tree2.setModel(self.model)
-        self.tree2.setSelectionModel(self.tree.selectionModel())
+        # self.tree2.setSelectionModel(self.tree.selectionModel())
         lo.addWidget(self.tree2)
 
         self.sel_model = self.tree.selectionModel()
