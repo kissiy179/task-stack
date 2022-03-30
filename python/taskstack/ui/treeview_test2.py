@@ -21,6 +21,9 @@ class BaseItem(object):
         
         if parent is not None:
             self.parent.addChild(self)
+
+    def flags(self):
+        return QtCore.Qt.ItemIsEnabled
         
     def addChild(self, child):
         self.children.append(child)
@@ -58,11 +61,14 @@ class TaskItem(BaseItem):
     def __init__(self, task_, parent=None):
         super(TaskItem, self).__init__(parent)
         self._task = task_
-
         params = self._task.get_parameters()
 
         for param_name in params.keys():
             param_item = ParameterItem(param_name, self)
+
+    def flags(self):
+        flags = super(TaskItem, self).flags() | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
+        return flags
 
     def get_task(self):
         return self._task
@@ -87,6 +93,10 @@ class ParameterItem(BaseItem):
     def __init__(self, name='param', parent=None):
         super(ParameterItem, self).__init__(parent)
         self.name = name
+
+    def flags(self):
+        flags = super(ParameterItem, self).flags() | QtCore.Qt.ItemIsSelectable
+        return flags
 
     def data(self, column=0, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
@@ -177,13 +187,6 @@ class TreeModel(QtCore.QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
         self.root = root
         
-    def flags(self, index):
-        if not index.isValid():
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
-
-        # return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
-    
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction | QtCore.Qt.CopyAction
     
@@ -192,6 +195,18 @@ class TreeModel(QtCore.QAbstractItemModel):
             return index.internalPointer()
 
         return self.root
+    
+    def flags(self, index):
+        item = self.itemFromIndex(index)
+
+        if item == self.root:
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
+
+        if hasattr(item, 'flags'):
+            return item.flags()
+
+        else: 
+            return QtCore.Qt.ItemIsEnabled
     
     def rowCount(self, index):
         item = self.itemFromIndex(index)
@@ -215,8 +230,8 @@ class TreeModel(QtCore.QAbstractItemModel):
         return None
         
     def index(self, row, column, parentIndex):
-        parentItem = self.itemFromIndex(parentIndex)
-        item = parentItem.child(row)
+        parent_item = self.itemFromIndex(parentIndex)
+        item = parent_item.child(row)
         return self.createIndex(row, column, item)
     
     def parent(self, index):
@@ -225,15 +240,15 @@ class TreeModel(QtCore.QAbstractItemModel):
         if item is None:
             return QtCore.QModelIndex()
 
-        parentItem = item.parent
+        parent_item = item.parent
 
-        if parentItem == self.root:
+        if parent_item == self.root:
             return QtCore.QModelIndex()
 
-        row = parentItem.children.index(item)
+        row = parent_item.children.index(item)
 
         if row > -1:
-            return self.createIndex(parentItem.row(), 0, parentItem)
+            return self.createIndex(parent_item.row(), 0, parent_item)
 
         return QtCore.QModelIndex()
 
@@ -265,15 +280,18 @@ class TreeModel(QtCore.QAbstractItemModel):
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
-        parentItem = self.itemFromIndex(parentIndex)
+        parent_item = self.itemFromIndex(parentIndex)
 
-        if parentItem != self.root:
+        if parent_item != self.root:
             return
 
-        row = row if not row == -1 else parentItem.rowCount()
+        # if type(parent_item) == TaskItem:
+        #     parent_item = parent_item.parent
+
+        row = row if not row == -1 else parent_item.rowCount()
         item = mimedata.itemInstance()
         self.beginInsertRows(parentIndex, row, row)
-        parentItem.insertChild(row, item)
+        parent_item.insertChild(row, item)
         self.endInsertRows()
         return True
 
@@ -345,14 +363,14 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         # セレクションモデルはすでに削除されているのでItemViewから再取得
         sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
-def main():
+def show():
     win = TestWindow()
     win.show()
 
 if __name__ == '__main__':
-    main()
+    show()
 
 '''
 import taskstack.ui.treeview_test2 as tv; reload(tv)
-tv.main()
+tv.show()
 '''
