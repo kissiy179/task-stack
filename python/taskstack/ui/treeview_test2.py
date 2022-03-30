@@ -219,21 +219,22 @@ class TreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(row, column, item)
     
     def parent(self, index):
-        if not index.isValid():
+        item = self.itemFromIndex(index)
+
+        if item is None:
             return QtCore.QModelIndex()
-            
-        item = index.internalPointer()
 
-        try:
-            parentItem = item.parent
+        parentItem = item.parent
 
-            if parentItem == self.root:
-                return QtCore.QModelIndex()
+        if parentItem == self.root:
+            return QtCore.QModelIndex()
 
-            else:
-                return self.createIndex(parentItem.row(), 0, parentItem)
-                
-        except: pass
+        row = parentItem.children.index(item)
+
+        if row > -1:
+            return self.createIndex(parentItem.row(), 0, parentItem)
+
+        return QtCore.QModelIndex()
 
     def insertRows(self, row, count, parentIndex):
         self.beginInsertRows(parentIndex, row, row+count-1)
@@ -259,9 +260,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def mimeData(self, index):
         item = self.itemFromIndex(index[0])
-        # mimedata = PyObjMime(item)
         mimedata = TaskMime(item)
-        self.dragging_index = index[0]
         return mimedata
     
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
@@ -322,28 +321,22 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.sel_model = self.tree.selectionModel()
 
         tglBtn = QtWidgets.QPushButton('Show Index')
-        tglBtn.clicked.connect(self.toggle)
+        tglBtn.clicked.connect(self.toggle_index_shown)
         lo.addWidget(tglBtn)
 
     def log(self, selection, command):
         print('test')
         print(selection, command)
 
-    def toggle(self):
+    def toggle_index_shown(self):
         showIndex = not self.model.showIndex
         self.model = TreeModel(self.model.root) 
         self.model.showIndex = showIndex
         self.tree.setModel(self.model)
 
     def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
-        try:
-            dragging_row = self.model.dragging_index.row()
-
-            if first > dragging_row:
-                first -= 1
-            
-        except: pass
-
+        parentItem = self.model.itemFromIndex(parent)
+        first = min(first, parentItem.rowCount()-1)
         item = self.model.itemFromIndex(parent)
         child_item = item.children[first]
         child = self.model.createIndex(first, 0, child_item)
