@@ -59,6 +59,11 @@ class TaskItem(BaseItem):
         super(TaskItem, self).__init__(parent)
         self._task = task_
 
+        params = self._task.get_parameters()
+
+        for param_name in params.keys():
+            param_item = ParameterItem(param_name, self)
+
     def get_task(self):
         return self._task
 
@@ -74,6 +79,22 @@ class TaskItem(BaseItem):
 
         elif role == QtCore.Qt.BackgroundRole:
             color = string_to_color(self._task.get_name())
+            return QtGui.QColor(*color)
+
+
+class ParameterItem(BaseItem):
+
+    def __init__(self, name='param', parent=None):
+        super(ParameterItem, self).__init__(parent)
+        self.name = name
+
+    def data(self, column=0, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.DisplayRole:
+            return self.name
+
+        elif role == QtCore.Qt.BackgroundRole:
+            color = string_to_color(self.parent._task.get_name())
+            color = [channel * 0.7 for channel in color]
             return QtGui.QColor(*color)
 
 #====================================================================
@@ -170,7 +191,6 @@ class TreeModel(QtCore.QAbstractItemModel):
     
     def itemFromIndex(self, index):
         if index.isValid():
-            # print(index)
             return index.internalPointer()
 
         return self.root
@@ -310,7 +330,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.tree.setDragEnabled(True)
         self.tree.setAcceptDrops(True)
         self.tree.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
-        self.tree.expandAll()
+        # self.tree.expandAll()
         lo.addWidget(self.tree)
 
         self.tree2 = QtWidgets.QTreeView()
@@ -321,7 +341,8 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.sel_model = self.tree.selectionModel()
 
         tglBtn = QtWidgets.QPushButton('Show Index')
-        tglBtn.clicked.connect(self.toggle_index_shown)
+        # tglBtn.clicked.connect(self.toggle_index_shown)
+        tglBtn.clicked.connect(self.show_expanded)
         lo.addWidget(tglBtn)
 
     def log(self, selection, command):
@@ -330,20 +351,23 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
     def toggle_index_shown(self):
         showIndex = not self.model.showIndex
-        self.model = TreeModel(self.model.root) 
+        self.model = TreeModel(self.model.root)
         self.model.showIndex = showIndex
         self.tree.setModel(self.model)
 
     def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
-        parentItem = self.model.itemFromIndex(parent)
-        first = min(first, parentItem.rowCount()-1)
-        item = self.model.itemFromIndex(parent)
-        child_item = item.children[first]
+        sel_model = self.tree.selectionModel()
+        crr_selected_index = sel_model.selectedRows()[0]
+        crr_selected_row = crr_selected_index.row()
+
+        if first > crr_selected_row:
+            first -= 1
+
+        parent_item = self.model.itemFromIndex(parent)
+        child_item = parent_item.children[first]
         child = self.model.createIndex(first, 0, child_item)
-        # print self.model.itemFromIndex(child)
 
         # セレクションモデルはすでに削除されているのでItemViewから再取得
-        sel_model = self.tree.selectionModel()
         sel_model.select(child, QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
 def main():
