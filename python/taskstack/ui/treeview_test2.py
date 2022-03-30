@@ -173,8 +173,6 @@ class TaskMime(QtCore.QMimeData):
 
 class TreeModel(QtCore.QAbstractItemModel):
 
-    showIndex = False
-
     def __init__(self, root, parent=None):
         super(TreeModel, self).__init__(parent)
         self.root = root
@@ -202,22 +200,9 @@ class TreeModel(QtCore.QAbstractItemModel):
     def columnCount(self, index):
         item = self.itemFromIndex(index)
         columnCount = item.columnCount()
-
-        if self.showIndex:
-            columnCount += 1
-
         return columnCount
     
     def data(self, index, role):
-        # インデックス表示ON、0列目の場合行番号を返す
-        if self.showIndex and index.column() == 0:
-            if role == QtCore.Qt.DisplayRole:
-                return str(index.row())
-
-            else:
-                return None
-            
-        # それ以外はアイテムに任せる
         item = self.itemFromIndex(index)
         data = item.data(index.column(), role)
         return data
@@ -225,17 +210,13 @@ class TreeModel(QtCore.QAbstractItemModel):
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             headers = copy.deepcopy(self.root.headers)
-
-            if self.showIndex:
-                headers.insert(0, 'Index')  
-
             return headers[section]
             
         return None
         
     def index(self, row, column, parentIndex):
         parentItem = self.itemFromIndex(parentIndex)
-        item = parentItem.child(row)           
+        item = parentItem.child(row)
         return self.createIndex(row, column, item)
     
     def parent(self, index):
@@ -310,21 +291,11 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         for task_ in task_list_:
             item = TaskItem(task_, root)
         
-        # itemA = TaskItem( 'ItemA', root )
-        # itemB = TaskItem( 'ItemB', root )
-        # itemC = TaskItem( 'ItemC', root )
-        # itemG = TaskItem( 'ItemG', root )
-        # itemD = TaskItem( 'ItemD', itemA )
-        # itemE = TaskItem( 'ItemE', itemB )
-        # itemF = TaskItem( 'ItemF', itemC )
-        # itemH = TaskItem( 'ItemH', itemG)
-
         lo = QtWidgets.QVBoxLayout()
         self.setLayout(lo)
         self.model = TreeModel(root)
         self.model.rowsInserted.connect(self.selectItem, QtCore.Qt.QueuedConnection) # すべて終わってから処理するのでQueuedConnectionが必要
         # self.sel_model = QtCore.QItemSelectionModel()
-        # model.showIndex = True
         self.tree = QtWidgets.QTreeView()
         self.tree.setModel(self.model)
         self.tree.setDragEnabled(True)
@@ -341,19 +312,11 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.sel_model = self.tree.selectionModel()
 
         tglBtn = QtWidgets.QPushButton('Show Index')
-        # tglBtn.clicked.connect(self.toggle_index_shown)
-        tglBtn.clicked.connect(self.show_expanded)
         lo.addWidget(tglBtn)
 
     def log(self, selection, command):
         print('test')
         print(selection, command)
-
-    def toggle_index_shown(self):
-        showIndex = not self.model.showIndex
-        self.model = TreeModel(self.model.root)
-        self.model.showIndex = showIndex
-        self.tree.setModel(self.model)
 
     def selectItem(self, parent=QtCore.QModelIndex(), first=0, last=0):
         sel_model = self.tree.selectionModel()
