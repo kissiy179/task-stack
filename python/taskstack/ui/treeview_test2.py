@@ -277,6 +277,22 @@ class TreeModel(QtCore.QAbstractItemModel):
         self.endInsertRows()
         return True
 
+class CustomTreeView(QtWidgets.QTreeView):
+
+    def __init__(self, parent=None):
+        super(CustomTreeView, self).__init__(parent)
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+
+    def mousePressEvent(self, event):
+        super(CustomTreeView, self).mousePressEvent(event)
+        index = self.indexAt(event.pos())
+        row = index.row()
+        
+        if row == -1:
+            self.clearSelection()
+
 class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
     def __init__(self, parent=None):
@@ -296,12 +312,8 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.model = TreeModel(root)
         self.model.rowsInserted.connect(self.selectItem, QtCore.Qt.QueuedConnection) # すべて終わってから処理するのでQueuedConnectionが必要
         # self.sel_model = QtCore.QItemSelectionModel()
-        self.tree = QtWidgets.QTreeView()
+        self.tree = CustomTreeView()
         self.tree.setModel(self.model)
-        self.tree.setDragEnabled(True)
-        self.tree.setAcceptDrops(True)
-        self.tree.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
-        # self.tree.expandAll()
         lo.addWidget(self.tree)
 
         self.tree2 = QtWidgets.QTreeView()
