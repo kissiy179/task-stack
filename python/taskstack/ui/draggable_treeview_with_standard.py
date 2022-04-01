@@ -28,7 +28,7 @@ class TaskItem(QtGui.QStandardItem):
 
     def data(self, role):
         if role == QtCore.Qt.DisplayRole:
-            return type(self.task).__name__
+            return self.task.get_name()
 
 class ParameterItem(QtGui.QStandardItem):
 
@@ -92,12 +92,16 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         
         # build model
         for task_ in task_list_:
-            task_item = TaskItem(task_)
+            task_item = TaskItem(task_, task_.get_name())
             self.model.appendRow(task_item)
 
         self.tree = TreeView()
         self.tree.setModel(self.model)
+        self.model.itemChanged.connect(self.log)
         lo.addWidget(self.tree)
+
+    def log(self, item):
+        print(item.data(role=QtCore.Qt.DisplayRole))
 
 
 def show():
