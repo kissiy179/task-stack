@@ -67,7 +67,7 @@ class TaskItem(BaseItem):
             param_item = ParameterItem(param_name, self)
 
     def flags(self):
-        flags = super(TaskItem, self).flags() | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable
+        flags = super(TaskItem, self).flags() | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled
         return flags
 
     def get_task(self):
@@ -80,8 +80,8 @@ class TaskItem(BaseItem):
         elif role == QtCore.Qt.DecorationRole:
             return import_icon
 
-        elif role == QtCore.Qt.CheckStateRole:
-            return self._task.get_active()
+        # elif role == QtCore.Qt.CheckStateRole:
+        #     return self._task.get_active()
 
         elif role == QtCore.Qt.BackgroundRole:
             color = string_to_color(self._task.get_name())
@@ -95,7 +95,7 @@ class ParameterItem(BaseItem):
         self.name = name
 
     def flags(self):
-        flags = super(ParameterItem, self).flags() | QtCore.Qt.ItemIsSelectable
+        flags = super(ParameterItem, self).flags() | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled
         return flags
 
     def data(self, column=0, role=QtCore.Qt.DisplayRole):
@@ -202,20 +202,21 @@ class TreeModel(QtCore.QAbstractItemModel):
         if item == self.root:
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
 
-        if hasattr(item, 'flags'):
-            return item.flags()
+        elif hasattr(item, 'flags'):
+            return item.flags() | QtCore.Qt.ItemIsDropEnabled
 
         else: 
             return QtCore.Qt.ItemIsEnabled
     
     def rowCount(self, index):
         item = self.itemFromIndex(index)
-        return item.rowCount()
+        row_count = item.rowCount()
+        return row_count
     
     def columnCount(self, index):
         item = self.itemFromIndex(index)
-        columnCount = item.columnCount()
-        return columnCount
+        column_count = item.columnCount()
+        return column_count
     
     def data(self, index, role):
         item = self.itemFromIndex(index)
@@ -252,21 +253,17 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return QtCore.QModelIndex()
 
-    def insertRows(self, row, count, parentIndex):
-        self.beginInsertRows(parentIndex, row, row+count-1)
-        self.endInsertRows()
-        # print 'insertRows'
-        return True
+    # def insertRows(self, row, count, parentIndex):
+    #     self.beginInsertRows(parentIndex, row, row+count-1)
+    #     self.endInsertRows()
+    #     return True
     
     def removeRows(self, row, count, parentIndex):
-        try: # エラーが出るタイミングがあるのでエラー処理
-            self.beginRemoveRows(parentIndex, row, row + count-1)
-            parent = self.itemFromIndex(parentIndex)
-            parent.removeChild(row)
-            self.endRemoveRows()
-            return True
-
-        except: pass
+        self.beginRemoveRows(parentIndex, row, row + count-1)
+        parent_item = self.itemFromIndex(parentIndex)
+        parent_item.removeChild(row)
+        self.endRemoveRows()
+        return True
     
     def mimeTypes(self):
         types = []
@@ -285,10 +282,6 @@ class TreeModel(QtCore.QAbstractItemModel):
         if parent_item != self.root:
             return
 
-        # if type(parent_item) == TaskItem:
-        #     parent_item = parent_item.parent
-
-        row = row if not row == -1 else parent_item.rowCount()
         item = mimedata.itemInstance()
         self.beginInsertRows(parentIndex, row, row)
         parent_item.insertChild(row, item)
@@ -333,14 +326,6 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         self.tree = CustomTreeView()
         self.tree.setModel(self.model)
         lo.addWidget(self.tree)
-
-        self.tree2 = QtWidgets.QTreeView()
-        self.tree2.setModel(self.model)
-        # self.tree2.setSelectionModel(self.tree.selectionModel())
-        lo.addWidget(self.tree2)
-
-        self.sel_model = self.tree.selectionModel()
-
         tglBtn = QtWidgets.QPushButton('Show Index')
         lo.addWidget(tglBtn)
 
@@ -371,6 +356,6 @@ if __name__ == '__main__':
     show()
 
 '''
-import taskstack.ui.treeview_test2 as tv; reload(tv)
+import taskstack.ui.draggable_treeview_with_abstract as tv; reload(tv)
 tv.show()
 '''
