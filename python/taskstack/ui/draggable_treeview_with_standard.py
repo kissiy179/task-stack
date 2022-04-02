@@ -61,7 +61,12 @@ class TreeModel(QtGui.QStandardItemModel):
         if role == QtCore.Qt.DisplayRole:
             return '{}  ( {} )'.format(item.data(role), type(item).__name__)
 
-    def dropMimeData_(self, data, action, row, column, parent):
+    def dropMimeData(self, data, action, row, column, parent):
+        # parent_item = self.itemFromIndex(parent)
+
+        # if parent_item: # 親アイテムがある場合はルートではない
+        #     return
+
         ba = data.data(
             "application/x-qabstractitemmodeldatalist"
         )
@@ -93,12 +98,21 @@ class TreeView(QtWidgets.QTreeView):
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        self.current_is_expanded = False
 
     def setModel(self, model):
+        '''
+        setModelをオーバーライド
+        モデル追加と同時にシグナル接続
+        '''
         super(TreeView, self).setModel(model)
         self.model().itemChanged.connect(self.select_item, QtCore.Qt.QueuedConnection) # 変更処理が終わってから実行したいのでQueuedConnection(キューに入れらた接続)を指定
 
     def mousePressEvent(self, event):
+        '''
+        マウス押下時の処理
+        押下位置がアイテム外だったら選択をクリア
+        '''
         super(TreeView, self).mousePressEvent(event)
         index = self.indexAt(event.pos())
         row = index.row()
@@ -106,9 +120,16 @@ class TreeView(QtWidgets.QTreeView):
         if row == -1:
             self.clearSelection()
 
+        self.current_is_expanded = self.isExpanded(index)
+
     def select_item(self, item):
+        '''
+        アイテムを選択する
+        '''
         sel_model = self.selectionModel()
-        sel_model.select(item.index(), QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
+        index = item.index()
+        sel_model.select(index, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
+        self.setExpanded(index, self.current_is_expanded)
 
 class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
@@ -130,11 +151,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         self.tree = TreeView()
         self.tree.setModel(self.model)
-        # self.model.itemChanged.connect(self.log)
         lo.addWidget(self.tree)
-
-    def log(self, item):
-        print(item.data(role=QtCore.Qt.DisplayRole))
 
 def show():
     win = TestWindow()
