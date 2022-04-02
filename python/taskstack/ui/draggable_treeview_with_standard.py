@@ -61,6 +61,31 @@ class TreeModel(QtGui.QStandardItemModel):
         if role == QtCore.Qt.DisplayRole:
             return '{}  ( {} )'.format(item.data(role), type(item).__name__)
 
+    def dropMimeData_(self, data, action, row, column, parent):
+        ba = data.data(
+            "application/x-qabstractitemmodeldatalist"
+        )
+        ds = QtCore.QDataStream(
+            ba, QtCore.QIODevice.ReadOnly
+        )
+        i = 0
+
+        while not ds.atEnd():
+            src_row = ds.readInt32()
+            src_column = ds.readInt32()
+            map_items = ds.readInt32()
+            # self.addTopLevelItem(item)
+            print('source', src_row, src_column)
+            print('dest', row, column)
+            for _ in range(map_items):
+                role = ds.readInt32()
+                value = ds.readQVariant()
+                print('    ', value, role)
+                # item.setData(i, role, value)
+            # i = (i + 1) % self.columnCount()
+
+        return super(TreeModel, self).dropMimeData(data, action, row, column, parent)
+
 class TreeView(QtWidgets.QTreeView):
 
     def __init__(self, parent=None):
@@ -69,6 +94,10 @@ class TreeView(QtWidgets.QTreeView):
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
 
+    def setModel(self, model):
+        super(TreeView, self).setModel(model)
+        self.model().itemChanged.connect(self.select_item, QtCore.Qt.QueuedConnection) # 変更処理が終わってから実行したいのでQueuedConnection(キューに入れらた接続)を指定
+
     def mousePressEvent(self, event):
         super(TreeView, self).mousePressEvent(event)
         index = self.indexAt(event.pos())
@@ -76,6 +105,10 @@ class TreeView(QtWidgets.QTreeView):
         
         if row == -1:
             self.clearSelection()
+
+    def select_item(self, item):
+        sel_model = self.selectionModel()
+        sel_model.select(item.index(), QtCore.QItemSelectionModel.Rows|QtCore.QItemSelectionModel.ClearAndSelect)
 
 class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
@@ -97,12 +130,11 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
 
         self.tree = TreeView()
         self.tree.setModel(self.model)
-        self.model.itemChanged.connect(self.log)
+        # self.model.itemChanged.connect(self.log)
         lo.addWidget(self.tree)
 
     def log(self, item):
         print(item.data(role=QtCore.Qt.DisplayRole))
-
 
 def show():
     win = TestWindow()
