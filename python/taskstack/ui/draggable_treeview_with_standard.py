@@ -58,8 +58,8 @@ class TaskItem(QtGui.QStandardItem):
         elif role == QtCore.Qt.DecorationRole:
             return task_icon
 
-    def mimeData(self):
-        return QtCore.QMimeData()
+    # def mimeData(self):
+    #     return QtCore.QMimeData()
 
     def dropMimeData(self, model, data, action, row, column):
         parent_item = self.parent()
@@ -70,7 +70,7 @@ class TaskItem(QtGui.QStandardItem):
         else:
             parent_index = QtCore.QModelIndex()
             
-        row = self.row() + 1
+        row = self.row() + 1    
         return super(type(model), model).dropMimeData(data, action, row, column, parent_index)
 
 class ParameterItem(QtGui.QStandardItem):
@@ -79,7 +79,7 @@ class ParameterItem(QtGui.QStandardItem):
         super(ParameterItem, self).__init__(*args, **kwargs) 
 
     def flags(self):
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsDragEnabled #| QtCore.Qt.ItemIsDropEnabled
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDropEnabled #| QtCore.Qt.ItemIsDragEnabled
 
     def data(self, role):
         if role == QtCore.Qt.DecorationRole:
@@ -87,6 +87,10 @@ class ParameterItem(QtGui.QStandardItem):
         
         else:
             return super(ParameterItem, self).data(role)
+
+    def dropMimeData(self, model, data, action, row, column):
+        parent_task_item = self.parent()
+        return parent_task_item.dropMimeData(model, data, action, row, column)
 
 class TreeModel(QtGui.QStandardItemModel):
     '''
@@ -198,6 +202,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         task_list_ = params.create_task_list()
 
         lo = QtWidgets.QVBoxLayout()
+        lo.setContentsMargins(0,0,0,0)
         self.setLayout(lo)
         self.model = TreeModel()
         
@@ -206,9 +211,9 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
             task_item = TaskItem(task_, task_.get_name())
             self.model.appendRow(task_item)
 
-            for i in range(3):
-                child_task_item = TaskItem(task_, task_.get_name())
-                task_item.appendRow(child_task_item)
+            # for i in range(3):
+            #     child_task_item = TaskItem(task_, task_.get_name())
+            #     task_item.appendRow(child_task_item)
 
         self.tree = DraggableTreeView()
         self.tree.setModel(self.model)
