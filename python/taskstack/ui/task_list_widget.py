@@ -396,8 +396,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         task = task_class()
         self.add_task(task)
 
-    def add_task(self, task=None, name='NewSceneTask', parameters={}):
-        self.__task_list.add_task(task=task, name=name, parameters=parameters)
+    def add_task(self, task=None):
+        self.__task_list.add_task(task=task)
         self.init_ui()
         vertical_bar = self.scroll_area.verticalScrollBar()
         vertical_bar.setSliderPosition(vertical_bar.maximum())
