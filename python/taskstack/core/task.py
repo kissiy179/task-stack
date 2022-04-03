@@ -98,6 +98,20 @@ class Task(object):
         return task_classes
 
     @classmethod
+    def get_task_by_info(cls, info):
+        task_classes = cls.get_task_classes()
+        task_class = task_classes.get(info.get('name'))
+
+        if not task_class:
+            print('[TaskStackError] Task "{}" does not exist.'.format(name))
+            return
+
+        task = task_class()
+        task.set_active(info.get('active', True))
+        task.set_parameters(**info.get('parameters', {}))
+        return task
+
+    @classmethod
     def is_display_in_list(cls):
         '''
         クラス選択リストに表示するかどうか
@@ -171,6 +185,13 @@ class Task(object):
         拡張パラメータを設定する
         '''
         self.__extra_parameters.update(parameters)
+
+    def get_info(self):
+        info = {}
+        info['name'] = self.get_name()
+        info['active'] = self.get_active()
+        info['parameters'] = self.get_parameters()
+        return info
 
     @classmethod
     def get_doc(self, first_line_only=False):

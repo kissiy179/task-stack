@@ -39,9 +39,7 @@ class TaskList(list):
         params = []
 
         for task in self:
-            task_active = task.get_active()
-            task_params = task.get_parameters(consider_keywords=consider_keywords)
-            params.append({'name': type(task).__name__, 'active': task_active, 'parameters': task_params})
+            params.append(task.get_info())
 
         return params
 
@@ -49,35 +47,17 @@ class TaskList(list):
         self.clear_tasks()
         
         for task_info in parameters:
-            task_name = task_info.get('name')
-            task_active = task_info.get('active', True)
-            task_params = task_info.get('parameters')
-            self.add_task(name=task_name, active=task_active, parameters=task_params)
+            self.add_task(info=task_info)
 
-    def add_task(self, task=None, name='', active=True, parameters={}):
+    def add_task(self, task=None, info={}):
         if not task:
-            task_classes = Task.get_task_classes()
-            task_class = task_classes.get(name)
-
-            if not task_class:
-                print('[TaskStackError] Task "{}" does not exist.'.format(name))
-                return
-
-            task = task_class()
+            task = Task.get_task_by_info(info)
 
         # Connect signals
         task_emitter = task.get_emitter()
         task_emitter.error_raised.connect(self.__emitter.error_raised)
         task_emitter.warning_raised.connect(self.__emitter.warning_raised)
         task_emitter.executed.connect(self.__emitter.increment)
-        # task_emitter.executed.connect(self.log)
-        task.set_active(active)
-
-        if not isinstance(parameters, dict):
-            print('[TaskStackError] Parameters must be dictionary.'.format(name))
-            return
-
-        task.set_parameters(**parameters)
         self.append(task)
 
     def remove_task(self, idx):
