@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import json
 import cPickle as pickle
 import cStringIO
 import copy
@@ -58,8 +59,15 @@ class TaskItem(QtGui.QStandardItem):
         elif role == QtCore.Qt.DecorationRole:
             return task_icon
 
-    # def mimeData(self):
-    #     return QtCore.QMimeData()
+    def mimeTypes(self):
+        return ['text/plain']
+
+    def mimeData(self):
+        info = self.task.get_info()
+        data = QtCore.QMimeData()
+        info_text = json.dumps(info)
+        data.setText(info_text)
+        return data
 
     def dropMimeData(self, model, data, action, row, column):
         parent_item = self.parent()
@@ -68,10 +76,18 @@ class TaskItem(QtGui.QStandardItem):
             parent_index = parent_item.index()
 
         else:
+            parent_item = model.invisibleRootItem()
             parent_index = QtCore.QModelIndex()
             
-        row = self.row() + 1    
-        return super(type(model), model).dropMimeData(data, action, row, column, parent_index)
+        row = self.row() + 1
+        info_text = data.text()
+        info = json.loads(info_text)
+        task_ = task.Task.get_task_by_info(info)
+        task_item = TaskItem(task_, task_.get_name())
+        model.insertRow(row, parent_index)
+        parent_item.setChild(row, task_item)
+        return True
+        # return super(type(model), model).dropMimeData(data, action, row, column, parent_index)
 
 class ParameterItem(QtGui.QStandardItem):
 
@@ -99,7 +115,7 @@ class TreeModel(QtGui.QStandardItemModel):
     '''
 
     def __init__(self, parent=None):
-        super(TreeModel, self).__init__(parent) 
+        super(TreeModel, self).__init__(parent)
 
     def flags(self, index):
         item = self.itemFromIndex(index)
@@ -118,6 +134,15 @@ class TreeModel(QtGui.QStandardItemModel):
         else:
             return item.data(role)
 
+    def mimeTypes(self):
+        child = self.invisibleRootItem().child(0)
+        mime_types = super(TreeModel, self).mimeTypes()
+
+        if hasattr(child, 'mimeTypes'):
+            mime_types = child.mimeTypes()
+
+        return mime_types
+
     def mimeData(self, indexes):
         index = indexes[0]
         item = self.itemFromIndex(index)
@@ -126,15 +151,18 @@ class TreeModel(QtGui.QStandardItemModel):
             return QtCore.QMimeData()
 
         if hasattr(item, 'mimeData'):
-            return getattr(item, 'mimeData')()
+            data = item.mimeData()
+        else:
+            data = super(TreeModel, self).mimeData(indexes)
 
-        return super(TreeModel, self).mimeData(indexes)
+        return data
 
     def dropMimeData(self, data, action, row, column, parent):
         parent_item = self.itemFromIndex(parent)
 
-        if parent_item and hasattr(parent_item, 'dropMimeData'):
-            return getattr(parent_item, 'dropMimeData')(self, data, action, row, column)
+        if hasattr(parent_item, 'dropMimeData'):
+            dropped = parent_item.dropMimeData(self, data, action, row, column)
+            return dropped
 
         return super(TreeModel, self).dropMimeData(data, action, row, column, parent)
 
@@ -209,6 +237,7 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         # build model
         for task_ in task_list_:
             task_item = TaskItem(task_, task_.get_name())
+            # task_item = QtGui.QStandardItem(task_.get_name())
             self.model.appendRow(task_item)
 
             # for i in range(3):
