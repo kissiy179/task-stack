@@ -111,14 +111,16 @@ class ParameterItem(QtGui.QStandardItem):
         parent_task_item = self.parent()
         return parent_task_item.dropMimeData(model, data, action, row, column)
 
-class TreeModel(QtGui.QStandardItemModel):
+class DelegateToItemModel(QtGui.QStandardItemModel):
     '''
-    ドラッグ&ドロップ可能にしてあるがドロップ後はすべてStandardItemになってしまう
-    mimedataの処理が必要
+    各種メソッドをアイテム側に移譲するモデル
+    アイテムが対象メソッドを持っていない場合通常のQStandardItemModelと同じ動作をする
+
+    dropMimeDataメソッドに関して、ルートへのドロップ時に必ずQStandardItemとして扱われるため、継承先で実装する必要がある
     '''
 
     def __init__(self, parent=None):
-        super(TreeModel, self).__init__(parent)
+        super(DelegateToItemModel, self).__init__(parent)
 
     def flags(self, index):
         item = self.itemFromIndex(index)
@@ -126,7 +128,7 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(item, 'flags'):
             return item.flags()
 
-        return super(TreeModel, self).flags(index)
+        return super(DelegateToItemModel, self).flags(index)
 
     def data(self, index, role):
         item = self.itemFromIndex(index)
@@ -134,7 +136,7 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(item, 'data'):
             return item.data(role)
 
-        return super(TreeModel, self).data(index, role)
+        return super(DelegateToItemModel, self).data(index, role)
 
     def mimeTypes(self):
         child = self.invisibleRootItem().child(0)
@@ -142,7 +144,7 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(child, 'mimeTypes'):
             return child.mimeTypes()
 
-        return super(TreeModel, self).mimeTypes()
+        return super(DelegateToItemModel, self).mimeTypes()
 
     def mimeData(self, indexes):
         index = indexes[0]
@@ -151,8 +153,17 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(item, 'mimeData'):
             return item.mimeData()
 
-        return super(TreeModel, self).mimeData(indexes)
+        return super(DelegateToItemModel, self).mimeData(indexes)
 
+    def dropMimeData(self, data, action, row, column, parent):
+        parent_item = self.itemFromIndex(parent)
+
+        if hasattr(parent_item, 'dropMimeData'):
+            return parent_item.dropMimeData(self, data, action, row, column)
+
+        return super(DelegateToItemModel, self).dropMimeData(data, action, row, column, parent)
+
+class TaskModel(DelegateToItemModel):
     def dropMimeData(self, data, action, row, column, parent):
         parent_item = self.itemFromIndex(parent)
 
@@ -241,7 +252,8 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         lo = QtWidgets.QVBoxLayout()
         lo.setContentsMargins(0,0,0,0)
         self.setLayout(lo)
-        self.model = TreeModel()
+        self.model = TaskModel()
+        # self.model = QtGui.QStandardItemModel()
         
         # build model
         for task_ in task_list_:
