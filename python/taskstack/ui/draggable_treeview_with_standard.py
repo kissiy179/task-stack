@@ -72,12 +72,8 @@ class TaskItem(QtGui.QStandardItem):
     def dropMimeData(self, model, data, action, row, column):
         parent_item = self.parent()
 
-        if parent_item:
-            parent_index = parent_item.index()
-
-        else:
-            parent_item = model.invisibleRootItem()
-            parent_index = QtCore.QModelIndex()
+        if not parent_item:
+            parent_item = model
             
         # mimeDataからアイテムを復元
         info_text = data.text()
@@ -87,7 +83,7 @@ class TaskItem(QtGui.QStandardItem):
 
         # アイテムを挿入
         row = self.row() + 1
-        model.insertRow(row, task_item)
+        parent_item.insertRow(row, task_item)
         model.itemChanged.emit(task_item)
         return True
 
@@ -163,7 +159,7 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(parent_item, 'dropMimeData'):
             return parent_item.dropMimeData(self, data, action, row, column)
 
-        # ここから↓は継承先クラスでの実装もしくはアイテムに移譲したい
+        # ここから↓↓↓は継承先クラスでの実装もしくはアイテムに移譲したい
         # mimeDataからアイテムを復元
         info_text = data.text()
         info = json.loads(info_text)
