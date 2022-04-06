@@ -45,8 +45,8 @@ class TaskItem(QtGui.QStandardItem):
         self.task = task_
         params = self.task.get_parameters()
 
-        for param_name in params.keys():
-            param_item = ParameterItem(param_name)
+        for name, value in params.items():
+            param_item = ParameterItem(name, value)
             self.appendRow(param_item)
 
     def flags(self):
@@ -91,14 +91,19 @@ class TaskItem(QtGui.QStandardItem):
 
 class ParameterItem(QtGui.QStandardItem):
 
-    def __init__(self, *args, **kwargs):
-        super(ParameterItem, self).__init__(*args, **kwargs) 
+    def __init__(self, name, value, *args, **kwargs):
+        super(ParameterItem, self).__init__(name) 
+        self.name = name
+        self.value = value
 
     def flags(self):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDropEnabled #| QtCore.Qt.ItemIsDragEnabled
 
     def data(self, role):
-        if role == QtCore.Qt.DecorationRole:
+        if role == QtCore.Qt.DisplayRole:
+            return '{} = {}'.format(self.name, self.value)
+
+        elif role == QtCore.Qt.DecorationRole:
             return param_icon
         
         else:
@@ -127,6 +132,7 @@ class TreeModel(QtGui.QStandardItemModel):
 
     def data(self, index, role):
         item = self.itemFromIndex(index)
+        return item.data(role)
 
         if role == QtCore.Qt.DisplayRole:
             return '{}  ( {} )'.format(item.data(role), type(item).__name__)
