@@ -87,8 +87,8 @@ class TaskItem(QtGui.QStandardItem):
 
         # アイテムを挿入
         row = self.row() + 1
-        model.insertRow(row, parent_index)
-        parent_item.setChild(row, task_item)
+        model.insertRow(row, task_item)
+        model.itemChanged.emit(task_item)
         return True
 
 class ParameterItem(QtGui.QStandardItem):
@@ -163,7 +163,21 @@ class TreeModel(QtGui.QStandardItemModel):
         if hasattr(parent_item, 'dropMimeData'):
             return parent_item.dropMimeData(self, data, action, row, column)
 
-        return super(TreeModel, self).dropMimeData(data, action, row, column, parent)
+        # ここから↓は継承先クラスでの実装もしくはアイテムに移譲したい
+        # mimeDataからアイテムを復元
+        info_text = data.text()
+        info = json.loads(info_text)
+        task_ = task.Task.get_task_by_info(info)
+        task_item = TaskItem(task_, task_.get_name())
+
+        # アイテムを挿入
+        if row < 0:
+            row = self.rowCount()
+
+        parent_item = self.invisibleRootItem()
+        self.insertRow(row, task_item)
+        self.itemChanged.emit(task_item)
+        return True
 
 class DraggableTreeView(QtWidgets.QTreeView):
     '''
