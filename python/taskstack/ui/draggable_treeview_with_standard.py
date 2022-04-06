@@ -79,15 +79,17 @@ class TaskItem(QtGui.QStandardItem):
             parent_item = model.invisibleRootItem()
             parent_index = QtCore.QModelIndex()
             
-        row = self.row() + 1
+        # mimeDataからアイテムを復元
         info_text = data.text()
         info = json.loads(info_text)
         task_ = task.Task.get_task_by_info(info)
         task_item = TaskItem(task_, task_.get_name())
+
+        # アイテムを挿入
+        row = self.row() + 1
         model.insertRow(row, parent_index)
         parent_item.setChild(row, task_item)
         return True
-        # return super(type(model), model).dropMimeData(data, action, row, column, parent_index)
 
 class ParameterItem(QtGui.QStandardItem):
 
@@ -124,51 +126,42 @@ class TreeModel(QtGui.QStandardItemModel):
 
     def flags(self, index):
         item = self.itemFromIndex(index)
-
-        if not item:
-            return QtCore.Qt.ItemIsDropEnabled
         
-        return item.flags()
+        if hasattr(item, 'flags'):
+            return item.flags()
+
+        return super(TreeModel, self).flags(index)
 
     def data(self, index, role):
         item = self.itemFromIndex(index)
-        return item.data(role)
 
-        if role == QtCore.Qt.DisplayRole:
-            return '{}  ( {} )'.format(item.data(role), type(item).__name__)
-
-        else:
+        if hasattr(item, 'data'):
             return item.data(role)
+
+        return super(TreeModel, self).data(index, role)
 
     def mimeTypes(self):
         child = self.invisibleRootItem().child(0)
-        mime_types = super(TreeModel, self).mimeTypes()
 
         if hasattr(child, 'mimeTypes'):
-            mime_types = child.mimeTypes()
+            return child.mimeTypes()
 
-        return mime_types
+        return super(TreeModel, self).mimeTypes()
 
     def mimeData(self, indexes):
         index = indexes[0]
         item = self.itemFromIndex(index)
 
-        if not item:
-            return QtCore.QMimeData()
-
         if hasattr(item, 'mimeData'):
-            data = item.mimeData()
-        else:
-            data = super(TreeModel, self).mimeData(indexes)
+            return item.mimeData()
 
-        return data
+        return super(TreeModel, self).mimeData(indexes)
 
     def dropMimeData(self, data, action, row, column, parent):
         parent_item = self.itemFromIndex(parent)
 
         if hasattr(parent_item, 'dropMimeData'):
-            dropped = parent_item.dropMimeData(self, data, action, row, column)
-            return dropped
+            return parent_item.dropMimeData(self, data, action, row, column)
 
         return super(TreeModel, self).dropMimeData(data, action, row, column, parent)
 
