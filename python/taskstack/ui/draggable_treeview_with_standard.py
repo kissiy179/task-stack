@@ -5,6 +5,7 @@ import cPickle as pickle
 import cStringIO
 import copy
 import random
+import functools
 from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
 import qtawesome as qta
 from taskstack.ui import task_list_widget
@@ -40,6 +41,7 @@ param_icon = qta.icon('mdi.adjust', color='lightgreen')
 
 class TaskItem(QtGui.QStandardItem):
 
+
     def __init__(self, task_=None, *args, **kwargs):
         super(TaskItem, self).__init__(*args, **kwargs) 
         self.task = task_
@@ -50,14 +52,36 @@ class TaskItem(QtGui.QStandardItem):
             self.appendRow(param_item)
 
     def flags(self):
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+        flags = (
+                QtCore.Qt.ItemIsEnabled
+                | QtCore.Qt.ItemIsSelectable
+                | QtCore.Qt.ItemIsDragEnabled
+                | QtCore.Qt.ItemIsDropEnabled
+                | QtCore.Qt.ItemIsUserCheckable
+                )
+        return flags
 
     def data(self, role):
         if role == QtCore.Qt.DisplayRole:
             return self.task.get_name()
 
+        elif role == QtCore.Qt.CheckStateRole:
+            return int(self.task.get_active()) * 2
+
+        elif role == QtCore.Qt.BackgroundRole:
+            if self.task.get_active():
+                return QtGui.QColor('slateblue')
+
+            return QtGui.QColor('darkslateblue')
+
         elif role == QtCore.Qt.DecorationRole:
             return task_icon
+
+    def setData(self, value, role):
+        if role == QtCore.Qt.CheckStateRole:
+            self.task.set_active(bool(value))
+
+        self.model().dataChanged.emit(self.index(), self.index())
 
     def mimeTypes(self):
         return ['text/plain']
@@ -95,11 +119,20 @@ class ParameterItem(QtGui.QStandardItem):
         self.value = value
 
     def flags(self):
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDropEnabled #| QtCore.Qt.ItemIsDragEnabled
+        flags = (
+                QtCore.Qt.ItemIsEnabled
+                | QtCore.Qt.ItemIsSelectable
+                # | QtCore.Qt.ItemIsDragEnabled
+                | QtCore.Qt.ItemIsDropEnabled
+                )
+        return flags
 
     def data(self, role):
         if role == QtCore.Qt.DisplayRole:
             return '{} = {}'.format(self.name, self.value)
+
+        elif role == QtCore.Qt.BackgroundRole:
+            return self.parent().data(role)
 
         elif role == QtCore.Qt.DecorationRole:
             return param_icon
@@ -121,6 +154,7 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
 
     def __init__(self, parent=None):
         super(DelegateToItemModel, self).__init__(parent)
+        self.dataChanged.connect(self.layoutChanged) # データ変更があった場合レイアウト変更を呼び出す(リフレッシュ)
 
     def flags(self, index):
         item = self.itemFromIndex(index)
@@ -164,6 +198,7 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
         return super(DelegateToItemModel, self).dropMimeData(data, action, row, column, parent)
 
 class TaskModel(DelegateToItemModel):
+
     def dropMimeData(self, data, action, row, column, parent):
         parent_item = self.itemFromIndex(parent)
 
@@ -230,7 +265,11 @@ class DraggableTreeView(QtWidgets.QTreeView):
         '''
         sel_model = self.selectionModel()
         index = item.index()
-        sel_model.select(index, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
+        sel_model.select(
+                        index, 
+                        QtCore.QItemSelectionModel.Rows
+                        | QtCore.QItemSelectionModel.ClearAndSelect
+                        )
 
     def post_drop_item_process(self, item):
         '''
