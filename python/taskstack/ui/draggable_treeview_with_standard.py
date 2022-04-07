@@ -68,11 +68,17 @@ class TaskItem(QtGui.QStandardItem):
         elif role == QtCore.Qt.CheckStateRole:
             return int(self.task.get_active()) * 2
 
+        elif role == QtCore.Qt.ForegroundRole:
+            if self.task.get_active():
+                return QtGui.QColor('whitesmoke')
+
+            return QtGui.QColor('gray')
+
         elif role == QtCore.Qt.BackgroundRole:
             if self.task.get_active():
-                return QtGui.QColor('slateblue')
+                return QtGui.QColor('dimgray')
 
-            return QtGui.QColor('darkslateblue')
+            return QtGui.QColor('#404040')
 
         elif role == QtCore.Qt.DecorationRole:
             return task_icon
@@ -131,8 +137,11 @@ class ParameterItem(QtGui.QStandardItem):
         if role == QtCore.Qt.DisplayRole:
             return '{} = {}'.format(self.name, self.value)
 
+        elif role == QtCore.Qt.ForegroundRole:
+            return self.parent().data(role).lighter(90)
+
         elif role == QtCore.Qt.BackgroundRole:
-            return self.parent().data(role)
+            return self.parent().data(role).lighter(80)
 
         elif role == QtCore.Qt.DecorationRole:
             return param_icon
