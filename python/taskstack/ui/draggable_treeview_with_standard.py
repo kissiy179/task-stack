@@ -174,9 +174,9 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
         return super(DelegateToItemModel, self).flags(index)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        items = self.findItems()
-        print(items)
-        return 1
+        # items = self.findItems()
+        # print(items)
+        return 2
 
     def data(self, index, role):
         item = self.itemFromIndex(index)
@@ -263,8 +263,9 @@ class DraggableTreeView(QtWidgets.QTreeView):
             header.setStretchLastSection(False)
             header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
 
-            for i in range(1, column_count):
-                header.setSectionResizeMode(i, QtWidgets.QHeaderView.ResizeToContents)
+            # for i in range(1, column_count):
+            #     print(i)
+            #     header.setSectionResizeMode(i, QtWidgets.QHeaderView.ResizeToContents)
 
         # シグナル接続
         model.itemChanged.connect(self.post_drop_item_process, QtCore.Qt.QueuedConnection) # 変更処理が終わってから実行したいのでQueuedConnection(キューに入れらた接続)を指定
