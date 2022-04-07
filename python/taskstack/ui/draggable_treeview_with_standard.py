@@ -173,6 +173,11 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
 
         return super(DelegateToItemModel, self).flags(index)
 
+    def columnCount(self, parent=QtCore.QModelIndex()):
+        items = self.findItems()
+        print(items)
+        return 1
+
     def data(self, index, role):
         item = self.itemFromIndex(index)
 
@@ -250,6 +255,17 @@ class DraggableTreeView(QtWidgets.QTreeView):
         # モデル登録
         super(DraggableTreeView, self).setModel(model)
 
+        # ヘッダー設定
+        header = self.header()
+        column_count = model.columnCount()
+
+        if column_count > 0:
+            header.setStretchLastSection(False)
+            header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+
+            for i in range(1, column_count):
+                header.setSectionResizeMode(i, QtWidgets.QHeaderView.ResizeToContents)
+
         # シグナル接続
         model.itemChanged.connect(self.post_drop_item_process, QtCore.Qt.QueuedConnection) # 変更処理が終わってから実行したいのでQueuedConnection(キューに入れらた接続)を指定
 
@@ -296,12 +312,10 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
         params = task_list.TaskListParameters()
         params.load(file_path)
         task_list_ = params.create_task_list()
-
         lo = QtWidgets.QVBoxLayout()
         lo.setContentsMargins(0,0,0,0)
         self.setLayout(lo)
         self.model = TaskModel()
-        # self.model = QtGui.QStandardItemModel()
         
         # build model
         for task_ in task_list_:
@@ -309,12 +323,11 @@ class TestWindow(maya_base_mixin, QtWidgets.QWidget):
             # task_item = QtGui.QStandardItem(task_.get_name())
             self.model.appendRow(task_item)
 
-            # for i in range(3):
-            #     child_task_item = TaskItem(task_, task_.get_name())
-            #     task_item.appendRow(child_task_item)
-
         self.tree = DraggableTreeView()
         self.tree.setModel(self.model)
+        # header = self.tree.header()
+        # header.setStretchLastSection(False)
+        # header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         # self.tree.expandAll()
         self.tree.setHeaderHidden(True)
         lo.addWidget(self.tree)
