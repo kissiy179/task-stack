@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
+import codecs
 from pprint import pprint
 from functools import partial
 from collections import OrderedDict
@@ -39,6 +41,37 @@ def get_random_color():
         color.append(random.randint(0, 180))
 
     return tuple(color)
+
+def char_to_color(c):
+    if sys.version.startswith('3'):
+        hex_code = codecs.encode(bytes(c, 'utf-8'), 'hex-codec')
+
+    else:
+        hex_code = codecs.encode(c.lower(), 'hex')
+        
+    col_num = int(hex_code, 16)    
+    return col_num
+
+def string_to_color(s, correction=40):
+    s = s if s else 'z'
+    s = s.ljust(3, '0')
+    color = [char_to_color(i) for i in s[:3]]
+    avg = sum(color) / len(color)
+
+    if avg < correction:
+        sub = correction - avg
+        color = [min(255, n + sub) for n in color]
+
+    max_ = max(color)
+    min_ = min(color)
+    
+    if max_ - min_ <= 255:
+        maxidx = color.index(max_)
+        minidx = color.index(min_)
+        color[maxidx] = min(255, max_ + correction)
+        color[minidx] = max(0, min_ - correction)
+        
+    return color
 
 class HorizontalLine(QtWidgets.QFrame):
 
@@ -88,15 +121,15 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             # カラーバー
             color_bar = QtWidgets.QWidget()
             color_bar.setMinimumWidth(10)
-            # color = get_random_color()
-            # color_bar.setStyleSheet('background-color: rgb{}'.format(str(color)))
-            color_bar.setStyleSheet('background-color: #3f3f3f;')
+            color = string_to_color(task.get_name())
+            color_bar.setStyleSheet('background-color: rgb{}'.format(str(tuple(color))))
+            # color_bar.setStyleSheet('background-color: #3f3f3f;')
             hlo.addWidget(color_bar)
             
             # オーダー/削除エリア
             if reordable:
                 vlo = QtWidgets.QVBoxLayout()   
-                vlo.setContentsMargins(3,0,1,0)
+                vlo.setContentsMargins(2,0,0,0)
                 # hlo.addLayout(vlo, 1)
                 color_bar.setLayout(vlo)
                 vlo.setSpacing(0)
