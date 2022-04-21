@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from collections import OrderedDict
 # import abc
 import json
@@ -126,12 +127,20 @@ class TaskListParameters(list):
         super(TaskListParameters, self).__init__(*args, **kwargs)
 
     def load(self, path):
+        if not os.path.exists(path):
+            return
+
         with open(path, 'r') as f:
             params = json.load(f)#, object_pairs_hook=OrderedDict)
 
         self.__init__(params)
 
     def dump(self, path):
+        dirpath = os.path.dirname(path)
+
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+            
         with open(path, 'w') as f:
             json.dump(self, f, indent=4)
 
