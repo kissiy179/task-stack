@@ -174,8 +174,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
         # self.__task_list_menu.start_reload.connect(self.)
-        self.__task_list_menu.start_reload.connect(self.store_task_list_parameters)
-        self.__task_list_menu.end_reload.connect(self.restore_task_list_parameters)
+        self.__task_list_menu.start_reload.connect(self.store_parameters)
+        self.__task_list_menu.end_reload.connect(self.restore_parameters)
         self.__task_list_parameters = ''
         self.__ignored_actions = []
         self.show_details = True
@@ -436,13 +436,19 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list.clear_tasks()
         self.init_ui()
 
-    def store_task_list_parameters(self):
+    def store_parameters(self):
+        '''
+        各タスクのパラメータを一時保存
+        '''
         self.inner_wgt.apply_parameters()
         params = TaskListParameters(self.get_parameters())
         text = params.dumps()
         self.__task_list_parameters = text
 
-    def restore_task_list_parameters(self):
+    def restore_parameters(self):
+        '''
+        各タスクのパラメータを復元
+        '''
         params = TaskListParameters()
         text = self.__task_list_parameters
         params.loads(text)
@@ -486,6 +492,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def set_parameters(self, params):
         self.__task_list.set_parameters(params)
+        self.inner_wgt.apply_parameters()
 
     def export_parameters(self, file_path=''):
         if not file_path:
