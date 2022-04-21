@@ -185,10 +185,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         if use_recent_tasks:
             self.import_task_list_parameters(RECENT_TASKS_FILE_PATH)
-            self.updated.connect(partial(self.export_task_list_parameters, RECENT_TASKS_FILE_PATH))
+            self.updated.connect(partial(self.export_parameters, RECENT_TASKS_FILE_PATH))
 
     def log(self):
-        print(self.__task_list.get_parameters())
+        print(self.get_parameters())
 
     def init_ui(self, executable=True, show_details=None, tool_bar_position='', emit_signal=True):
         # Result show details
@@ -227,7 +227,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         # Row Text
         else:
             self.raw_text.textChanged.connect(self.set_task_list_parameters_from_raw_text_widget)
-            params = TaskListParameters(self.__task_list.get_parameters())
+            params = TaskListParameters(self.get_parameters())
             self.raw_text.setText(params.dumps())
             # self.raw_text.setReadOnly(True)
             self.scroll_area.setWidget(self.raw_text)
@@ -330,9 +330,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         io_actions.append(import_task_list_parameters_action)
 
         # Export tasks
-        export_task_list_parameters_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
-        export_task_list_parameters_action.triggered.connect(self.export_task_list_parameters)
-        io_actions.append(export_task_list_parameters_action)
+        export_parameters_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
+        export_parameters_action.triggered.connect(self.export_parameters)
+        io_actions.append(export_parameters_action)
 
         # Execute actions -------
         exec_actions = []
@@ -436,7 +436,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def store_task_list_parameters(self):
         self.inner_wgt.apply_parameters()
-        params = TaskListParameters(self.__task_list.get_parameters())
+        params = TaskListParameters(self.get_parameters())
         text = params.dumps()
         self.__task_list_parameters = text
 
@@ -444,7 +444,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         params = TaskListParameters()
         text = self.__task_list_parameters
         params.loads(text)
-        self.__task_list.set_parameters(params)
+        self.set_parameters(params)
         self.init_ui()
 
     def set_task_list_parameters(self, params=''):
@@ -453,7 +453,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             params = TaskListParameters()
             params.loads(param_text)
 
-        self.__task_list.set_parameters(params)
+        self.set_parameters(params)
         # self.init_ui()
 
     def set_task_list_parameters_from_raw_text_widget(self):
@@ -475,10 +475,17 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         params = TaskListParameters()
         params.load(file_path)
-        self.__task_list.set_parameters(params)
+        self.set_parameters(params)
         self.init_ui()
 
-    def export_task_list_parameters(self, file_path=''):
+    def get_parameters(self):
+        params = self.__task_list.get_parameters()
+        return params
+
+    def set_parameters(self, params):
+        self.__task_list.set_parameters(params)
+
+    def export_parameters(self, file_path=''):
         if not file_path:
             file_info = QtWidgets.QFileDialog().getSaveFileName(self, 'Export TaskList Parameters', filter=JSON_FILTERS)
             file_path = file_info[0]
@@ -492,7 +499,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             os.makedirs(dir_path)
 
         self.inner_wgt.apply_parameters()
-        params = TaskListParameters(self.__task_list.get_parameters())
+        params = TaskListParameters(self.get_parameters())
         params.dump(file_path)
 
     def preprocess(self):
@@ -535,4 +542,4 @@ class ChildTaskListWidget(TaskListWidget):
         return
 
 # WIDGET_TABLEにtask_listを追加
-WIDGET_TABLE['task_list'] =  {'class': ChildTaskListWidget, 'get_method': '', 'set_method': '', 'update_signale': 'updated'}
+WIDGET_TABLE['task_list'] =  {'class': ChildTaskListWidget, 'get_method': 'get_parameters', 'set_method': 'set_parameters', 'update_signale': 'updated'}
