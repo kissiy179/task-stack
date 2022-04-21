@@ -153,7 +153,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     updated = QtCore.Signal()
     show_raw_text = False
 
-    def __init__(self, task_list=None, use_recent_tasks=False, *args, **kwargs):
+    def __init__(self, task_list=None, use_recent_tasks=False, tool_bar_position='top', *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
         self.setMinimumHeight(400)
@@ -179,7 +179,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__task_list_parameters = ''
         self.__ignored_actions = []
         self.show_details = True
-        self.init_ui()
+        self.init_ui(tool_bar_position=tool_bar_position)
         self.resize(500, 600)
         # self.updated.connect(self.log)
 
@@ -260,14 +260,17 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             menu.addAction(action)
 
     def init_tool_bar(self, position=''):
-        TOOLBAR_POSITION = TOOLBAR_POSITIONS.get(position)
+        toolbar_position = TOOLBAR_POSITIONS.get(position)
+
+        if not toolbar_position:
+            return
         
         if self.__tool_bar:
-            self.addToolBar(TOOLBAR_POSITION, self.__tool_bar) if TOOLBAR_POSITION else None
+            self.addToolBar(toolbar_position, self.__tool_bar) if toolbar_position else None
             return 
 
         toolbar = QtWidgets.QToolBar('Commands')
-        self.addToolBar(TOOLBAR_POSITION, toolbar) if TOOLBAR_POSITION else self.addToolBar(toolbar)
+        self.addToolBar(toolbar_position, toolbar) if toolbar_position else self.addToolBar(toolbar)
         toolbar.setIconSize(QtCore.QSize(16, 16))
 
         for action in self.__actions.get('exec_actions'):
