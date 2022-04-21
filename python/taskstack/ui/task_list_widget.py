@@ -187,6 +187,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             self.import_task_list_parameters(RECENT_TASKS_FILE_PATH)
             self.updated.connect(partial(self.export_parameters, RECENT_TASKS_FILE_PATH))
 
+    def setContentsMargins(self, left, top, right, bottom):
+        self.__main_layout.setContentsMargins(left, top, right, bottom)
+
     def log(self):
         print(self.get_parameters())
 
@@ -203,7 +206,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Main layout
         self.__main_layout = QtWidgets.QVBoxLayout()
-        # self.__main_layout.setContentsMargins(0,0,0,0)
         main_wgt.setLayout(self.__main_layout)
 
         # Scroll aere
@@ -534,6 +536,7 @@ class ChildTaskListWidget(TaskListWidget):
 
     def __init__(self, *args, **kwargs):
         super(ChildTaskListWidget, self).__init__(*args, **kwargs)
+        self.setContentsMargins(0,0,0,0)
 
     def init_tool_bar(self, *args, **kwargs):
         return
