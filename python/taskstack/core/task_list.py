@@ -40,7 +40,7 @@ class TaskList(list):
         params = []
 
         for task in self:
-            params.append(task.get_info())
+            params.append(task.get_info(consider_keywords))
 
         return params
 

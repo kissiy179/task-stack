@@ -186,11 +186,11 @@ class Task(object):
         '''
         self.__extra_parameters.update(parameters)
 
-    def get_info(self):
+    def get_info(self, consider_keywords=False):
         info = {}
         info['name'] = self.get_name()
         info['active'] = self.get_active()
-        info['parameters'] = self.get_parameters()
+        info['parameters'] = self.get_parameters(consider_keywords)
         return info
 
     @classmethod

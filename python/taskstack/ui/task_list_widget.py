@@ -39,7 +39,6 @@ class HorizontalLine(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Plain)
 
 class InnerTaskListWidget(QtWidgets.QWidget):
-
     remove_task = QtCore.Signal(int)
     moveup_task = QtCore.Signal(int)
     movedown_task = QtCore.Signal(int)
@@ -181,10 +180,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.show_details = True
         self.init_ui(tool_bar_position=tool_bar_position)
         self.resize(500, 600)
-        # self.updated.connect(self.log)
 
         if use_recent_tasks:
-            self.import_task_list_parameters(RECENT_TASKS_FILE_PATH)
+            self.import_parameters(RECENT_TASKS_FILE_PATH)
             self.updated.connect(partial(self.export_parameters, RECENT_TASKS_FILE_PATH))
 
     def setContentsMargins(self, left, top, right, bottom):
@@ -327,9 +325,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         actions['io_actions'] = io_actions
 
         # Import tasks
-        import_task_list_parameters_action = QtWidgets.QAction(import_icon, '&Import Tasks', self)
-        import_task_list_parameters_action.triggered.connect(self.import_task_list_parameters)
-        io_actions.append(import_task_list_parameters_action)
+        import_parameters_action = QtWidgets.QAction(import_icon, '&Import Tasks', self)
+        import_parameters_action.triggered.connect(self.import_parameters)
+        io_actions.append(import_parameters_action)
 
         # Export tasks
         export_parameters_action = QtWidgets.QAction(export_icon, '&Emport Tasks', self)
@@ -455,7 +453,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.set_parameters(params)
         self.init_ui()
 
-    def import_task_list_parameters(self, file_path=''):
+    def import_parameters(self, file_path=''):
         if not file_path:
             file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
             file_path = file_info[0]
@@ -471,10 +469,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def get_parameters(self):
         params = TaskListParameters(self.__task_list.get_parameters())
         return params
-
-    def set_parameters(self, params):
-        self.__task_list.set_parameters(params)
-        self.inner_wgt.apply_parameters()
 
     def set_parameters(self, params=''):
         if isinstance(params, basestring):
