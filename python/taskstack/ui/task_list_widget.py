@@ -4,6 +4,7 @@ from pprint import pprint
 from functools import partial
 from collections import OrderedDict
 from re import L
+import random
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
 from . import WIDGET_TABLE
 import qtawesome as qta
@@ -30,6 +31,14 @@ TOOLBAR_POSITIONS = {
 }
 PRESET_DIR_PATH = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
 RECENT_TASKS_FILE_PATH = os.path.join(PRESET_DIR_PATH, 'recent_tasks.json')
+
+def get_random_color():
+    color = []
+
+    for i in range(3):
+        color.append(random.randint(0, 180))
+
+    return tuple(color)
 
 class HorizontalLine(QtWidgets.QFrame):
 
@@ -73,13 +82,23 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         for i, task in enumerate(self.__task_list):
             hlo = QtWidgets.QHBoxLayout()
             hlo.setSpacing(0)
-            hlo.setContentsMargins(3,0,0,0)
+            hlo.setContentsMargins(0,0,0,0)
             lo.addLayout(hlo)
+
+            # カラーバー
+            color_bar = QtWidgets.QWidget()
+            color_bar.setMinimumWidth(10)
+            # color = get_random_color()
+            # color_bar.setStyleSheet('background-color: rgb{}'.format(str(color)))
+            color_bar.setStyleSheet('background-color: #3f3f3f;')
+            hlo.addWidget(color_bar)
             
             # オーダー/削除エリア
             if reordable:
                 vlo = QtWidgets.QVBoxLayout()   
-                hlo.addLayout(vlo, 1)
+                vlo.setContentsMargins(3,0,1,0)
+                # hlo.addLayout(vlo, 1)
+                color_bar.setLayout(vlo)
                 vlo.setSpacing(0)
                 vlo.addStretch()
 
@@ -177,7 +196,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.show_details = True
         self.reordable = True
         self.init_ui(tool_bar_position=tool_bar_position)
-        self.resize(500, 600)
+        self.resize(600, 600)
 
         if use_recent_tasks:
             self.import_parameters(RECENT_TASKS_FILE_PATH)
