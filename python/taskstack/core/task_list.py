@@ -53,6 +53,9 @@ class TaskList(list):
         if not task:
             task = Task.get_task_by_info(info)
 
+        if not task:
+            return
+
         # Connect signals
         task_emitter = task.get_emitter()
         task_emitter.error_raised.connect(self.__emitter.error_raised)

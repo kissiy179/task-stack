@@ -103,7 +103,7 @@ class Task(object):
         task_class = task_classes.get(info.get('name'))
 
         if not task_class:
-            print('[TaskStackError] Task "{}" does not exist.'.format(name))
+            print('[TaskStackError] Task "{}" does not exist.'.format(task_class))
             return
 
         task = task_class()
