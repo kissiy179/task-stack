@@ -242,9 +242,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             self.init_tool_bar(position=tool_bar_position)
             self.init_status_bar()
 
-            # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
-            self.inner_wgt.increment.connect(self.__progress_bar.increment)
-
         # Emit Signal
         if emit_signal:
             self.updated.emit()
@@ -311,6 +308,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__status_bar.showMessage('{} tasks.'.format(task_count))
         self.__status_bar.setSizeGripEnabled(False)
         self.__progress_bar.setVisible(False)
+        
+        # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
+        self.inner_wgt.increment.connect(self.__progress_bar.increment)
+
 
     def clear_ui(self):
         if self.__main_layout:
@@ -530,6 +531,9 @@ class ChildTaskListWidget(TaskListWidget):
     def init_ui(self, *args, **kwargs):
         kwargs['tool_bar_position'] = ''
         super(ChildTaskListWidget, self).init_ui(*args, **kwargs)
+
+    def init_status_bar(self, *args, **kwargs):
+        return
 
 # WIDGET_TABLEにtask_listを追加
 WIDGET_TABLE['task_list'] =  {'class': ChildTaskListWidget, 'get_method': '', 'set_method': '', 'update_signale': 'updated'}
