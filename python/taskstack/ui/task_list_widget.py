@@ -56,7 +56,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         self.__task_widgets = []
         self.show_details = show_details
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;} InnerTaskListWidget {background-color: #3f3f3f}')
+        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}  {background-color: #3f3f3f}')
         lo = QtWidgets.QVBoxLayout()
         lo.setContentsMargins(0,0,0,0)
         lo.setSpacing(0)
