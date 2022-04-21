@@ -139,6 +139,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             try:
                 getattr(widget, set_method)(value)
                 getattr(widget, update_signal).connect(self.updated)
+                widget.init_ui() # TaskListWidget対応
 
             except:
                 pass
