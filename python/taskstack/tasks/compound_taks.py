@@ -21,14 +21,25 @@ class CompoundTask(task.Task):
         parameter_types['Child Tasks'] = 'task_list'
         return parameter_types
 
+    def get_parameters(self, consider_keywords=True):
+        # タスク情報ファイルからパラメータを取得
+        parameters = super(CompoundTask, self).get_parameters(consider_keywords)
+        task_list_file = parameters.get('Task List File')
+        task_list_parameters = task_list.TaskListParameters()
+        task_list_parameters.load(task_list_file)
+
+        # 子タスクに受け渡し
+        parameters['Child Tasks'] = task_list_parameters
+        return parameters
+
     def execute(self):
         super(CompoundTask, self).execute()
         parameters = self.get_parameters()
 
         # タスク情報ファイルからタスクリストの取得
-        task_list_file = parameters.get('Task List File')
+        child_parameters = parameters.get('Child Tasks')
         task_list_parameters = task_list.TaskListParameters()
-        task_list_parameters.load(task_list_file)
+        task_list_parameters.loads(child_parameters)
         task_list_ = task_list.TaskList()
         task_list_.set_parameters(task_list_parameters)
 
