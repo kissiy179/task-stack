@@ -228,8 +228,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # Row Text
         else:
-            self.raw_text.textChanged.connect(self.set_task_list_parameters_from_raw_text_widget)
-            params = TaskListParameters(self.get_parameters())
+            self.raw_text.textChanged.connect(self.set_parameters_from_raw_text_widget)
+            params = self.get_parameters()
             self.raw_text.setText(params.dumps())
             # self.raw_text.setReadOnly(True)
             self.scroll_area.setWidget(self.raw_text)
@@ -441,7 +441,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         各タスクのパラメータを一時保存
         '''
         self.inner_wgt.apply_parameters()
-        params = TaskListParameters(self.get_parameters())
+        params = self.get_parameters()
         text = params.dumps()
         self.__task_list_parameters = text
 
@@ -454,24 +454,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         params.loads(text)
         self.set_parameters(params)
         self.init_ui()
-
-    def set_task_list_parameters(self, params=''):
-        if isinstance(params, basestring):
-            param_text = params
-            params = TaskListParameters()
-            params.loads(param_text)
-
-        self.set_parameters(params)
-        # self.init_ui()
-
-    def set_task_list_parameters_from_raw_text_widget(self):
-        text = self.raw_text.toPlainText()
-
-        try:
-            self.set_task_list_parameters(text)
-
-        except:
-            pass
 
     def import_task_list_parameters(self, file_path=''):
         if not file_path:
@@ -487,12 +469,30 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
 
     def get_parameters(self):
-        params = self.__task_list.get_parameters()
+        params = TaskListParameters(self.__task_list.get_parameters())
         return params
 
     def set_parameters(self, params):
         self.__task_list.set_parameters(params)
         self.inner_wgt.apply_parameters()
+
+    def set_parameters(self, params=''):
+        if isinstance(params, basestring):
+            param_text = params
+            params = TaskListParameters()
+            params.loads(param_text)
+
+        self.__task_list.set_parameters(params)
+        # self.init_ui()
+
+    def set_parameters_from_raw_text_widget(self):
+        text = self.raw_text.toPlainText()
+
+        try:
+            self.set_parameters(text)
+
+        except:
+            pass
 
     def export_parameters(self, file_path=''):
         if not file_path:
@@ -508,7 +508,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             os.makedirs(dir_path)
 
         self.inner_wgt.apply_parameters()
-        params = TaskListParameters(self.get_parameters())
+        params = self.get_parameters()
         params.dump(file_path)
 
     def preprocess(self):
