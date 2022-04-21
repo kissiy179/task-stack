@@ -50,13 +50,13 @@ class InnerTaskListWidget(QtWidgets.QWidget):
     warning_raised = QtCore.Signal(str)
     increment = QtCore.Signal()
 
-    def __init__(self, taks_list, show_details=True, *args, **kwargs):
+    def __init__(self, taks_list, show_details=True, reordable=True, *args, **kwargs):
         super(InnerTaskListWidget, self).__init__(*args, **kwargs)
         self.__task_list = taks_list
         self.__task_widgets = []
         self.show_details = show_details
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}  {background-color: #3f3f3f}')
+        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}  {background-color: #3d3d3d}')
         lo = QtWidgets.QVBoxLayout()
         lo.setContentsMargins(0,0,0,0)
         lo.setSpacing(0)
@@ -75,38 +75,37 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             hlo.setSpacing(0)
             hlo.setContentsMargins(3,0,0,0)
             lo.addLayout(hlo)
-            vlo = QtWidgets.QVBoxLayout()   
-            hlo.addLayout(vlo, 1)
-            vlo.setSpacing(0)
+            
+            # オーダー/削除エリア
+            if reordable:
+                vlo = QtWidgets.QVBoxLayout()   
+                hlo.addLayout(vlo, 1)
+                vlo.setSpacing(0)
+                vlo.addStretch()
 
-            # Stretch
-            vlo.addStretch()
+                # Remove button
+                remove_btn = QtWidgets.QPushButton()
+                remove_btn.setIcon(close_icon)
+                remove_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                remove_btn.clicked.connect(partial(self._remove_task, i))
+                vlo.addWidget(remove_btn)
 
-            # Remove button
-            remove_btn = QtWidgets.QPushButton()
-            remove_btn.setIcon(close_icon)
-            remove_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            remove_btn.clicked.connect(partial(self._remove_task, i))
-            vlo.addWidget(remove_btn)
+                # Spacer
+                spacer = QtWidgets.QSpacerItem(5,10)
+                vlo.addItem(spacer)
 
-            # Spacer
-            spacer = QtWidgets.QSpacerItem(5,10)
-            vlo.addItem(spacer)
-
-            # Up/Down button
-            up_btn = QtWidgets.QPushButton()
-            up_btn.setIcon(up_icon)
-            up_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            up_btn.clicked.connect(partial(self._moveup_task, i))
-            vlo.addWidget(up_btn)
-            down_btn = QtWidgets.QPushButton()
-            down_btn.setIcon(down_icon)
-            down_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-            down_btn.clicked.connect(partial(self._movedown_task, i))
-            vlo.addWidget(down_btn)
-
-            # Stretch
-            vlo.addStretch()
+                # Up/Down button
+                up_btn = QtWidgets.QPushButton()
+                up_btn.setIcon(up_icon)
+                up_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                up_btn.clicked.connect(partial(self._moveup_task, i))
+                vlo.addWidget(up_btn)
+                down_btn = QtWidgets.QPushButton()
+                down_btn.setIcon(down_icon)
+                down_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                down_btn.clicked.connect(partial(self._movedown_task, i))
+                vlo.addWidget(down_btn)
+                vlo.addStretch()
 
             # Task widget
             task_wdiget = TaskWidget(task)
@@ -166,18 +165,17 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         self.__menu_bar = None
         self.__tool_bar = None
-        self.__tool_bar_position = None
         self.__status_bar = None
         self.__main_layout = None
         self.__actions = self.get_actions()
         self.__task_list_menu = TaskListMenu()
         self.__task_list_menu.triggered.connect(self.add_task_class)
-        # self.__task_list_menu.start_reload.connect(self.)
         self.__task_list_menu.start_reload.connect(self.store_parameters)
         self.__task_list_menu.end_reload.connect(self.restore_parameters)
         self.__task_list_parameters = ''
         self.__ignored_actions = []
         self.show_details = True
+        self.reordable = True
         self.init_ui(tool_bar_position=tool_bar_position)
         self.resize(500, 600)
 
@@ -213,7 +211,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__main_layout.addWidget(self.scroll_area)
 
         # Tasks widgets
-        self.inner_wgt = InnerTaskListWidget(self.__task_list, show_details=show_details)
+        self.inner_wgt = InnerTaskListWidget(self.__task_list, show_details=show_details, reordable=self.reordable)
         self.raw_text = QtWidgets.QTextEdit()
 
         if not self.show_raw_text:
@@ -537,6 +535,7 @@ class ChildTaskListWidget(TaskListWidget):
 
     def __init__(self, *args, **kwargs):
         super(ChildTaskListWidget, self).__init__(*args, **kwargs)
+        self.reordable = False
         self.setContentsMargins(0,0,0,0)
 
     def init_tool_bar(self, *args, **kwargs):
