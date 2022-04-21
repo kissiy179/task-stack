@@ -38,10 +38,8 @@ class CompoundTask(task.Task):
 
         # タスク情報ファイルからタスクリストの取得
         child_parameters = parameters.get('Child Tasks')
-        task_list_parameters = task_list.TaskListParameters()
-        task_list_parameters.loads(child_parameters)
         task_list_ = task_list.TaskList()
-        task_list_.set_parameters(task_list_parameters)
+        task_list_.set_parameters(child_parameters)
 
         # 無限ループになるのでタスクリストにこのクラスのタスクがあった場合除外
         del_tasks = [task_ for task_ in task_list_ if type(task_) == type(self)]
