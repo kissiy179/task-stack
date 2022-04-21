@@ -3,7 +3,6 @@ from collections import OrderedDict
 from pprint import pprint
 from functools import partial
 from mayaqt import maya_base_mixin, QtCore, QtWidgets, QtGui
-from . import WIDGET_TABLE
 import qtawesome as qta
 from ..core.task import Task
 close_icon = qta.icon('fa5s.clipboard-list', color='lightgray')

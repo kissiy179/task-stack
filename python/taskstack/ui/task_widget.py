@@ -161,6 +161,10 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             param_type = param_types.get(param_name)
             widget_info = WIDGET_TABLE.get(param_type)
             get_method = widget_info.get('get_method')
+
+            if not get_method:
+                continue
+
             params[param_name] = getattr(widget, get_method)()
 
         task.set_parameters(**params)

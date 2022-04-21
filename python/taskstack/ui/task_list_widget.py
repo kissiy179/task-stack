@@ -156,7 +156,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def __init__(self, task_list=None, use_recent_tasks=False, tool_bar_position='top', *args, **kwargs):
         super(TaskListWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle('Task List')
-        self.setMinimumHeight(400)
+        self.setMinimumHeight(300)
 
         if task_list:
             self.__task_list = task_list
@@ -517,3 +517,19 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def set_ignore_actions(self, action_names=()):
         self.__ignored_actions = action_names
+
+class ChildTaskListWidget(TaskListWidget):
+    '''
+    子タスクリスト用タスクリストウィジェット
+    タスクバーを非表示化
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(ChildTaskListWidget, self).__init__(*args, **kwargs)
+
+    def init_ui(self, *args, **kwargs):
+        kwargs['tool_bar_position'] = ''
+        super(ChildTaskListWidget, self).init_ui(*args, **kwargs)
+
+# WIDGET_TABLEにtask_listを追加
+WIDGET_TABLE['task_list'] =  {'class': ChildTaskListWidget, 'get_method': '', 'set_method': '', 'update_signale': 'updated'}
