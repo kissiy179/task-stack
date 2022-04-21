@@ -12,13 +12,13 @@ class CompoundTask(task.Task):
     def get_default_parameters(self):
         return OrderedDict((
             ('Task List File', ''),
-            ('Child Tasks Parameters', '')
+            ('Child Tasks', '')
         ))
 
     def get_parameter_types(self):
         parameter_types = super(CompoundTask, self).get_parameter_types()
         parameter_types['Task List File'] = 'file_in_pj'
-        parameter_types['Child Tasks Parameters'] = 'task_list'
+        parameter_types['Child Tasks'] = 'task_list'
         return parameter_types
 
     def execute(self):
