@@ -308,7 +308,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.__status_bar.showMessage('{} tasks.'.format(task_count))
         self.__status_bar.setSizeGripEnabled(False)
         self.__progress_bar.setVisible(False)
-        
+
         # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
         self.inner_wgt.increment.connect(self.__progress_bar.increment)
 
@@ -528,9 +528,8 @@ class ChildTaskListWidget(TaskListWidget):
     def __init__(self, *args, **kwargs):
         super(ChildTaskListWidget, self).__init__(*args, **kwargs)
 
-    def init_ui(self, *args, **kwargs):
-        kwargs['tool_bar_position'] = ''
-        super(ChildTaskListWidget, self).init_ui(*args, **kwargs)
+    def init_tool_bar(self, *args, **kwargs):
+        return
 
     def init_status_bar(self, *args, **kwargs):
         return
