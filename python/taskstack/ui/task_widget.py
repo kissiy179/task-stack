@@ -27,14 +27,8 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__main_layout = None
         self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
+        self.connect_signals()
         self.resize(300, 0)
-        self.updated.connect(self.apply_parameters)
-        # self.updated.connect(self.log_parameters)
-        task_emitter = self.__task.get_emitter()
-        task_emitter.execute_start.connect(self.preprocess)
-        task_emitter.executed.connect(self.postprocess)
-        task_emitter.warning_raised.connect(self.set_warning_message)
-        task_emitter.error_raised.connect(self.set_error_message)
 
     def log_parameters(self):
         print(self.__task.get_active(), self.__task.get_parameters(consider_keywords=False))
@@ -152,6 +146,14 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
     def clear_ui(self):
         if self.__main_layout:
             QtWidgets.QWidget().setLayout(self.__main_layout)
+
+    def connect_signals(self):
+        self.updated.connect(self.apply_parameters)
+        task_emitter = self.__task.get_emitter()
+        task_emitter.execute_start.connect(self.preprocess)
+        task_emitter.executed.connect(self.postprocess)
+        task_emitter.warning_raised.connect(self.set_warning_message)
+        task_emitter.error_raised.connect(self.set_error_message)
 
     def apply_parameters(self):
         task = self.__task
