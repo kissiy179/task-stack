@@ -131,18 +131,20 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
                 continue
 
             widget_class = widget_info.get('class')
-            set_method = widget_info.get('set_method')
-            update_signal = widget_info.get('update_signal')
+            set_method = widget_info.get('set_method', '')
+            update_ui_method = widget_info.get('update_ui_method', '')
+            update_signal = widget_info.get('update_signal', '')
             widget = widget_class()
             value = parametrs.get(param_name)
 
-            try:
+            if hasattr(widget, set_method):
                 getattr(widget, set_method)(value)
-                getattr(widget, update_signal).connect(self.updated)
-                widget.init_ui() # TaskListWidget対応
 
-            except:
-                pass
+            if hasattr(widget, update_signal):
+                getattr(widget, update_signal).connect(self.updated)
+
+            if hasattr(widget, update_ui_method):
+                getattr(widget, update_ui_method)()
 
             lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget

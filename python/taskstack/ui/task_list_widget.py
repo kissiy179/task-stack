@@ -122,6 +122,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             color_bar = QtWidgets.QWidget()
             color_bar.setMinimumWidth(10)
             color = string_to_color(task.get_name())
+            # color = 227,149,141
             color_bar.setStyleSheet('background-color: rgb{}'.format(str(tuple(color))))
             # color_bar.setStyleSheet('background-color: #3f3f3f;')
             hlo.addWidget(color_bar)
@@ -129,7 +130,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             # オーダー/削除エリア
             if reordable:
                 vlo = QtWidgets.QVBoxLayout()   
-                vlo.setContentsMargins(2,0,0,0)
+                vlo.setContentsMargins(1,0,0,0)
                 # hlo.addLayout(vlo, 1)
                 color_bar.setLayout(vlo)
                 vlo.setSpacing(0)
@@ -597,4 +598,10 @@ class ChildTaskListWidget(TaskListWidget):
         return
 
 # WIDGET_TABLEにtask_listを追加
-WIDGET_TABLE['task_list'] =  {'class': ChildTaskListWidget, 'get_method': 'get_parameters', 'set_method': 'set_parameters', 'update_signal': 'updated'}
+WIDGET_TABLE['task_list'] =  {
+    'class': ChildTaskListWidget,
+    'get_method': 'get_parameters', 
+    'set_method': 'set_parameters', 
+    'update_ui_method': 'init_ui',
+    'update_signal': 'updated',
+    }

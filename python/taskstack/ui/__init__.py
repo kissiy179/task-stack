@@ -32,16 +32,66 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
 
 WIDGET_TABLE = {
-    'bool': {'class': QtWidgets.QCheckBox, 'get_method': 'isChecked', 'set_method': 'setChecked', 'update_signal': 'stateChanged'},
-    'int': {'class': CustomSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
-    'float': {'class': CustomDoubleSpinBox, 'get_method': 'value', 'set_method': 'setValue', 'update_signal': 'valueChanged'},
-    'str': {'class': QtWidgets.QLineEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file': {'class': path_edit.FilePathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'dir': {'class': path_edit.DirectoryPathEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'file_in_pj': {'class': path_in_project_edit.FilePathInProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'dir_in_pj': {'class': path_in_project_edit.DirectoryPathInProjectEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'scn': {'class': path_in_project_edit.MayaSceneEdit, 'get_method': 'text', 'set_method': 'setText', 'update_signal': 'textChanged'},
-    'multi_line_str': {'class': CustomTextEdit, 'get_method': 'toPlainText', 'set_method': 'setText', 'update_signal': 'textChanged'},
+    'bool': {
+        'class': QtWidgets.QCheckBox, 
+        'get_method': 'isChecked', 'set_method': 
+        'setChecked', 
+        'update_signal': 'stateChanged',
+        },
+    'int': {
+        'class': CustomSpinBox, 
+        'get_method': 'value', 
+        'set_method': 'setValue', 
+        'update_signal': 'valueChanged',
+        },
+    'float': {
+        'class': CustomDoubleSpinBox, 
+        'get_method': 'value', 
+        'set_method': 'setValue', 
+        'update_signal': 'valueChanged'
+        },
+    'str': {
+        'class': QtWidgets.QLineEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'file': {
+        'class': path_edit.FilePathEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'dir': {
+        'class': path_edit.DirectoryPathEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'file_in_pj': {
+        'class': path_in_project_edit.FilePathInProjectEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'dir_in_pj': {
+        'class': path_in_project_edit.DirectoryPathInProjectEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'scn': {
+        'class': path_in_project_edit.MayaSceneEdit, 
+        'get_method': 'text', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
+    'multi_line_str': {
+        'class': CustomTextEdit, 
+        'get_method': 'toPlainText', 
+        'set_method': 'setText', 
+        'update_signal': 'textChanged'
+        },
 }
 
 import task_list_menu; reload(task_list_menu)
