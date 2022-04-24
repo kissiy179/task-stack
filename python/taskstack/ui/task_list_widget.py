@@ -242,6 +242,10 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
     def log(self):
         print(self.get_parameters())
 
+    def clear_ui(self):
+        if self.__main_layout:
+            QtWidgets.QWidget().setLayout(self.__main_layout)
+
     def init_ui(self, executable=True, show_details=None, tool_bar_position='', emit_signal=True):
         # Result show details
         show_details = show_details if show_details else self.show_details
@@ -362,11 +366,6 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         # プログレスバーのインクリメントはinner_wgtのシグナル経由で行う
         self.inner_wgt.increment.connect(self.__progress_bar.increment)
-
-
-    def clear_ui(self):
-        if self.__main_layout:
-            QtWidgets.QWidget().setLayout(self.__main_layout)
 
     def get_actions(self):
         actions = OrderedDict()
@@ -504,31 +503,17 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.set_parameters(params)
         self.init_ui()
 
-    def import_parameters(self, file_path=''):
-        if not file_path:
-            file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
-            file_path = file_info[0]
-
-        if not file_path or not os.path.exists(file_path):
-            return
-
-        params = TaskListParameters()
-        params.load(file_path)
-        self.set_parameters(params)
-        self.init_ui()
-
     def get_parameters(self):
         params = TaskListParameters(self.__task_list.get_parameters())
         return params
 
-    def set_parameters(self, params=''):
+    def set_parameters(self, params=''):        
         if isinstance(params, basestring):
             param_text = params
             params = TaskListParameters()
             params.loads(param_text)
 
         self.__task_list.set_parameters(params)
-        # self.init_ui()
 
     def set_parameters_from_raw_text_widget(self):
         text = self.raw_text.toPlainText()
@@ -538,6 +523,22 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
         except:
             pass
+
+    def import_parameters(self, file_path=''):
+        if not file_path:
+            file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
+            file_path = file_info[0]
+
+        params = TaskListParameters()
+
+        if os.path.exists(file_path):
+            params.load(file_path)
+
+        else:
+            params = []
+
+        self.set_parameters(params)
+        self.init_ui()
 
     def export_parameters(self, file_path=''):
         if not file_path:
@@ -596,6 +597,13 @@ class ChildTaskListWidget(TaskListWidget):
 
     def init_status_bar(self, *args, **kwargs):
         return
+
+    # def init_ui(self, *args, **kwargs):
+    #     print('init_ui ----------------')
+    #     super(ChildTaskListWidget, self).init_ui(*args, **kwargs)
+        # tasks = self.get_task_list()
+    #     print(tasks.get_parameters())
+    #     print(tasks.get_parameters())
 
 # WIDGET_TABLEにtask_listを追加
 WIDGET_TABLE['task_list'] =  {

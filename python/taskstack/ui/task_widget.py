@@ -27,7 +27,6 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__main_layout = None
         self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
-        self.connect_signals()
         self.resize(300, 0)
 
     def log_parameters(self):
@@ -42,6 +41,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         doc = task.get_doc()
         param_types = self.__parameter_types
         params = task.get_parameters(consider_keywords=False)
+        # print(params)
 
         # Main layout
         self.__main_layout = QtWidgets.QVBoxLayout()
@@ -125,35 +125,71 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
                 continue
 
             widget_class = widget_info.get('class')
-            set_method = widget_info.get('set_method', '')
-            update_ui_method = widget_info.get('update_ui_method', '')
-            update_signal = widget_info.get('update_signal', '')
             widget = widget_class()
+            set_method_name = widget_info.get('set_method', '')
+            update_ui_method_name = widget_info.get('update_ui_method', '')
             value = parametrs.get(param_name)
 
-            if hasattr(widget, set_method):
-                getattr(widget, set_method)(value)
+            if hasattr(widget, set_method_name):
+                getattr(widget, set_method_name)(value)
 
-            if hasattr(widget, update_signal):
-                getattr(widget, update_signal).connect(self.updated)
-
-            if hasattr(widget, update_ui_method):
-                getattr(widget, update_ui_method)()
+            if hasattr(widget, update_ui_method_name):
+                getattr(widget, update_ui_method_name)()
 
             lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget
+
+        self.connect_signals()
 
     def clear_ui(self):
         if self.__main_layout:
             QtWidgets.QWidget().setLayout(self.__main_layout)
 
     def connect_signals(self):
+        # 基本シグナル設定
         self.updated.connect(self.apply_parameters)
         task_emitter = self.__task.get_emitter()
         task_emitter.execute_start.connect(self.preprocess)
         task_emitter.executed.connect(self.postprocess)
         task_emitter.warning_raised.connect(self.set_warning_message)
         task_emitter.error_raised.connect(self.set_error_message)
+
+        # パラメータウィジェット毎のシグナル設定
+        param_types = self.__task.get_parameter_types()
+
+        for param_name, param_type in param_types.items():
+            widget = self.__widgets.get(param_name)
+            widget_info = WIDGET_TABLE.get(param_type)
+
+            if not widget_info:
+                continue
+
+            signal_name = widget_info.get('update_signal', '')
+            signal = getattr(widget, signal_name)
+
+            if hasattr(widget, signal_name):
+                signal.connect(self.updated)
+
+        # get_signal_connection_infosから取得できる情報からシグナル設定
+        signal_connection_infos = self.__task.get_signal_connection_infos()
+        
+        for signal_param_name, slot_param_infos in signal_connection_infos.items():
+            signal_widget = self.__widgets.get(signal_param_name)
+            signal_param_type = param_types.get(signal_param_name)
+            signal_widget_info = WIDGET_TABLE.get(signal_param_type)
+            signal_name = signal_widget_info.get('update_signal', '')
+            signal = getattr(signal_widget, signal_name)
+
+            for slot_param_name, slot_name in slot_param_infos.items():
+                signal_param_type = param_types.get(slot_param_name)
+                slot_widget = self.__widgets.get(slot_param_name)
+
+                if not hasattr(slot_widget, slot_name):
+                    continue
+
+                slot = getattr(slot_widget, slot_name)
+                signal.connect(slot)
+                # print(signal_widget, signal_name, slot)
 
     def apply_parameters(self):
         task = self.__task

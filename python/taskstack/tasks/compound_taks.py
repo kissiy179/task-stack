@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from collections import OrderedDict
 import taskstack.core.task as task
 import taskstack.core.task_list as task_list
@@ -34,8 +35,20 @@ class CompoundTask(task.Task):
 
     def get_signal_connection_infos(self):
         conn_infos = super(CompoundTask, self).get_signal_connection_infos()
-        conn_infos['Task List File'] = ['Child Tasks']
+        conn_infos['Task List File'] = {'Child Tasks': 'import_parameters'}
         return conn_infos
+
+    # def set_parameters(self, **parameters):
+    #     task_list_file = parameters.get('Task List File')
+
+    #     if os.path.exists(task_list_file):
+    #         task_list_parameters = task_list.TaskListParameters()
+    #         task_list_parameters.load(task_list_file)
+    #         parameters['Child Tasks'] = task_list_parameters
+
+    #     print('set params') #@@
+    #     print(parameters, '***8')
+    #     super(CompoundTask, self).set_parameters(**parameters)
 
     def execute(self):
         super(CompoundTask, self).execute()
