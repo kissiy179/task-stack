@@ -119,6 +119,16 @@ class Task(object):
         '''
         return True
         
+    def get_signal_connection_infos(self):
+        '''
+        シグナル接続情報を取得する
+        {
+            シグナル送信パラメータ: [スロット用パラメータ1, スロット用パラメータ2, ... ],
+            ...
+        }
+        '''
+        return OrderedDict()
+
     def get_parameter_types(self):
         '''
         使用するUIウィジェットを決定するための各パラメータの型を返す

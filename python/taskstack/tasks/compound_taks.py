@@ -32,6 +32,11 @@ class CompoundTask(task.Task):
         parameters['Child Tasks'] = task_list_parameters
         return parameters
 
+    def get_signal_connection_infos(self):
+        conn_infos = super(CompoundTask, self).get_signal_connection_infos()
+        conn_infos['Task List File'] = ['Child Tasks']
+        return conn_infos
+
     def execute(self):
         super(CompoundTask, self).execute()
         parameters = self.get_parameters()
