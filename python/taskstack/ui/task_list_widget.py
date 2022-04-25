@@ -121,6 +121,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             # カラーバー
             color_bar = QtWidgets.QWidget()
             color_bar.setMinimumWidth(10)
+            color_bar.setAttribute(QtCore.Qt.WA_StyledBackground) # 2019ではこれがないとQWidgetは背景色で塗れない
             color = string_to_color(task.get_name())
             # color = 227,149,141
             color_bar.setStyleSheet('background-color: rgb{}'.format(str(tuple(color))))
