@@ -522,12 +522,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
 
     def set_parameters_from_raw_text_widget(self):
         text = self.raw_text.toPlainText()
-
-        try:
-            self.set_parameters(text)
-
-        except:
-            pass
+        self.set_parameters(text)
 
     def import_parameters(self, file_path='', force=False):
         if not file_path:

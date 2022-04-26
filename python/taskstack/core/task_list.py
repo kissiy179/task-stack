@@ -48,6 +48,7 @@ class TaskList(list):
         self.clear_tasks()
         
         try:
+            print(parameters)
             for task_info in parameters:
                 self.add_task(info=task_info)
 
