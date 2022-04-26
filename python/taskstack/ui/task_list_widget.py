@@ -135,7 +135,11 @@ class InnerTaskListWidget(QtWidgets.QWidget):
                 # hlo.addLayout(vlo, 1)
                 color_bar.setLayout(vlo)
                 vlo.setSpacing(0)
-                vlo.addStretch()
+                # vlo.addStretch()
+
+                # Spacer
+                spacer = QtWidgets.QSpacerItem(5,10)
+                vlo.addItem(spacer)
 
                 # Remove button
                 remove_btn = QtWidgets.QPushButton()
@@ -145,7 +149,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
                 vlo.addWidget(remove_btn)
 
                 # Spacer
-                spacer = QtWidgets.QSpacerItem(5,10)
+                spacer = QtWidgets.QSpacerItem(5,5)
                 vlo.addItem(spacer)
 
                 # Up/Down button
@@ -525,7 +529,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         except:
             pass
 
-    def import_parameters(self, file_path=''):
+    def import_parameters(self, file_path='', force=False):
         if not file_path:
             file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
             file_path = file_info[0]
