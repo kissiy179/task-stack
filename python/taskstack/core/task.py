@@ -195,7 +195,13 @@ class Task(object):
         '''
         このオブジェクトにパラメータを設定する
         '''
-        self.__parameters.update(parameters)
+        crr_parameters = self.__parameters
+
+        for key in crr_parameters:
+            if key in parameters:
+                crr_parameters[key] = parameters[key]
+
+        self.__parameters = crr_parameters
 
     def get_extra_parameters(self):
         '''
