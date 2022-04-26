@@ -5,9 +5,9 @@ from functools import partial
 import traceback
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
 import qtawesome as qta
+from pyside_components.util.color import color_to_hextriplet
 from . import WIDGET_TABLE
 
-exec_icon = qta.icon('fa5s.play', color='lightgreen')
 ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*Error: .*$)', re.MULTILINE | re.DOTALL)
 
 class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
@@ -25,6 +25,9 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.__warning_message = ''
         self.__label_prefix = ''
         self.__main_layout = None
+        color = self.__task.get_color()
+        color = [int(num * 1.3) for num in color]
+        self.__exec_icon = qta.icon('fa5s.play', color=color_to_hextriplet(color))
         self.setWindowTitle(type(self.__task).__name__)
         self.init_ui()
         self.resize(300, 0)
@@ -71,7 +74,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         if executable:
             exec_btn = QtWidgets.QPushButton()
-            exec_btn.setIcon(exec_icon)
+            exec_btn.setIcon(self.__exec_icon)
             exec_btn.setIconSize(QtCore.QSize(14, 14))
             exec_btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             exec_btn.clicked.connect(self.execute)
@@ -83,7 +86,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             
         self.group_lo.addLayout(doc_lo)
         self.doc_lbl = QtWidgets.QLabel(doc)
-        self.doc_lbl.setStyleSheet('background-color: #555')
+        self.doc_lbl.setStyleSheet('background-color: #585858;')# border: 0px solid gray; border-radius: 3px;')
         self.doc_lbl.setMargin(5)
         doc_lo.addWidget(self.doc_lbl)
 

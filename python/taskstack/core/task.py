@@ -8,6 +8,7 @@ import copy
 import traceback
 from collections import OrderedDict
 from qtpy import QtCore
+from pyside_components.util.color import string_to_color
 from . import TaskStackError, TaskStackWarning
 
 TASK_DIRS = os.environ.get('TASKSTACK_TASK_DIRS')
@@ -264,6 +265,10 @@ class Task(object):
         このタスクを実行するかどうかを設定する
         '''
         self.__active = active
+
+    def get_color(self):
+        color = string_to_color(self.get_name())
+        return tuple(color)
         
     def execute_if_active(self):
         '''

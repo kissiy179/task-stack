@@ -8,6 +8,7 @@ from collections import OrderedDict
 from re import L
 import random
 from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets, QtGui
+from pyside_components.widgets.horizontal_line import HorizontalLine
 from . import WIDGET_TABLE
 import qtawesome as qta
 from ..core.task_list import TaskList, TaskListParameters
@@ -18,7 +19,7 @@ export_icon = qta.icon('fa5s.save', color='lightgray')
 close_icon = qta.icon('fa5s.trash-alt', color='lightgray')
 up_icon = qta.icon('fa5s.chevron-up', color='lightgray')
 down_icon = qta.icon('fa5s.chevron-down', color='lightgray')
-exec_icon = qta.icon('fa5s.play', color='lightgreen')
+exec_icon = qta.icon('fa5s.play', color='lightgray')
 add_icon = qta.icon('fa5s.plus', color='lightgray')
 detail_icon = qta.icon('fa5s.align-left', color='lightgray')
 code_icon = qta.icon('fa5s.code', color='lightgray')
@@ -33,52 +34,6 @@ TOOLBAR_POSITIONS = {
 }
 PRESET_DIR_PATH = os.path.join(os.environ.get('MAYA_APP_DIR'), 'taskstack')
 RECENT_TASKS_FILE_PATH = os.path.join(PRESET_DIR_PATH, 'recent_tasks.json')
-
-def get_random_color():
-    color = []
-
-    for i in range(3):
-        color.append(random.randint(0, 180))
-
-    return tuple(color)
-
-def char_to_color(c):
-    if sys.version.startswith('3'):
-        hex_code = codecs.encode(bytes(c, 'utf-8'), 'hex-codec')
-
-    else:
-        hex_code = codecs.encode(c.lower(), 'hex')
-        
-    col_num = int(hex_code, 16)    
-    return col_num
-
-def string_to_color(s, correction=40):
-    s = s if s else 'z'
-    s = s.ljust(3, '0')
-    color = [char_to_color(i) for i in s[:3]]
-    avg = sum(color) / len(color)
-
-    if avg < correction:
-        sub = correction - avg
-        color = [min(255, n + sub) for n in color]
-
-    max_ = max(color)
-    min_ = min(color)
-    
-    if max_ - min_ <= 255:
-        maxidx = color.index(max_)
-        minidx = color.index(min_)
-        color[maxidx] = min(255, max_ + correction)
-        color[minidx] = max(0, min_ - correction)
-        
-    return color
-
-class HorizontalLine(QtWidgets.QFrame):
-
-    def __init__(self, *args, **kwargs):
-        super(HorizontalLine, self).__init__(*args, **kwargs)
-        self.setFrameShape(QtWidgets.QFrame.HLine)
-        self.setFrameShadow(QtWidgets.QFrame.Plain)
 
 class InnerTaskListWidget(QtWidgets.QWidget):
     remove_task = QtCore.Signal(int)
@@ -98,7 +53,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
         self.__task_widgets = []
         self.show_details = show_details
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}  {background-color: #3d3d3d}')
+        self.setStyleSheet('QPushButton {background-color: transparent; border-style: solid; border-width:0px;}')
         lo = QtWidgets.QVBoxLayout()
         lo.setContentsMargins(0,0,0,0)
         lo.setSpacing(0)
@@ -122,7 +77,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
             color_bar = QtWidgets.QWidget()
             color_bar.setMinimumWidth(10)
             color_bar.setAttribute(QtCore.Qt.WA_StyledBackground) # 2019ではこれがないとQWidgetは背景色で塗れない
-            color = string_to_color(task.get_name())
+            color = task.get_color()
             # color = 227,149,141
             color_bar.setStyleSheet('background-color: rgb{}'.format(str(tuple(color))))
             # color_bar.setStyleSheet('background-color: #3f3f3f;')
@@ -149,7 +104,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
                 vlo.addWidget(remove_btn)
 
                 # Spacer
-                spacer = QtWidgets.QSpacerItem(5,5  )
+                spacer = QtWidgets.QSpacerItem(5,5)
                 vlo.addItem(spacer)
 
                 # Up/Down button
@@ -166,15 +121,19 @@ class InnerTaskListWidget(QtWidgets.QWidget):
                 vlo.addStretch()
 
             # Task widget
-            task_wdiget = TaskWidget(task)
-            task_wdiget.init_ui(show_parameters=self.show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
-            task_wdiget.updated.connect(self.updated)
-            hlo.addWidget(task_wdiget, 100)
-            self.__task_widgets.append(task_wdiget)
+            task_widget = TaskWidget(task)
+            task_widget.init_ui(show_parameters=self.show_details, label_prefix='[ {} ]  '.format(i))#executable=False)
+            task_widget.updated.connect(self.updated)
+            hlo.addWidget(task_widget, 100)
+            self.__task_widgets.append(task_widget)
 
             # Line
             line = HorizontalLine()
             lo.addWidget(line)
+
+            # Spacer
+            # spacer = QtWidgets.QSpacerItem(5, 10)
+            # lo.addItem(spacer)
 
         lo.addStretch()
 
