@@ -47,8 +47,12 @@ class TaskList(list):
     def set_parameters(self, parameters):
         self.clear_tasks()
         
-        for task_info in parameters:
-            self.add_task(info=task_info)
+        try:
+            for task_info in parameters:
+                self.add_task(info=task_info)
+
+        except Exception as e:
+            print(e)
 
     def add_task(self, task=None, info={}):
         if not task:
