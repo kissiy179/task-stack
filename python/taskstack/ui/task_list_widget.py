@@ -149,7 +149,7 @@ class InnerTaskListWidget(QtWidgets.QWidget):
                 vlo.addWidget(remove_btn)
 
                 # Spacer
-                spacer = QtWidgets.QSpacerItem(5,5)
+                spacer = QtWidgets.QSpacerItem(5,5  )
                 vlo.addItem(spacer)
 
                 # Up/Down button
@@ -539,8 +539,11 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         if os.path.exists(file_path):
             params.load(file_path)
 
-        else:
+        elif force:
             params = []
+
+        else:
+            return
 
         self.set_parameters(params)
         self.init_ui()
@@ -600,8 +603,11 @@ class ChildTaskListWidget(TaskListWidget):
     def init_tool_bar(self, *args, **kwargs):
         return
 
-    def init_status_bar(self, *args, **kwargs):
-        return
+    # def init_status_bar(self, *args, **kwargs):
+    #     return
+
+    def import_parameters(self, file_path='', force=True):
+        return super(ChildTaskListWidget, self).import_parameters(file_path, force)
 
     # def init_ui(self, *args, **kwargs):
     #     print('init_ui ----------------')
