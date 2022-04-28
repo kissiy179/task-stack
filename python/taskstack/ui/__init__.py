@@ -24,6 +24,12 @@ class CustomDoubleSpinBox(QtWidgets.QDoubleSpinBox):
         self.setMaximum(100000)
         self.setDecimals(3)
 
+class CustomLineEdit(QtWidgets.QLineEdit):
+
+    def __init__(self, *args, **kwargs):
+        super(CustomLineEdit, self).__init__(*args, **kwargs)
+        self.setClearButtonEnabled(True)
+
 class CustomTextEdit(QtWidgets.QTextEdit):
 
     def __init__(self, *args, **kwargs):
@@ -51,7 +57,7 @@ WIDGET_TABLE = {
         'update_signal': 'valueChanged'
         },
     'str': {
-        'class': QtWidgets.QLineEdit, 
+        'class': CustomLineEdit, 
         'get_method': 'text', 
         'set_method': 'setText', 
         'update_signal': 'textChanged'
