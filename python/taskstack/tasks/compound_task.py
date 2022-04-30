@@ -14,7 +14,7 @@ class CompoundTask(task.Task):
     def get_default_parameters(self):
         return OrderedDict((
             ('Task List File', ''),
-            ('Child Tasks', [])
+            ('Child Tasks', []),
         ))
 
     def get_parameter_types(self):
@@ -42,6 +42,7 @@ class CompoundTask(task.Task):
     def set_parameters(self, **parameters):
         # 通常通りタスク情報を上書き
         crr_params = super(CompoundTask, self).set_parameters(**parameters)
+        print(parameters)
 
         # タスクファイルからタスク情報を取得
         task_list_file = crr_params.get('Task List File')
@@ -50,16 +51,19 @@ class CompoundTask(task.Task):
 
         # 読み込んだタスク情報を現在の子タスク情報で上書き
         crr_child_task_params = crr_params.get('Child Tasks')
+
         for i, task_info in enumerate(task_list_params):
             task_name = task_info.get('name')
 
             for crr_task_info in crr_child_task_params:
                 crr_task_name = crr_task_info.get('name')
 
-                if crr_task_name in task_name:
+                if crr_task_name == task_name:
                     for key in task_info:
                         if key in crr_task_info:
-                            task_info[key] = crr_task_info[key]
+                            value = crr_task_info[key]
+                            # print(task_name, key, value)
+                            task_info[key] = value
                             task_list_params[i] = task_info
         
         crr_params['Child Tasks'] = task_list_params

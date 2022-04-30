@@ -62,7 +62,6 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.group_box.setCheckable(True)
         self.group_box.setChecked(task.get_active())
         # self.group_box.setStyle(QtWidgets.QStyleFactory.create("plastique"))
-        self.group_box.toggled.connect(self.updated)
         self.__main_layout.addWidget(self.group_box)
         self.group_lo = QtWidgets.QVBoxLayout()
         self.group_lo.setSpacing(2)
@@ -92,6 +91,9 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
         # Parameters
         self.init_parameters_ui(params, param_types, show_parameters)
+
+        # Connect signals
+        self.connect_signals()
 
         # Error message
         if self.__error_message:
@@ -142,7 +144,6 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
             lo.addRow(param_name, widget)
             self.__widgets[param_name] = widget
 
-        self.connect_signals()
 
     def clear_ui(self):
         if self.__main_layout:
@@ -150,6 +151,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
     def connect_signals(self):
         # 基本シグナル設定
+        self.group_box.toggled.connect(self.updated)
         self.updated.connect(self.apply_parameters)
         task_emitter = self.__task.get_emitter()
         task_emitter.execute_start.connect(self.preprocess)
