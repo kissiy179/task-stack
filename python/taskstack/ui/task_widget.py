@@ -151,9 +151,9 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
     def connect_signals(self):
         # 基本シグナル設定
-        self.group_box.toggled.connect(self.updated)
         self.updated.connect(self.apply_parameters)
-        task_emitter = self.__task.get_emitter()
+        self.group_box.toggled.connect(self.updated)
+        task_emitter = self.__task.get_emitter(new=True)
         task_emitter.execute_start.connect(self.preprocess)
         task_emitter.executed.connect(self.postprocess)
         task_emitter.warning_raised.connect(self.set_warning_message)

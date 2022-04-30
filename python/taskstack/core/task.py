@@ -24,6 +24,9 @@ class SignalEmitter(QtCore.QObject):
     error_raised = QtCore.Signal(str)
     warning_raised = QtCore.Signal(str)
 
+    # def clear(self):
+    #     super(SignalEmitter, self).__init__(self)
+
 class Task(object):
     
     __metaclass__ = abc.ABCMeta
@@ -36,7 +39,10 @@ class Task(object):
         self.__active = True
         self.__emitter = SignalEmitter()
 
-    def get_emitter(self):
+    def get_emitter(self, new=False):
+        if new:
+            self.__emitter = SignalEmitter()
+
         return self.__emitter
 
     @abc.abstractmethod

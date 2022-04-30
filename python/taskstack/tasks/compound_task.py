@@ -40,9 +40,16 @@ class CompoundTask(task.Task):
         return conn_infos
 
     def set_parameters(self, **parameters):
+        '''
+        このオブジェクトにパラメータを設定する
+        子タスクで設定済みのパラメータはなるべく再現する
+
+        ＊＊＊注意＊＊＊
+        設定済みパラメータを再現するため既存子タスクと新規設定子タスクのマッチングは単純な名前で行う
+        そのため同じタスクが複数ある場合実行順が遅い子タスクの値がすべてのタスクに引き継がれる
+        '''
         # 通常通りタスク情報を上書き
         crr_params = super(CompoundTask, self).set_parameters(**parameters)
-        print(parameters)
 
         # タスクファイルからタスク情報を取得
         task_list_file = crr_params.get('Task List File')
