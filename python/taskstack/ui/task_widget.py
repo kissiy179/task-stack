@@ -199,7 +199,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         params = {}
         param_types = self.__parameter_types
         active = self.group_box.isChecked()
-        self.__task.set_active(active)
+        task.set_active(active)
 
         for param_name, widget in self.__widgets.items():
             param_type = param_types.get(param_name)

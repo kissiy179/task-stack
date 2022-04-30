@@ -468,15 +468,9 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         self.init_ui()
 
     def get_parameters(self):
-        params = TaskListParameters(self.__task_list.get_parameters())
-        return params
+        return self.__task_list.get_parameters()
 
     def set_parameters(self, params=''):        
-        if isinstance(params, basestring):
-            param_text = params
-            params = TaskListParameters()
-            params.loads(param_text)
-
         self.__task_list.set_parameters(params)
 
     def set_parameters_from_raw_text_widget(self):
@@ -488,18 +482,7 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
             file_info = QtWidgets.QFileDialog().getOpenFileName(self, 'Import TaskList Parameters', filter=JSON_FILTERS)
             file_path = file_info[0]
 
-        params = TaskListParameters()
-
-        if os.path.exists(file_path):
-            params.load(file_path)
-
-        elif force:
-            params = []
-
-        else:
-            return
-
-        self.set_parameters(params)
+        self.__task_list.import_parameters(file_path, force)
         self.init_ui()
 
     def export_parameters(self, file_path=''):
@@ -510,14 +493,8 @@ class TaskListWidget(maya_dockable_mixin, QtWidgets.QMainWindow):
         if not file_path:
             return
 
-        dir_path = os.path.dirname(file_path)
-
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-
         self.inner_wgt.apply_parameters()
-        params = self.get_parameters()
-        params.dump(file_path)
+        self.__task_list.export_parameters(file_path)
 
     def preprocess(self):
         self.__progress_bar.setVisible(True)

@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 # import abc
 import json
+from pprint import pprint
 from qtpy import QtCore
 from .task import Task
 import maya.cmds as cmds
@@ -42,17 +43,44 @@ class TaskList(list):
         for task in self:
             params.append(task.get_info(consider_keywords))
 
+        params = TaskListParameters(params)
         return params
 
     def set_parameters(self, parameters):
         self.clear_tasks()
-        
-        try:
-            for task_info in parameters:
-                self.add_task(info=task_info)
 
-        except Exception as e:
-            print(e)
+        if isinstance(parameters, basestring):
+            param_text = parameters
+            parameters = TaskListParameters()
+            parameters.loads(param_text)
+        
+        for task_info in parameters:
+            self.add_task(info=task_info)
+
+    def import_parameters(self, file_path='', force=False):
+        if os.path.exists(file_path):
+            params = TaskListParameters()
+            params.load(file_path)
+
+        elif force:
+            params = []
+
+        else:
+            return
+
+        self.set_parameters(params)
+
+    def export_parameters(self, file_path=''):
+        if not file_path:
+            return
+
+        dir_path = os.path.dirname(file_path)
+
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+        params = self.get_parameters()
+        params.dump(file_path)
 
     def add_task(self, task=None, info={}):
         if not task:

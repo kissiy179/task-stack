@@ -7,6 +7,7 @@ import re
 import copy
 import traceback
 from collections import OrderedDict
+from pprint import pprint
 from qtpy import QtCore
 from pyside_components.util.color import string_to_color
 from . import TaskStackError, TaskStackWarning
@@ -109,7 +110,8 @@ class Task(object):
 
         task = task_class()
         task.set_active(info.get('active', True))
-        task.set_parameters(**info.get('parameters', {}))
+        params = info.get('parameters', {})
+        task.set_parameters(**params)
         return task
 
     @classmethod
@@ -203,6 +205,7 @@ class Task(object):
                 crr_parameters[key] = parameters[key]
 
         self.__parameters = crr_parameters
+        return self.__parameters
 
     def get_extra_parameters(self):
         '''

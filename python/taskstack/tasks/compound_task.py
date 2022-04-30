@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from collections import OrderedDict
+from pprint import pprint
 import taskstack.core.task as task
 import taskstack.core.task_list as task_list
 
@@ -13,7 +14,7 @@ class CompoundTask(task.Task):
     def get_default_parameters(self):
         return OrderedDict((
             ('Task List File', ''),
-            ('Child Tasks', '')
+            ('Child Tasks', [])
         ))
 
     def get_parameter_types(self):
@@ -22,33 +23,47 @@ class CompoundTask(task.Task):
         parameter_types['Child Tasks'] = 'task_list'
         return parameter_types
 
-    def get_parameters(self, consider_keywords=True):
-        # タスク情報ファイルからパラメータを取得
-        parameters = super(CompoundTask, self).get_parameters(consider_keywords)
-        task_list_file = parameters.get('Task List File')
-        task_list_parameters = task_list.TaskListParameters()
-        task_list_parameters.load(task_list_file)
+    # def get_parameters(self, consider_keywords=True):
+    #     # タスク情報ファイルからパラメータを取得
+    #     parameters = super(CompoundTask, self).get_parameters(consider_keywords)
+    #     task_list_file = parameters.get('Task List File')
+    #     task_list_parameters = task_list.TaskListParameters()
+    #     task_list_parameters.load(task_list_file)
 
-        # 子タスクに受け渡し
-        parameters['Child Tasks'] = task_list_parameters
-        return parameters
+    #     # 子タスクに受け渡し
+    #     parameters['Child Tasks'] = task_list_parameters
+    #     return parameters
 
     def get_signal_connection_infos(self):
         conn_infos = super(CompoundTask, self).get_signal_connection_infos()
         conn_infos['Task List File'] = {'Child Tasks': 'import_parameters'}
         return conn_infos
 
-    # def set_parameters(self, **parameters):
-    #     task_list_file = parameters.get('Task List File')
+    def set_parameters(self, **parameters):
+        # 通常通りタスク情報を上書き
+        crr_params = super(CompoundTask, self).set_parameters(**parameters)
 
-    #     if os.path.exists(task_list_file):
-    #         task_list_parameters = task_list.TaskListParameters()
-    #         task_list_parameters.load(task_list_file)
-    #         parameters['Child Tasks'] = task_list_parameters
+        # タスクファイルからタスク情報を取得
+        task_list_file = crr_params.get('Task List File')
+        task_list_params = task_list.TaskListParameters()
+        task_list_params.load(task_list_file)
 
-    #     print('set params') #@@
-    #     print(parameters, '***8')
-    #     super(CompoundTask, self).set_parameters(**parameters)
+        # 読み込んだタスク情報を現在の子タスク情報で上書き
+        crr_child_task_params = crr_params.get('Child Tasks')
+        for i, task_info in enumerate(task_list_params):
+            task_name = task_info.get('name')
+
+            for crr_task_info in crr_child_task_params:
+                crr_task_name = crr_task_info.get('name')
+
+                if crr_task_name in task_name:
+                    for key in task_info:
+                        if key in crr_task_info:
+                            task_info[key] = crr_task_info[key]
+                            task_list_params[i] = task_info
+        
+        crr_params['Child Tasks'] = task_list_params
+        return super(CompoundTask, self).set_parameters(**crr_params)
 
     def execute(self):
         super(CompoundTask, self).execute()
