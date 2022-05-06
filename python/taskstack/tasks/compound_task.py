@@ -43,10 +43,6 @@ class CompoundTask(task.Task):
         '''
         このオブジェクトにパラメータを設定する
         子タスクで設定済みのパラメータはなるべく再現する
-
-        # TODO:
-        設定済みパラメータを再現するため既存子タスクと新規設定子タスクのマッチングは単純な名前で行う
-        そのため同じタスクが複数ある場合実行順が遅い子タスクの値がすべてのタスクに引き継がれる
         '''
         # 通常通りタスク情報を上書き
         crr_params = super(CompoundTask, self).set_parameters(**parameters)
@@ -58,20 +54,27 @@ class CompoundTask(task.Task):
 
         # 読み込んだタスク情報を現在の子タスク情報で上書き
         crr_child_task_params = crr_params.get('Child Tasks')
+        used_task_idxs = []
 
         for i, task_info in enumerate(task_list_params):
             task_name = task_info.get('name')
 
-            for crr_task_info in crr_child_task_params:
+            for j, crr_task_info in enumerate(crr_child_task_params):
                 crr_task_name = crr_task_info.get('name')
 
-                if crr_task_name == task_name:
-                    for key in task_info:
-                        if key in crr_task_info:
-                            value = crr_task_info[key]
-                            # print(task_name, key, value)
-                            task_info[key] = value
-                            task_list_params[i] = task_info
+                if j in used_task_idxs or crr_task_name != task_name:
+                    continue
+
+                used_task_idxs.append(j)
+
+                for key in task_info:
+                    if key in crr_task_info:
+                        value = crr_task_info[key]
+                        # print(task_name, key, value)
+                        task_info[key] = value
+                        task_list_params[i] = task_info
+
+                break
         
         crr_params['Child Tasks'] = task_list_params
         return super(CompoundTask, self).set_parameters(**crr_params)
