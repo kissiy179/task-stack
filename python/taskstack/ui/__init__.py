@@ -38,6 +38,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         self.setFixedHeight(80)
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
 
+# TaskWidgetで各パラメータに使用するウィジェットを洗濯するための情報を登録
 WIDGET_TABLE = {
     'bool': {
         'class': QtWidgets.QCheckBox, 
