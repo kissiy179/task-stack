@@ -39,7 +39,27 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed))
 
 # TaskWidgetで各パラメータに使用するウィジェットを洗濯するための情報を登録
-WIDGET_TABLE = {
+
+# Mayaのすべてのノードタイプ用のウィジェット情報を登録
+WIDGET_TABLE = {}
+
+for node_type in cmds.allNodeTypes(includeAbstract=True):
+    if node_type.endswith(' (abstract)'):
+        node_type = node_type[:-11]
+
+    non_exact_node_type = '{}+'.format(node_type)
+
+    for node_type_ in [node_type, non_exact_node_type]:
+        wgt_info = {
+            'class': partial(node_name_edit.NodeNameEdit, node_type_), 
+            'get_method': 'text', 
+            'set_method': 'setText', 
+            'update_signal': 'textChanged'
+            }
+        WIDGET_TABLE[node_type_] = wgt_info
+
+# その他のウィジェット情報を登録
+WIDGET_TABLE.update({
     'bool': {
         'class': QtWidgets.QCheckBox, 
         'get_method': 'isChecked', 
@@ -100,23 +120,7 @@ WIDGET_TABLE = {
         'set_method': 'setText', 
         'update_signal': 'textChanged'
         },
-}
-
-# Mayaのすべてのノードタイプ用のウィジェット情報を登録
-for node_type in cmds.allNodeTypes(includeAbstract=True):
-    if node_type.endswith(' (abstract)'):
-        node_type = node_type[:-11]
-
-    non_exact_node_type = '{}+'.format(node_type)
-
-    for node_type_ in [node_type, non_exact_node_type]:
-        wgt_info = {
-            'class': partial(node_name_edit.NodeNameEdit, node_type_), 
-            'get_method': 'text', 
-            'set_method': 'setText', 
-            'update_signal': 'textChanged'
-            }
-        WIDGET_TABLE[node_type_] = wgt_info
+})
 
 # 各種タスク用ウィジェットを読み込み
 import task_list_menu; reload(task_list_menu)
