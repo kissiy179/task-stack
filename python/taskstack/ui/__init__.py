@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import inspect
+from functools import partial
+import maya.cmds as cmds
 from mayaqt import QtWidgets, QtCore
 import qtawesome as qta
-import maya.cmds as cmds
 from pyside_components.widgets import path_edit
-from maya_pyside_components.widgets import path_in_project_edit
+from maya_pyside_components.widgets import path_in_project_edit, node_name_edit
 
 class CustomSpinBox(QtWidgets.QSpinBox):
     '''最大最小値を引き上げたSpinBox'''
@@ -40,8 +41,8 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 WIDGET_TABLE = {
     'bool': {
         'class': QtWidgets.QCheckBox, 
-        'get_method': 'isChecked', 'set_method': 
-        'setChecked', 
+        'get_method': 'isChecked', 
+        'set_method': 'setChecked', 
         'update_signal': 'stateChanged',
         },
     'int': {
@@ -100,6 +101,23 @@ WIDGET_TABLE = {
         },
 }
 
+# Mayaのすべてのノードタイプ用のウィジェット情報を登録
+for node_type in cmds.allNodeTypes(includeAbstract=True):
+    if node_type.endswith(' (abstract)'):
+        node_type = node_type[:-11]
+
+    non_exact_node_type = '{}+'.format(node_type)
+
+    for node_type_ in [node_type, non_exact_node_type]:
+        wgt_info = {
+            'class': partial(node_name_edit.NodeNameEdit, node_type_), 
+            'get_method': 'text', 
+            'set_method': 'setText', 
+            'update_signal': 'textChanged'
+            }
+        WIDGET_TABLE[node_type_] = wgt_info
+
+# 各種タスク用ウィジェットを読み込み
 import task_list_menu; reload(task_list_menu)
 import task_widget; reload(task_widget)
 import task_list_widget; reload(task_list_widget)
