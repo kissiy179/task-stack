@@ -24,7 +24,6 @@ class TemplateTask(task.Task):
             ('Test File', 'Test Path'),
             ('Test Bool', True),
             ('Test Number', 0.0),
-            ('Test Node', 'Test Node'),
         ))
 
     def get_parameter_types(self):
@@ -34,8 +33,7 @@ class TemplateTask(task.Task):
         使用できるタイプはtaskstack.ui.__init__.pyのWIDGET_TABLEを参照
         '''
         parameter_types = super(TemplateTask, self).get_parameter_types()
-        parameter_types['Test File'] = 'file_in_pj'
-        parameter_types['Test Node'] = 'dagNode+'
+        parameter_types['Test File'] = 'file'
         return parameter_types
 
     def execute(self):
