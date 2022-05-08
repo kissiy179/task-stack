@@ -124,7 +124,7 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         wgt.setVisible(show_parameters)
 
         for param_name, param_type in parameter_types.items():
-            widget_info = WIDGET_TABLE.get(param_type)
+            widget_info = WIDGET_TABLE.get(param_type, WIDGET_TABLE.get('str'))
 
             if not widget_info:
                 continue
