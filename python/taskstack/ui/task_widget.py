@@ -1,14 +1,25 @@
 # encoding: UTF-8
+import sys
 import re
+import subprocess
 from pprint import pprint
 from functools import partial
 import traceback
-from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtWidgets
+from mayaqt import maya_base_mixin, maya_dockable_mixin, QtCore, QtGui, QtWidgets
 import qtawesome as qta
 from pyside_components.util.color import color_to_hextriplet
 from . import WIDGET_TABLE
 
 ERROR_PATTERN = re.compile(r'.*(?P<main_err>^[a-zA-Z]*Error: .*$)', re.MULTILINE | re.DOTALL)
+
+class TaskMenu(QtWidgets.QMenu):
+    def __init__(self, task, parent=None):
+        super(TaskMenu, self).__init__(parent)
+        self.clear()
+
+        action = QtWidgets.QAction('Open Source File', self)
+        action.triggered.connect(task.open_source_file)
+        self.addAction(action)
 
 class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
 
@@ -32,9 +43,19 @@ class TaskWidget(maya_dockable_mixin, QtWidgets.QWidget):
         self.init_ui()
         self.resize(300, 0)
 
-    def log_parameters(self):
-        print(self.__task.get_active(), self.__task.get_parameters(consider_keywords=False))
+    def mousePressEvent(self, event):
+        btn = event.button()
 
+        if btn == QtCore.Qt.MouseButton.RightButton:
+            menu = TaskMenu(self, self)
+            menu.exec_(QtGui.QCursor.pos())
+
+    def open_source_file(self):
+        module_name = self.__task.__class__.__module__
+        module = sys.modules.get(module_name)
+        path = module.__file__
+        subprocess.check_output(path, shell=True)
+        
     def init_ui(self, executable=True, show_parameters=True, label_prefix=''):
         # uiクリア
         self.clear_ui()
