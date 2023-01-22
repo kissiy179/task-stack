@@ -10,7 +10,8 @@ from mayaqt import maya_base_mixin, QtCore, QtGui, QtWidgets
 import qtawesome as qta
 from taskstack.ui import task_list_widget
 from taskstack.core import task, task_list
-from pyside_components.widgets.tag_item_button import string_to_color
+# from pyside_components.util.color import string_to_color
+import pyside_components.util.color
 
 task_icon = qta.icon('mdi.cube', color='cyan')
 param_icon = qta.icon('fa5s.dice-d6', color='lightgreen')
@@ -45,7 +46,7 @@ class TaskItem(QtGui.QStandardItem):
     def __init__(self, task_=None, *args, **kwargs):
         super(TaskItem, self).__init__(*args, **kwargs) 
         self.task = task_
-        params = self.task.get_parameters()
+        params = self.task.get_parameters(consider_keywords=False)
 
         for name, value in params.items():
             param_item = ParameterItem(name, value)
@@ -165,6 +166,12 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
         super(DelegateToItemModel, self).__init__(parent)
         self.dataChanged.connect(self.layoutChanged) # データ変更があった場合レイアウト変更を呼び出す(リフレッシュ)
 
+    # def itemFromIndex(self, index):
+    #     col = index.column()
+    #     print(col)
+
+    #     super(DelegateToItemModel, self).itemFromIndex(index)
+
     def flags(self, index):
         item = self.itemFromIndex(index)
         
@@ -176,7 +183,7 @@ class DelegateToItemModel(QtGui.QStandardItemModel):
     def columnCount(self, parent=QtCore.QModelIndex()):
         # items = self.findItems()
         # print(items)
-        return 2
+        return 1
 
     def data(self, index, role):
         item = self.itemFromIndex(index)
